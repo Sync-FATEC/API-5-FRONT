@@ -49,3 +49,6 @@ app.*.map.json
 /web
 /macos 
 /ios
+
+firebase.ts
+firebase.json

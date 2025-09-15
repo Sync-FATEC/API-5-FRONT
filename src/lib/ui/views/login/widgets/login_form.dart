@@ -81,10 +81,18 @@ class _LoginFormState extends State<LoginForm> {
                 // Conecte o controlador ao TextField
                 TextField(
                   controller: _passwordController,
-                  obscureText: true,
+                  obscureText: !viewModel.isPasswordVisible,
                   decoration: InputDecoration(
                     labelText: 'Insira sua senha',
                     prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        viewModel.isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: viewModel.togglePasswordVisibility,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
@@ -93,7 +101,18 @@ class _LoginFormState extends State<LoginForm> {
 
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: TextButton(onPressed: () {}, child: const Text( 'Esqueceu sua senha?', style: TextStyle(color: AppColors.black, decoration: TextDecoration.underline),),),
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/forgot-password');
+                    },
+                    child: const Text(
+                      'Esqueceu sua senha?',
+                      style: TextStyle(
+                        color: AppColors.black,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
                 ),
 
                 // Mostra um indicador de carregamento ou o botão
@@ -102,11 +121,17 @@ class _LoginFormState extends State<LoginForm> {
                   child: viewModel.isLoading
                       ? const CircularProgressIndicator() // Mostra enquanto estiver carregando
                       : ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             // Pega o texto dos controladores e chama a ViewModel
                             final email = _emailController.text;
                             final password = _passwordController.text;
-                            viewModel.login(email, password);
+                            
+                            final success = await viewModel.login(email, password);
+                            
+                            if (success && context.mounted) {
+                              // Navegar para a tela principal
+                              Navigator.of(context).pushReplacementNamed('/home');
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.bluePrimary,

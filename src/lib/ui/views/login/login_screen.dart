@@ -17,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => LoginViewModel(),
+      create: (context) => LoginViewModel(context),
       child: Scaffold(
         body: SingleChildScrollView(
           child: Stack(
