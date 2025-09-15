@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:api2025/ui/views/login/login_screen.dart';
 import 'package:api2025/ui/views/home/home_screen.dart';
 import 'package:api2025/ui/views/forgot_password/forgot_password_screen.dart';
@@ -10,6 +11,9 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Carregar variáveis de ambiente
+  await dotenv.load(fileName: ".env");
   
   // Inicializar Firebase
   await Firebase.initializeApp(
