@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'widgets/header.dart';
 import 'widgets/login_form.dart';
 import '../../viewmodels/login_viewmodel.dart';
+import '../../widgets/background_header.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,7 +23,10 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Stack(
             children: [
               // Widget 1: O Header Azul
-              Header(),
+              const Header(
+                title: "APP",
+                subtitle: "CONTROLE DE ESTOQUE",
+              ),
 
               // Widget 2: O Card de Login
               LoginForm(),

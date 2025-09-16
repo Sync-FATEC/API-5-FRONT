@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/forgot_password_viewmodel.dart';
-import 'widgets/forgot_password_header.dart';
 import 'widgets/forgot_password_form.dart';
+import '../../widgets/background_header.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
   const ForgotPasswordScreen({super.key});
@@ -18,7 +18,9 @@ class ForgotPasswordScreen extends StatelessWidget {
           child: Stack(
             children: [
               // Widget 1: O Header Azul
-              const ForgotPasswordHeader(),
+              const Header(
+                title: "RECUPERAR SENHA",
+              ),
 
               // Widget 2: O Card de Forgot Password
               const ForgotPasswordForm(),
