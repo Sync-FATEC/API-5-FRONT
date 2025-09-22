@@ -53,6 +53,60 @@ class StockProvider extends ChangeNotifier {
     return _stocks.where((stock) => stock.active).toList();
   }
 
+  // Criar novo estoque
+  Future<bool> createStock(String name, String location) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      print('StockProvider: Criando estoque - Nome: $name, Localização: $location');
+      final response = await _apiService.createStock(name, location);
+      
+      if (response != null && response.success) {
+        // Adicionar o novo estoque à lista local se retornado
+        if (response.data.isNotEmpty) {
+          _stocks.addAll(response.data);
+        }
+        print('StockProvider: Estoque criado com sucesso');
+        return true;
+      } else {
+        throw Exception(response?.message ?? 'Erro ao criar estoque');
+      }
+    } catch (e) {
+      print('StockProvider: Erro ao criar estoque: $e');
+      _setError('Erro ao criar estoque: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Excluir estoque
+  Future<bool> deleteStock(String stockId) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      print('StockProvider: Excluindo estoque - ID: $stockId');
+      final success = await _apiService.deleteStock(stockId);
+      
+      if (success) {
+        // Remover o estoque da lista local
+        _stocks.removeWhere((stock) => stock.id == stockId);
+        print('StockProvider: Estoque excluído com sucesso');
+        return true;
+      } else {
+        throw Exception('Erro ao excluir estoque');
+      }
+    } catch (e) {
+      print('StockProvider: Erro ao excluir estoque: $e');
+      _setError('Erro ao excluir estoque: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   // Limpar dados
   void clearStocks() {
     _stocks = [];

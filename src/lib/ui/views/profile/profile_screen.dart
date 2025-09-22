@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/providers/stock_provider.dart';
 import '../../../core/providers/user_provider.dart';
 import '../../widgets/background_header.dart';
+import '../stock/create_stock_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -34,8 +35,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        return Scaffold(
+          body: SingleChildScrollView(
         child: Stack(
           children: [
             // Widget 1: O Header Azul
@@ -116,13 +119,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         // Renderizar cards dinamicamente
                         ...stocks.map((stock) => Padding(
                           padding: const EdgeInsets.only(bottom: 20),
-                          child: _buildStockCard(
-                            context,
-                            title: stock.name,
-                            subtitle: stock.location,
-                            icon: _getIconForStock(stock.name),
-                            onTap: () {
-                              _navigateToStock(context, stock);
+                          child: Consumer<UserProvider>(
+                            builder: (context, userProvider, child) {
+                              return _buildStockCard(
+                                context,
+                                title: stock.name,
+                                subtitle: stock.location,
+                                icon: _getIconForStock(stock.name),
+                                stockId: stock.id,
+                                showDeleteButton: userProvider.isAdmin,
+                                onTap: () {
+                                  _navigateToStock(context, stock);
+                                },
+                              );
                             },
                           ),
                         )).toList(),
@@ -157,6 +166,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
+      floatingActionButton: userProvider.isAdmin
+          ? FloatingActionButton(
+              onPressed: () => _navigateToCreateStock(context),
+              backgroundColor: AppColors.bluePrimary,
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+            )
+          : null,
+    );
+      },
     );
   }
 
@@ -166,6 +187,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String subtitle,
     required IconData icon,
     required VoidCallback onTap,
+    String? stockId,
+    bool showDeleteButton = false,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -230,6 +253,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             
+            // Botão de exclusão (apenas para admins)
+            if (showDeleteButton && stockId != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: IconButton(
+                  onPressed: () => _showDeleteConfirmation(context, stockId, title),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.red,
+                    size: 24,
+                  ),
+                  tooltip: 'Excluir estoque',
+                ),
+              ),
+            
             // Seta
             Icon(
               Icons.arrow_forward_ios,
@@ -261,5 +299,157 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: AppColors.bluePrimary,
       ),
     );
+  }
+
+  void _navigateToCreateStock(BuildContext context) async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const CreateStockScreen(),
+      ),
+    );
+
+    // Se o estoque foi criado com sucesso, recarregar a lista
+    if (result == true) {
+      _loadStocks();
+    }
+  }
+
+  void _showDeleteConfirmation(BuildContext context, String stockId, String stockName) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.orange,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Confirmar Exclusão',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Tem certeza que deseja excluir o estoque:',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '"$stockName"',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.bluePrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Esta ação não pode ser desfeita.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.red.shade600,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Cancelar',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteStock(context, stockId, stockName);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text(
+                'Excluir',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteStock(BuildContext context, String stockId, String stockName) async {
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
+    
+    try {
+      final success = await stockProvider.deleteStock(stockId);
+      
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Estoque "$stockName" excluído com sucesso!'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao excluir o estoque "$stockName"'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao excluir estoque: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    }
   }
 }

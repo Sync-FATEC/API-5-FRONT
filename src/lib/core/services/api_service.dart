@@ -42,6 +42,45 @@ class ApiService {
       throw Exception('Erro ao buscar estoques: $e');
     }
   }
+
+  // Criar novo estoque
+  Future<StockApiResponse?> createStock(String name, String location) async {
+    print('ApiService: Fazendo chamada para /stocks/ - Nome: $name, Localização: $location');
+    try {
+      final response = await HttpClient.post('/stocks', body: {
+        'name': name,
+        'location': location,
+      });
+      print('ApiService: Resposta recebida - Success: ${response.success}, Data: ${response.data}');
+      
+      if (response.success && response.data != null) {
+        return StockApiResponse.fromJson(response.data!);
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('ApiService: Erro na chamada: $e');
+      throw Exception('Erro ao criar estoque: $e');
+    }
+  }
+
+  // Excluir estoque
+  Future<bool> deleteStock(String stockId) async {
+    print('ApiService: Fazendo chamada para DELETE /stocks/$stockId');
+    try {
+      final response = await HttpClient.delete('/stocks/$stockId');
+      print('ApiService: Resposta recebida - Success: ${response.success}, Message: ${response.message}');
+      
+      if (response.success) {
+        return true;
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('ApiService: Erro na chamada: $e');
+      throw Exception('Erro ao excluir estoque: $e');
+    }
+  }
 }
 
 // Classe para representar a resposta da API

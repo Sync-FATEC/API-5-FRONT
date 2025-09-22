@@ -29,6 +29,7 @@ class UserProvider extends ChangeNotifier {
   String get userRole => _apiUserData?.role ?? '';
   bool get isUserActive => _apiUserData?.isActive ?? false;
   String get userValidUntil => _apiUserData?.validUntil ?? '';
+  bool get isAdmin => _apiUserData?.role.toUpperCase() == 'ADMIN';
 
   UserProvider() {
     _initializeUser();
