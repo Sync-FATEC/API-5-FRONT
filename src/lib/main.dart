@@ -7,6 +7,7 @@ import 'package:api2025/ui/views/home/home_screen.dart';
 import 'package:api2025/ui/views/forgot_password/forgot_password_screen.dart';
 import 'package:api2025/ui/views/profile/profile_screen.dart';
 import 'package:api2025/core/providers/user_provider.dart';
+import 'package:api2025/core/providers/stock_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => StockProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

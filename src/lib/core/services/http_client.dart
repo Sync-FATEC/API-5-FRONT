@@ -3,16 +3,28 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'auth_service.dart';
 
 class HttpClient {
   static const String baseUrl = 'http://10.0.2.2:3000';
   static const Duration timeoutDuration = Duration(seconds: 30);
 
   // Headers padrão
-  static Map<String, String> get _defaultHeaders => {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  };
+  static Future<Map<String, String>> get _defaultHeaders async {
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    // Adicionar token de autorização se disponível
+    final authService = AuthService();
+    final token = await authService.getIdToken();
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
+    return headers;
+  }
 
   // GET Request
   static Future<HttpResponse> get(
@@ -22,10 +34,11 @@ class HttpClient {
   }) async {
     try {
       final uri = _buildUri(endpoint, queryParams);
+      final defaultHeaders = await _defaultHeaders;
       final response = await http
           .get(
             uri,
-            headers: {..._defaultHeaders, ...?headers},
+            headers: {...defaultHeaders, ...?headers},
           )
           .timeout(timeoutDuration);
 
@@ -43,10 +56,11 @@ class HttpClient {
   }) async {
     try {
       final uri = _buildUri(endpoint);
+      final defaultHeaders = await _defaultHeaders;
       final response = await http
           .post(
             uri,
-            headers: {..._defaultHeaders, ...?headers},
+            headers: {...defaultHeaders, ...?headers},
             body: body != null ? json.encode(body) : null,
           )
           .timeout(timeoutDuration);
@@ -65,10 +79,11 @@ class HttpClient {
   }) async {
     try {
       final uri = _buildUri(endpoint);
+      final defaultHeaders = await _defaultHeaders;
       final response = await http
           .put(
             uri,
-            headers: {..._defaultHeaders, ...?headers},
+            headers: {...defaultHeaders, ...?headers},
             body: body != null ? json.encode(body) : null,
           )
           .timeout(timeoutDuration);
@@ -86,10 +101,11 @@ class HttpClient {
   }) async {
     try {
       final uri = _buildUri(endpoint);
+      final defaultHeaders = await _defaultHeaders;
       final response = await http
           .delete(
             uri,
-            headers: {..._defaultHeaders, ...?headers},
+            headers: {...defaultHeaders, ...?headers},
           )
           .timeout(timeoutDuration);
 

@@ -129,8 +129,8 @@ class _LoginFormState extends State<LoginForm> {
                             final success = await viewModel.login(email, password);
                             
                             if (success && context.mounted) {
-                              // Navegar para a tela principal
-                              Navigator.of(context).pushReplacementNamed('/home');
+                              // Navegar para a tela de seleção de estoque
+                              Navigator.of(context).pushReplacementNamed('/profile');
                             }
                           },
                           style: ElevatedButton.styleFrom(

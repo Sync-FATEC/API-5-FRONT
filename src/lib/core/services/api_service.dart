@@ -24,6 +24,24 @@ class ApiService {
       throw Exception('Erro ao buscar dados do usuário: $e');
     }
   }
+
+  // Buscar estoques do usuário pela API
+  Future<StockApiResponse?> getStocks(String userId) async {
+    print('ApiService: Fazendo chamada para /stocks/$userId');
+    try {
+      final response = await HttpClient.get('/stocks/$userId');
+      print('ApiService: Resposta recebida - Success: ${response.success}, Data: ${response.data}');
+      
+      if (response.success && response.data != null) {
+        return StockApiResponse.fromJson(response.data!);
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('ApiService: Erro na chamada: $e');
+      throw Exception('Erro ao buscar estoques: $e');
+    }
+  }
 }
 
 // Classe para representar a resposta da API
@@ -88,6 +106,62 @@ class UserData {
       'validUntil': validUntil,
       'createdAt': createdAt,
       'isActive': isActive,
+    };
+  }
+}
+
+// Classe para representar a resposta da API de estoques
+class StockApiResponse {
+  final bool success;
+  final List<StockData> data;
+  final String message;
+
+  StockApiResponse({
+    required this.success,
+    required this.data,
+    required this.message,
+  });
+
+  factory StockApiResponse.fromJson(Map<String, dynamic> json) {
+    return StockApiResponse(
+      success: json['success'] ?? false,
+      data: json['data'] != null 
+          ? (json['data'] as List).map((item) => StockData.fromJson(item)).toList()
+          : [],
+      message: json['message'] ?? '',
+    );
+  }
+}
+
+// Classe para representar os dados de um estoque
+class StockData {
+  final String id;
+  final String name;
+  final String location;
+  final bool active;
+
+  StockData({
+    required this.id,
+    required this.name,
+    required this.location,
+    required this.active,
+  });
+
+  factory StockData.fromJson(Map<String, dynamic> json) {
+    return StockData(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      location: json['location'] ?? '',
+      active: json['active'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'location': location,
+      'active': active,
     };
   }
 }
