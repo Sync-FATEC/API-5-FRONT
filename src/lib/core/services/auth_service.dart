@@ -117,6 +117,20 @@ class AuthService {
     };
   }
 
+  // Obter token de autenticação do Firebase
+  Future<String?> getIdToken() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        return await user.getIdToken();
+      }
+      return null;
+    } catch (e) {
+      print('Erro ao obter token: $e');
+      return null;
+    }
+  }
+
   // Tratar exceções do Firebase Auth
   String _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
