@@ -1,9 +1,10 @@
 import 'package:api2025/core/constants/app_colors.dart';
+import 'package:api2025/ui/views/stock/create_stock_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/stock_provider.dart';
 import '../../../core/providers/user_provider.dart';
-import '../../widgets/stock_option_card.dart'; // Importe o widget que criamos
+import '../../widgets/custom_card.dart'; // Importe o widget que criamos
 import '../../widgets/background_header.dart'; // Importe o widget Header padrão
 
 class StockSelectionScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
   @override
   void initState() {
     super.initState();
+    // Garante que o provider seja chamado após o build da tela
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadStocks();
     });
@@ -34,150 +36,57 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    print('DEBUG: User Role = ${userProvider.apiUserData?.role}');
+    final bool isAdmin = (userProvider.apiUserData?.role?.toLowerCase() ?? '') == 'admin';
     return Scaffold(
-      body: Stack(
+      body: Stack( // <-- MUDANÇA 1: Usando Stack para sobrepor os widgets
         children: [
-          // Header padrão com forma curvada
-          const Header(title: 'ESCOLHA O ESTOQUE QUE\nDESEJA GERENCIAR'),
-          // Conteúdo da tela
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 120), // Espaçamento para o header
-                  // Card branco com as opções
-                  Card(
-                    elevation: 4,
-                    shadowColor: Colors.black.withOpacity(0.1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Consumer<StockProvider>(
-                      builder: (context, stockProvider, child) {
-                        if (stockProvider.isLoading) {
-                          return const Padding(
-                            padding: EdgeInsets.all(40.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                CircularProgressIndicator(),
-                                SizedBox(height: 20),
-                                Text('Carregando estoques...'),
-                              ],
-                            ),
-                          );
-                        }
+          // Camada de baixo: O Header
+          const Header(title: "ESCOLHA O ESTOQUE QUE \nDESEJA GERENCIAR"),
 
-                        if (stockProvider.errorMessage != null) {
-                          return Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  color: Colors.red,
-                                  size: 48,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Erro ao carregar estoques',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  stockProvider.errorMessage!,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                ElevatedButton(
-                                  onPressed: _loadStocks,
-                                  child: const Text('Tentar novamente'),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
+          // Camada de cima: A lista de cards
+          Consumer<StockProvider>(
+            builder: (context, stockProvider, child) {
+              final stocks = stockProvider.activeStocks;
 
-                        final stocks = stockProvider.activeStocks;
-
-                        if (stocks.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.all(40.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.inventory_outlined,
-                                  size: 48,
-                                  color: Colors.grey,
-                                ),
-                                SizedBox(height: 16),
-                                Text(
-                                  'Nenhum estoque disponível',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-
-                        return Column(
-                          children: [
-                            // Renderizar cards dinamicamente dos estoques da API
-                            ...stocks.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final stock = entry.value;
-                              final isLast = index == stocks.length - 1;
-
-                              return Column(
-                                children: [
-                                  StockOptionCard(
-                                    iconData: _getIconForStock(stock.name),
-                                    title: stock.name,
-                                    subtitle: stock.location,
-                                    iconBackgroundColor: AppColors.bluePrimary,
-                                    onTap: () {
-                                      _navigateToStock(context, stock);
-                                    },
-                                  ),
-                                  if (!isLast)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0,
-                                      ),
-                                      child: Divider(
-                                        color: Colors.grey[300],
-                                        height: 1,
-                                      ),
-                                    ),
-                                ],
-                              );
-                            }).toList(),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
+              // Usando ListView.builder para melhor performance
+              return Padding(
+                // <-- MUDANÇA 2: Padding para posicionar a lista
+                padding: const EdgeInsets.only(top: 180.0), // Ajuste este valor para subir/descer a lista
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                  itemCount: stocks.length,
+                  itemBuilder: (context, index) {
+                    final stock = stocks[index];
+                    return Padding(
+                      // Adiciona um espaçamento inferior entre os cards
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: CustomCard(
+                        iconData: _getIconForStock(stock.name),
+                        title: stock.name,
+                        subtitle: stock.location,
+                        onTap: () => _navigateToStock(context, stock),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
           ),
         ],
       ),
+            // ADICIONADO: FloatingActionButton que só aparece para admins
+      floatingActionButton: isAdmin
+          ? FloatingActionButton(
+              onPressed: () => _navigateToCreateStock(context),
+              backgroundColor: AppColors.bluePrimary,
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+            )
+          : null,
     );
   }
 
@@ -201,5 +110,18 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
       ),
     );
     print('${stockData.name} selecionado - ID: ${stockData.id}');
+  }
+
+    void _navigateToCreateStock(BuildContext context) async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const CreateStockScreen(),
+      ),
+    );
+
+    // Se o estoque foi criado com sucesso, recarregar a lista
+    if (result == true) {
+      _loadStocks();
+    }
   }
 }

@@ -1,7 +1,7 @@
 import 'package:api2025/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
-class StockOptionCard extends StatelessWidget {
+class CustomCard extends StatelessWidget {
   final IconData iconData;
   final String title;
   final String subtitle;
@@ -9,7 +9,7 @@ class StockOptionCard extends StatelessWidget {
   final Color iconBackgroundColor;
   final Color iconColor;
 
-  const StockOptionCard({
+  const CustomCard({
     super.key,
     required this.iconData,
     required this.title,
@@ -23,8 +23,17 @@ class StockOptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: const EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: AppColors.gray.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
