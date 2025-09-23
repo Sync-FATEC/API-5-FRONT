@@ -130,7 +130,7 @@ class _LoginFormState extends State<LoginForm> {
                             
                             if (success && context.mounted) {
                               // Navegar para a tela de seleção de estoque
-                              Navigator.of(context).pushReplacementNamed('/profile');
+                              Navigator.of(context).pushReplacementNamed('/stock-selection');
                             }
                           },
                           style: ElevatedButton.styleFrom(
