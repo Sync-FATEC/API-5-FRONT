@@ -13,4 +13,7 @@ class AppColors {
   // Vermelho
   static const Color red = Color(0xFFDC3A3A);
 
+  // Cinza
+  static const Color gray = Color(0xFF828488);
+
 }
