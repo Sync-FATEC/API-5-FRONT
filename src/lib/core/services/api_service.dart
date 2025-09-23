@@ -1,5 +1,6 @@
 // lib/core/services/api_service.dart
 
+import 'dart:convert';
 import 'http_client.dart';
 
 class ApiService {
@@ -79,6 +80,93 @@ class ApiService {
     } catch (e) {
       print('ApiService: Erro na chamada: $e');
       throw Exception('Erro ao excluir estoque: $e');
+    }
+  }
+
+  // Criar nova seção
+  Future<SectionApiResponse?> createSection(String name) async {
+    print('ApiService: Fazendo chamada para /sections - Nome: $name');
+    try {
+      final response = await HttpClient.post('/sections', body: {
+        'name': name,
+      });
+      print('ApiService: Resposta recebida - Success: ${response.success}, Data: ${response.data}');
+      
+      if (response.success && response.data != null) {
+        // Formatando a resposta para o padrão esperado
+        final Map<String, dynamic> formattedResponse = {
+          'success': true,
+          'message': '',
+          'data': [response.data]
+        };
+        return SectionApiResponse.fromJson(formattedResponse);
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('ApiService: Erro na chamada: $e');
+      throw Exception('Erro ao criar seção: $e');
+    }
+  }
+
+  // Buscar seções
+  Future<SectionApiResponse?> getSections() async {
+    print('ApiService: Fazendo chamada para /sections');
+    try {
+      final response = await HttpClient.get('/sections');
+      print('ApiService: Resposta recebida - Success: ${response.success}, Data: ${response.data}');
+      
+      if (response.success && response.data != null) {
+        // Verificar se a resposta contém a chave 'message' com uma lista de seções
+        if (response.data!.containsKey('message') && response.data!['message'] is String) {
+          // Se 'message' é uma string, tentar fazer parse como JSON
+          try {
+            final List<dynamic> sectionsJson = json.decode(response.data!['message']);
+            final Map<String, dynamic> formattedResponse = {
+              'success': true,
+              'message': '',
+              'data': sectionsJson
+            };
+            return SectionApiResponse.fromJson(formattedResponse);
+          } catch (e) {
+            print('ApiService: Erro ao fazer parse do JSON: $e');
+            throw Exception('Erro ao processar dados de seções: $e');
+          }
+        } else {
+          // Usar o formato original se 'message' já for uma lista
+          final Map<String, dynamic> formattedResponse = {
+            'success': true,
+            'message': '',
+            'data': response.data!['message'] is List 
+                ? response.data!['message'] 
+                : []
+          };
+          return SectionApiResponse.fromJson(formattedResponse);
+        }
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('ApiService: Erro na chamada: $e');
+      throw Exception('Erro ao buscar seções: $e');
+    }
+  }
+
+  // Excluir seção
+  Future<bool> deleteSection(String sectionId) async {
+    print('ApiService: Fazendo chamada para DELETE /sections/$sectionId');
+    try {
+      final response = await HttpClient.delete('/sections/$sectionId');
+      print('ApiService: Resposta recebida - Success: ${response.success}, Message: ${response.message}');
+      
+      if (response.success) {
+        return true;
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('ApiService: Erro na chamada: $e');
+      throw Exception('Erro ao excluir seção: $e');
     }
   }
 }
@@ -201,6 +289,54 @@ class StockData {
       'name': name,
       'location': location,
       'active': active,
+    };
+  }
+}
+
+// Classe para representar a resposta da API de seções
+class SectionApiResponse {
+  final bool success;
+  final List<SectionData> data;
+  final String message;
+
+  SectionApiResponse({
+    required this.success,
+    required this.data,
+    required this.message,
+  });
+
+  factory SectionApiResponse.fromJson(Map<String, dynamic> json) {
+    return SectionApiResponse(
+      success: json['success'] ?? false,
+      data: json['data'] != null 
+          ? (json['data'] as List).map((item) => SectionData.fromJson(item)).toList()
+          : [],
+      message: json['message'] ?? '',
+    );
+  }
+}
+
+// Classe para representar os dados de uma seção
+class SectionData {
+  final String id;
+  final String name;
+
+  SectionData({
+    required this.id,
+    required this.name,
+  });
+
+  factory SectionData.fromJson(Map<String, dynamic> json) {
+    return SectionData(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
     };
   }
 }

@@ -6,8 +6,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:api2025/ui/views/login/login_screen.dart';
 import 'package:api2025/ui/views/home/home_screen.dart';
 import 'package:api2025/ui/views/forgot_password/forgot_password_screen.dart';
+import 'package:api2025/ui/views/section/section_screen.dart';
 import 'package:api2025/core/providers/user_provider.dart';
 import 'package:api2025/core/providers/stock_provider.dart';
+import 'package:api2025/core/providers/section_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -34,6 +36,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => StockProvider()),
+        ChangeNotifierProvider(create: (_) => SectionProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -47,6 +50,7 @@ class MyApp extends StatelessWidget {
           '/home': (context) => const HomeScreen(),
           '/forgot-password': (context) => const ForgotPasswordScreen(),
           '/stock-selection': (context) => const StockSelectionScreen(),
+          '/sections': (context) => const SectionScreen(),
         },
       ),
     );

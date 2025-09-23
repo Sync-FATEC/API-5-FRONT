@@ -1,5 +1,6 @@
 import 'package:api2025/core/constants/app_colors.dart';
 import 'package:api2025/ui/views/stock/create_stock_screen.dart';
+import 'package:api2025/ui/views/section/section_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/stock_provider.dart';
@@ -67,6 +68,7 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
                         title: stock.name,
                         subtitle: stock.location,
                         onTap: () => _navigateToStock(context, stock),
+                        onDelete: isAdmin ? () => _deleteStock(context, stock.id) : null,
                       ),
                     );
                   },
@@ -76,17 +78,33 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
           ),
         ],
       ),
-            // ADICIONADO: FloatingActionButton que só aparece para admins
-      floatingActionButton: isAdmin
-          ? FloatingActionButton(
+            // Botões flutuantes
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: "btnSection",
+            onPressed: () => _navigateToSection(context),
+            backgroundColor: AppColors.bluePrimary,
+            child: const Icon(
+              Icons.business,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Botão de adicionar estoque (visível apenas para admins)
+          if (isAdmin)
+            FloatingActionButton(
+              heroTag: "btnAddStock",
               onPressed: () => _navigateToCreateStock(context),
               backgroundColor: AppColors.bluePrimary,
               child: const Icon(
                 Icons.add,
                 color: Colors.white,
               ),
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
 
@@ -122,6 +140,45 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
     // Se o estoque foi criado com sucesso, recarregar a lista
     if (result == true) {
       _loadStocks();
+    }
+  }
+
+  void _navigateToSection(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const SectionScreen(),
+      ),
+    );
+  }
+
+  void _deleteStock(BuildContext context, String stockId) async {
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
+    
+    try {
+      final success = await stockProvider.deleteStock(stockId);
+      
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Estoque excluído com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(stockProvider.errorMessage ?? 'Erro ao excluir estoque'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao excluir estoque: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }
