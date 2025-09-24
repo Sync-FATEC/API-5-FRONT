@@ -1,3 +1,5 @@
+// lib/ui/views/stock/stock_selection_screen.dart
+
 import 'package:api2025/core/constants/app_colors.dart';
 import 'package:api2025/ui/views/stock/create_stock_screen.dart';
 import 'package:api2025/ui/views/section/section_screen.dart';
@@ -7,6 +9,7 @@ import '../../../core/providers/stock_provider.dart';
 import '../../../core/providers/user_provider.dart';
 import '../../widgets/custom_card.dart';
 import '../../widgets/background_header.dart';
+import '../../widgets/add_floating_button.dart';
 
 class StockSelectionScreen extends StatefulWidget {
   const StockSelectionScreen({super.key});
@@ -36,29 +39,23 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    print('DEBUG: User Role = ${userProvider.apiUserData?.role}');
     final bool isAdmin = (userProvider.apiUserData?.role?.toLowerCase() ?? '') == 'admin';
+    
     return Scaffold(
       body: Stack(
         children: [
-          // Camada de baixo: O Header
           const Header(title: "ESCOLHA O ESTOQUE QUE \nDESEJA GERENCIAR"),
-
-          // Camada de cima: A lista de cards
           Consumer<StockProvider>(
             builder: (context, stockProvider, child) {
               final stocks = stockProvider.activeStocks;
-
-              // Usando ListView.builder para melhor performance
               return Padding(
-                padding: const EdgeInsets.only(top: 180.0), // Ajuste este valor para subir/descer a lista
+                padding: const EdgeInsets.only(top: 180.0),
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 5.0),
                   itemCount: stocks.length,
                   itemBuilder: (context, index) {
                     final stock = stocks[index];
                     return Padding(
-                      // Adiciona um espaçamento inferior entre os cards
                       padding: const EdgeInsets.only(bottom: 12.0),
                       child: CustomCard(
                         iconData: _getIconForStock(stock.name),
@@ -75,7 +72,6 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
           ),
         ],
       ),
-            // Botões flutuantes
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -89,17 +85,12 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          // Botão de adicionar estoque (visível apenas para admins)
-          if (isAdmin)
-            FloatingActionButton(
-              heroTag: "btnAddStock",
-              onPressed: () => _navigateToCreateStock(context),
-              backgroundColor: AppColors.bluePrimary,
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-              ),
-            ),
+          // PASSO 2: Substitua o botão antigo pelo novo componente
+          AddFloatingButton(
+            heroTag: "btnAddStock",
+            isVisible: isAdmin, // A visibilidade é controlada aqui
+            onPressed: () => _navigateToCreateStock(context),
+          ),
         ],
       ),
     );
@@ -112,7 +103,7 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
     } else if (name.contains('almoxarifado')) {
       return Icons.inventory_2_outlined;
     } else {
-      return Icons.store_outlined; // Ícone genérico
+      return Icons.store_outlined;
     }
   }
 
@@ -125,10 +116,8 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
     );
   }
 
-    void _navigateToCreateStock(BuildContext context) async {
+  void _navigateToCreateStock(BuildContext context) async {
     final result = await CreateStockModal.show(context);
-
-    // Se o estoque foi criado com sucesso, recarregar a lista
     if (result == true) {
       _loadStocks();
     }

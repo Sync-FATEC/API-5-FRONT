@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/providers/section_provider.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../widgets/custom_modal.dart';
+import '../../../../core/providers/section_provider.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../widgets/custom_modal.dart';
 
 class CreateSectionModal extends StatefulWidget {
   const CreateSectionModal({Key? key}) : super(key: key);
