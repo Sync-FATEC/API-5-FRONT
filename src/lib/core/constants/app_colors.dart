@@ -16,4 +16,7 @@ class AppColors {
   // Cinza
   static const Color gray = Color(0xFF828488);
 
+  // Verde
+  static const Color greenPrimary = Color(0xFF00C896);
+
 }
