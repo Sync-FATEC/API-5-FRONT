@@ -1,7 +1,7 @@
 // lib/ui/views/stock/stock_selection_screen.dart
 
 import 'package:api2025/core/constants/app_colors.dart';
-import 'package:api2025/ui/views/stock/create_stock_screen.dart';
+import 'package:api2025/ui/views/stock/widgets/create_stock_screen.dart';
 import 'package:api2025/ui/views/section/section_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
