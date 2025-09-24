@@ -130,11 +130,7 @@ class _SectionScreenState extends State<SectionScreen> {
   }
 
   void _navigateToCreateSection(BuildContext context) async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const CreateSectionScreen(),
-      ),
-    );
+    final result = await CreateSectionModal.show(context);
 
     // Se a seção foi criada com sucesso, recarregar a lista
     if (result == true) {

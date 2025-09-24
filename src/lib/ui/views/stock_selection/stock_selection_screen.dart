@@ -131,11 +131,7 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
   }
 
     void _navigateToCreateStock(BuildContext context) async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const CreateStockScreen(),
-      ),
-    );
+    final result = await CreateStockModal.show(context);
 
     // Se o estoque foi criado com sucesso, recarregar a lista
     if (result == true) {
