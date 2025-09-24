@@ -7,12 +7,12 @@ import '../../data/models/section_model.dart';
 class SectionProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
   
-  List<Section> _sections = [];
+  List<SectionModel> _sections = [];
   bool _isLoading = false;
   String? _errorMessage;
 
   // Getters
-  List<Section> get sections => _sections;
+  List<SectionModel> get sections => _sections;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -26,7 +26,7 @@ class SectionProvider extends ChangeNotifier {
       
       if (response != null && response.success) {
         _sections = response.data.map((sectionData) => 
-          Section(
+          SectionModel(
             id: sectionData.id,
             name: sectionData.name,
           )
@@ -80,7 +80,7 @@ class SectionProvider extends ChangeNotifier {
       if (response != null && response.success && response.data.isNotEmpty) {
         // Adicionando a nova seção à lista local
         final newSectionData = response.data.first;
-        final newSection = Section(
+        final newSection = SectionModel(
           id: newSectionData.id,
           name: newSectionData.name,
         );

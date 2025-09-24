@@ -2,16 +2,17 @@
 
 import 'package:flutter/foundation.dart';
 import '../services/api_service.dart';
+import '../../data/models/stock_model.dart';
 
 class StockProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
 
-  List<StockData> _stocks = [];
+  List<StockModel> _stocks = [];
   bool _isLoading = false;
   String? _errorMessage;
 
   // Getters
-  List<StockData> get stocks => _stocks;
+  List<StockModel> get stocks => _stocks;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -23,7 +24,7 @@ class StockProvider extends ChangeNotifier {
     try {
       print('StockProvider: Carregando estoques para userId: $userId');
       final response = await _apiService.getStocks(userId);
-      
+
       if (response != null && response.success) {
         _stocks = response.data;
         print('StockProvider: ${_stocks.length} estoques carregados');
@@ -40,7 +41,7 @@ class StockProvider extends ChangeNotifier {
   }
 
   // Obter estoque por ID
-  StockData? getStockById(String id) {
+  StockModel? getStockById(String id) {
     try {
       return _stocks.firstWhere((stock) => stock.id == id);
     } catch (e) {
@@ -49,7 +50,7 @@ class StockProvider extends ChangeNotifier {
   }
 
   // Obter estoques ativos
-  List<StockData> get activeStocks {
+  List<StockModel> get activeStocks {
     return _stocks.where((stock) => stock.active).toList();
   }
 
@@ -59,9 +60,11 @@ class StockProvider extends ChangeNotifier {
     _setError(null);
 
     try {
-      print('StockProvider: Criando estoque - Nome: $name, Localização: $location');
+      print(
+        'StockProvider: Criando estoque - Nome: $name, Localização: $location',
+      );
       final response = await _apiService.createStock(name, location);
-      
+
       if (response != null && response.success) {
         // Adicionar o novo estoque à lista local se retornado
         if (response.data.isNotEmpty) {
@@ -89,7 +92,7 @@ class StockProvider extends ChangeNotifier {
     try {
       print('StockProvider: Excluindo estoque - ID: $stockId');
       final success = await _apiService.deleteStock(stockId);
-      
+
       if (success) {
         // Remover o estoque da lista local
         _stocks.removeWhere((stock) => stock.id == stockId);
