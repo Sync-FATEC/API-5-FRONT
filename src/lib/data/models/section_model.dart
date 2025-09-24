@@ -1,14 +1,14 @@
-class Section {
+class SectionModel {
   final String id;
   final String name;
 
-  Section({
+  SectionModel({
     required this.id,
     required this.name,
   });
 
-  factory Section.fromJson(Map<String, dynamic> json) {
-    return Section(
+  factory SectionModel.fromJson(Map<String, dynamic> json) {
+    return SectionModel(
       id: json['id'] as String,
       name: json['name'] as String,
     );

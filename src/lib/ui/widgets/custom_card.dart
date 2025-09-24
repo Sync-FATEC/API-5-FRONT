@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/user_provider.dart';
 
-class CustomCard extends StatelessWidget {
+class CustomCard extends StatefulWidget {
   final IconData iconData;
   final String title;
   final String subtitle;
@@ -25,11 +25,18 @@ class CustomCard extends StatelessWidget {
     this.onDelete,
   });
 
+  @override
+  State<CustomCard> createState() => _CustomCardState();
+}
+
+class _CustomCardState extends State<CustomCard> {
+  bool _isPressed = false;
+
+  // CORREÇÃO 1: MÉTODOS MOVIDOS PARA A CLASSE STATE
   void _showOptionsMenu(BuildContext context, RenderBox renderBox, Size size) {
     final theme = Theme.of(context);
     final position = renderBox.localToGlobal(Offset.zero);
     
-    // Considerando as margens do card (16.0 horizontal)
     final cardMargin = 16.0;
     final cardWidth = size.width - (cardMargin * 2);
     
@@ -45,18 +52,18 @@ class CustomCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
-      color: Colors.white, // Mesma cor do card
+      color: Colors.white,
       constraints: BoxConstraints(
         minWidth: cardWidth,
         maxWidth: cardWidth,
       ),
       items: [
         PopupMenuItem(
-          height: 60, // Aumentando altura para mais padding
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0), // Padding maior
+          height: 60,
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
           child: Row(
             children: [
-              Icon(Icons.delete_outline, color: Colors.red, size: 24),
+              const Icon(Icons.delete_outline, color: Colors.red, size: 24),
               const SizedBox(width: 16),
               Text(
                 'Excluir',
@@ -84,7 +91,6 @@ class CustomCard extends StatelessWidget {
     final position = renderBox.localToGlobal(Offset.zero);
     final size = renderBox.size;
     
-    // Considerando as margens do card (16.0 horizontal)
     final cardMargin = 16.0;
     final cardWidth = size.width - (cardMargin * 2);
     
@@ -100,7 +106,7 @@ class CustomCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
-      color: Colors.white, // Mesma cor do card
+      color: Colors.white,
       constraints: BoxConstraints(
         minWidth: cardWidth,
         maxWidth: cardWidth,
@@ -108,10 +114,11 @@ class CustomCard extends StatelessWidget {
       items: [
         PopupMenuItem(
           enabled: false,
-          height: 50, // Aumentando altura
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0), // Padding maior
+          height: 50,
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+          // CORREÇÃO 2: Usar widget.title
           child: Text(
-            'Excluir $title?',
+            'Excluir ${widget.title}?',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
               fontSize: 16,
@@ -120,8 +127,8 @@ class CustomCard extends StatelessWidget {
         ),
         PopupMenuItem(
           enabled: false,
-          height: 50, // Aumentando altura
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0), // Padding maior
+          height: 50,
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
           child: Text(
             'Tem certeza que deseja excluir este item?',
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -131,12 +138,12 @@ class CustomCard extends StatelessWidget {
         ),
         const PopupMenuItem(
           enabled: false,
-          height: 16, // Espaçamento maior
+          height: 16,
           child: Divider(height: 1),
         ),
         PopupMenuItem(
-          height: 60, // Aumentando altura para mais padding
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0), // Padding maior
+          height: 60,
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
           child: Row(
             children: [
               Icon(Icons.cancel, color: theme.colorScheme.primary, size: 24),
@@ -152,8 +159,8 @@ class CustomCard extends StatelessWidget {
           onTap: () {},
         ),
         PopupMenuItem(
-          height: 60, // Aumentando altura para mais padding
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0), // Padding maior
+          height: 60,
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
           child: Row(
             children: [
               Icon(Icons.delete_outline, color: theme.colorScheme.error, size: 24),
@@ -168,8 +175,9 @@ class CustomCard extends StatelessWidget {
             ],
           ),
           onTap: () {
-            if (onDelete != null) {
-              onDelete!();
+            // CORREÇÃO 2: Usar widget.onDelete
+            if (widget.onDelete != null) {
+              widget.onDelete!();
             }
           },
         ),
@@ -181,21 +189,24 @@ class CustomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final userRole = userProvider.apiUserData?.role?.toUpperCase() ?? '';
-    final bool canDelete = userRole != 'SOLDADO' && onDelete != null;
+    // CORREÇÃO 2: Usar widget.onDelete
+    final bool canDelete = userRole != 'SOLDADO' && widget.onDelete != null;
     
     return GestureDetector(
+      // CORREÇÃO 2: A chamada do método agora está correta, pois ele foi movido.
       onLongPress: canDelete ? () {
         final RenderBox renderBox = context.findRenderObject() as RenderBox;
         final size = renderBox.size;
         
         _showOptionsMenu(context, renderBox, size);
       } : null,
-      onTap: onTap,
+      // CORREÇÃO 2: Usar widget.onTap
+      onTap: widget.onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         padding: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: _isPressed ? Colors.grey.shade200 : Colors.white,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: AppColors.gray.withOpacity(0.3),
@@ -205,23 +216,24 @@ class CustomCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Círculo do Ícone
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: iconBackgroundColor,
+                // CORREÇÃO 2: Usar widget.iconBackgroundColor
+                color: widget.iconBackgroundColor,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(iconData, size: 45, color: iconColor),
+              // CORREÇÃO 2: Usar widget.iconData e widget.iconColor
+              child: Icon(widget.iconData, size: 45, color: widget.iconColor),
             ),
             const SizedBox(width: 16),
-            // Coluna com Título e Subtítulo
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    // CORREÇÃO 2: Usar widget.title
+                    widget.title,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -229,14 +241,15 @@ class CustomCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    subtitle,
+                    // CORREÇÃO 2: Usar widget.subtitle
+                    widget.subtitle,
                     style: TextStyle(fontSize: 14, color: AppColors.gray),
                   ),
                 ],
               ),
             ),
-            // Ícone de seta (condicional)
-            if (showArrow)
+            // CORREÇÃO 2: Usar widget.showArrow
+            if (widget.showArrow)
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(

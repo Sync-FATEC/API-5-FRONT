@@ -3,28 +3,33 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../data/models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 
 class UserProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
   final ApiService _apiService = ApiService();
-  
+
   User? _currentUser;
   bool _isLoading = false;
   String? _errorMessage;
   Map<String, String?> _userData = {};
-  UserData? _apiUserData;
+  UserModel? _apiUserData;
 
   // Getters
   User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   Map<String, String?> get userData => _userData;
-  UserData? get apiUserData => _apiUserData;
+  UserModel? get apiUserData => _apiUserData;
   bool get isLoggedIn => _currentUser != null;
   String get userEmail => _currentUser?.email ?? _userData['user_email'] ?? '';
-  String get userDisplayName => _apiUserData?.name ?? _currentUser?.displayName ?? _userData['user_display_name'] ?? '';
+  String get userDisplayName =>
+      _apiUserData?.name ??
+      _currentUser?.displayName ??
+      _userData['user_display_name'] ??
+      '';
   String get userId => _currentUser?.uid ?? _userData['user_id'] ?? '';
   String get userRole => _apiUserData?.role ?? '';
   bool get isUserActive => _apiUserData?.isActive ?? false;
@@ -42,7 +47,7 @@ class UserProvider extends ChangeNotifier {
     try {
       // Verificar se há usuário logado no Firebase
       _currentUser = _authService.currentUser;
-      
+
       // Se não há usuário no Firebase, verificar dados locais
       if (_currentUser == null) {
         final isLoggedIn = await _authService.isLoggedIn();
@@ -77,24 +82,24 @@ class UserProvider extends ChangeNotifier {
   Future<bool> login(String email, String password) async {
     _setLoading(true);
     _clearError();
-    
+
     try {
       final credential = await _authService.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      
+
       if (credential?.user != null) {
         _currentUser = credential!.user;
         _userData = await _authService.getUserData();
-        
+
         // Fazer chamada da API para buscar dados do usuário
         print('Iniciando chamada da API para o email: $email');
         try {
           final apiResponse = await _apiService.getUserData(email);
           print('Resposta da API recebida: ${apiResponse?.data}');
           _apiUserData = apiResponse?.data;
-          
+
           // Salvar dados da API localmente
           await _saveApiUserData(_apiUserData);
           print('Dados da API salvos localmente');
@@ -102,11 +107,11 @@ class UserProvider extends ChangeNotifier {
           // Se a API falhar, continua com o login do Firebase
           print('Erro ao buscar dados da API: $apiError');
         }
-        
+
         _setLoading(false);
         return true;
       }
-      
+
       _setError('Falha no login');
       return false;
     } catch (e) {
@@ -121,20 +126,20 @@ class UserProvider extends ChangeNotifier {
   Future<bool> register(String email, String password) async {
     _setLoading(true);
     _clearError();
-    
+
     try {
       final credential = await _authService.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      
+
       if (credential?.user != null) {
         _currentUser = credential!.user;
         _userData = await _authService.getUserData();
         _setLoading(false);
         return true;
       }
-      
+
       _setError('Falha no registro');
       return false;
     } catch (e) {
@@ -149,7 +154,7 @@ class UserProvider extends ChangeNotifier {
   Future<void> logout() async {
     _setLoading(true);
     _clearError();
-    
+
     try {
       await _authService.signOut();
       await _clearApiUserData();
@@ -167,7 +172,7 @@ class UserProvider extends ChangeNotifier {
   Future<bool> resetPassword(String email) async {
     _setLoading(true);
     _clearError();
-    
+
     try {
       await _authService.sendPasswordResetEmail(email);
       _setLoading(false);
@@ -211,7 +216,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   // Salvar dados da API localmente
-  Future<void> _saveApiUserData(UserData? userData) async {
+  Future<void> _saveApiUserData(UserModel? userData) async {
     if (userData != null) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('api_user_id', userData.id);
@@ -225,12 +230,12 @@ class UserProvider extends ChangeNotifier {
   }
 
   // Carregar dados da API salvos localmente
-  Future<UserData?> _loadApiUserData() async {
+  Future<UserModel?> _loadApiUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final id = prefs.getString('api_user_id');
-    
+
     if (id != null) {
-      return UserData(
+      return UserModel(
         id: id,
         email: prefs.getString('api_user_email') ?? '',
         name: prefs.getString('api_user_name') ?? '',
@@ -240,7 +245,7 @@ class UserProvider extends ChangeNotifier {
         isActive: prefs.getBool('api_user_is_active') ?? false,
       );
     }
-    
+
     return null;
   }
 

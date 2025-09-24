@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/stock_provider.dart';
 import '../../../core/providers/user_provider.dart';
-import '../../widgets/custom_card.dart'; // Importe o widget que criamos
-import '../../widgets/background_header.dart'; // Importe o widget Header padrão
+import '../../widgets/custom_card.dart';
+import '../../widgets/background_header.dart';
 
 class StockSelectionScreen extends StatefulWidget {
   const StockSelectionScreen({super.key});
@@ -19,7 +19,6 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
   @override
   void initState() {
     super.initState();
-    // Garante que o provider seja chamado após o build da tela
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadStocks();
     });
@@ -29,7 +28,6 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final stockProvider = Provider.of<StockProvider>(context, listen: false);
 
-    // Usar o ID do usuário da API ou um ID fixo para teste
     final userId =
         userProvider.apiUserData?.id ?? '4ba9e4c7-c6ba-4f0e-af65-bd6992bc3c2f';
     stockProvider.loadStocks(userId);
@@ -41,7 +39,7 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
     print('DEBUG: User Role = ${userProvider.apiUserData?.role}');
     final bool isAdmin = (userProvider.apiUserData?.role?.toLowerCase() ?? '') == 'admin';
     return Scaffold(
-      body: Stack( // <-- MUDANÇA 1: Usando Stack para sobrepor os widgets
+      body: Stack(
         children: [
           // Camada de baixo: O Header
           const Header(title: "ESCOLHA O ESTOQUE QUE \nDESEJA GERENCIAR"),
@@ -53,7 +51,6 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
 
               // Usando ListView.builder para melhor performance
               return Padding(
-                // <-- MUDANÇA 2: Padding para posicionar a lista
                 padding: const EdgeInsets.only(top: 180.0), // Ajuste este valor para subir/descer a lista
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 5.0),
@@ -119,15 +116,13 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
     }
   }
 
-  void _navigateToStock(BuildContext context, stockData) {
-    // Implementar navegação para a tela específica do estoque
+  void _navigateToStock(BuildContext context, stockData) async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Navegando para ${stockData.name}'),
-        backgroundColor: const Color(0xFF2979FF),
+        backgroundColor: AppColors.bluePrimary,
       ),
     );
-    print('${stockData.name} selecionado - ID: ${stockData.id}');
   }
 
     void _navigateToCreateStock(BuildContext context) async {
