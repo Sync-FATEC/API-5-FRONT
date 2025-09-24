@@ -1,5 +1,6 @@
 import 'package:api2025/core/constants/app_colors.dart';
-import 'package:api2025/ui/views/section/create_section_screen.dart';
+import 'package:api2025/ui/views/section/widgets/create_section_screen.dart';
+import 'package:api2025/ui/widgets/add_floating_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/section_provider.dart';
@@ -113,13 +114,10 @@ class _SectionScreenState extends State<SectionScreen> {
         ],
       ),
       // Botão flutuante para criar seção
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToCreateSection(context),
-        backgroundColor: AppColors.bluePrimary,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+      floatingActionButton: AddFloatingButton(
+            heroTag: "btnAddStock",
+            isVisible: true, // A visibilidade é controlada aqui
+            onPressed: () => _navigateToCreateSection(context),
       ),
     );
   }

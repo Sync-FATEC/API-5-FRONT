@@ -1,4 +1,4 @@
-import 'package:api2025/ui/views/stock_selection/stock_selection_screen.dart';
+import 'package:api2025/ui/views/stock/stock_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';

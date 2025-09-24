@@ -1,72 +1,67 @@
-// lib/ui/views/stock/create_stock_screen.dart
+// lib/ui/views/section/create_section_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/providers/stock_provider.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../widgets/custom_modal.dart';
+import '../../../../core/providers/section_provider.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../widgets/custom_modal.dart';
 
-class CreateStockModal extends StatefulWidget {
-  const CreateStockModal({Key? key}) : super(key: key);
+class CreateSectionModal extends StatefulWidget {
+  const CreateSectionModal({Key? key}) : super(key: key);
 
   @override
-  State<CreateStockModal> createState() => _CreateStockModalState();
+  State<CreateSectionModal> createState() => _CreateSectionModalState();
 
   static Future<bool?> show(BuildContext context) {
     return CustomModal.show<bool>(
       context: context,
-      title: 'Cadastro de estoque do produto',
-      child: const _CreateStockForm(),
+      title: 'Cadastro de seção',
+      child: const _CreateSectionForm(),
     );
   }
 }
 
-class _CreateStockModalState extends State<CreateStockModal> {
+class _CreateSectionModalState extends State<CreateSectionModal> {
   @override
   Widget build(BuildContext context) {
     return Container(); // Este widget não será mais usado diretamente
   }
 }
 
-class _CreateStockForm extends StatefulWidget {
-  const _CreateStockForm({Key? key}) : super(key: key);
+class _CreateSectionForm extends StatefulWidget {
+  const _CreateSectionForm({Key? key}) : super(key: key);
 
   @override
-  _CreateStockFormState createState() => _CreateStockFormState();
+  _CreateSectionFormState createState() => _CreateSectionFormState();
 }
 
-class _CreateStockFormState extends State<_CreateStockForm> {
+class _CreateSectionFormState extends State<_CreateSectionForm> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _locationController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
     _nameController.dispose();
-    _locationController.dispose();
     super.dispose();
   }
 
-  Future<void> _createStock(BuildContext context) async {
+  Future<void> _createSection(BuildContext context) async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
     });
 
-    final stockProvider = Provider.of<StockProvider>(context, listen: false);
-
     try {
-      await stockProvider.createStock(
-        _nameController.text,
-        _locationController.text,
-      );
+      final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
+      
+      await sectionProvider.createSection(_nameController.text.trim());
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Estoque criado com sucesso!'),
+            content: Text('Seção criada com sucesso!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -76,7 +71,7 @@ class _CreateStockFormState extends State<_CreateStockForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao criar estoque: $e'),
+            content: Text('Erro ao criar seção: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -98,22 +93,11 @@ class _CreateStockFormState extends State<_CreateStockForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           CustomModalTextField(
-            label: 'Nome do estoque:',
+            label: 'Nome da seção:',
             controller: _nameController,
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Por favor, insira o nome do estoque';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          CustomModalTextField(
-            label: 'Localização:',
-            controller: _locationController,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Por favor, insira a localização';
+                return 'Por favor, insira o nome da seção';
               }
               return null;
             },
@@ -121,7 +105,7 @@ class _CreateStockFormState extends State<_CreateStockForm> {
           const SizedBox(height: 24),
           CustomModalButton(
             text: 'CADASTRAR',
-            onPressed: () => _createStock(context),
+            onPressed: () => _createSection(context),
             isLoading: _isLoading,
           ),
         ],

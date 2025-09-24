@@ -1,67 +1,72 @@
-// lib/ui/views/section/create_section_screen.dart
+// lib/ui/views/stock/create_stock_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/providers/section_provider.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../widgets/custom_modal.dart';
+import '../../../../core/providers/stock_provider.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../widgets/custom_modal.dart';
 
-class CreateSectionModal extends StatefulWidget {
-  const CreateSectionModal({Key? key}) : super(key: key);
+class CreateStockModal extends StatefulWidget {
+  const CreateStockModal({Key? key}) : super(key: key);
 
   @override
-  State<CreateSectionModal> createState() => _CreateSectionModalState();
+  State<CreateStockModal> createState() => _CreateStockModalState();
 
   static Future<bool?> show(BuildContext context) {
     return CustomModal.show<bool>(
       context: context,
-      title: 'Cadastro de seção',
-      child: const _CreateSectionForm(),
+      title: 'Cadastro de estoque do produto',
+      child: const _CreateStockForm(),
     );
   }
 }
 
-class _CreateSectionModalState extends State<CreateSectionModal> {
+class _CreateStockModalState extends State<CreateStockModal> {
   @override
   Widget build(BuildContext context) {
     return Container(); // Este widget não será mais usado diretamente
   }
 }
 
-class _CreateSectionForm extends StatefulWidget {
-  const _CreateSectionForm({Key? key}) : super(key: key);
+class _CreateStockForm extends StatefulWidget {
+  const _CreateStockForm({Key? key}) : super(key: key);
 
   @override
-  _CreateSectionFormState createState() => _CreateSectionFormState();
+  _CreateStockFormState createState() => _CreateStockFormState();
 }
 
-class _CreateSectionFormState extends State<_CreateSectionForm> {
+class _CreateStockFormState extends State<_CreateStockForm> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _locationController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
     _nameController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
-  Future<void> _createSection(BuildContext context) async {
+  Future<void> _createStock(BuildContext context) async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
     });
 
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
+
     try {
-      final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
-      
-      await sectionProvider.createSection(_nameController.text.trim());
+      await stockProvider.createStock(
+        _nameController.text,
+        _locationController.text,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Seção criada com sucesso!'),
+            content: Text('Estoque criado com sucesso!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -71,7 +76,7 @@ class _CreateSectionFormState extends State<_CreateSectionForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao criar seção: $e'),
+            content: Text('Erro ao criar estoque: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -93,11 +98,22 @@ class _CreateSectionFormState extends State<_CreateSectionForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           CustomModalTextField(
-            label: 'Nome da seção:',
+            label: 'Nome do estoque:',
             controller: _nameController,
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Por favor, insira o nome da seção';
+                return 'Por favor, insira o nome do estoque';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          CustomModalTextField(
+            label: 'Localização:',
+            controller: _locationController,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Por favor, insira a localização';
               }
               return null;
             },
@@ -105,7 +121,7 @@ class _CreateSectionFormState extends State<_CreateSectionForm> {
           const SizedBox(height: 24),
           CustomModalButton(
             text: 'CADASTRAR',
-            onPressed: () => _createSection(context),
+            onPressed: () => _createStock(context),
             isLoading: _isLoading,
           ),
         ],
