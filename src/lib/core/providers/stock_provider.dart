@@ -10,11 +10,13 @@ class StockProvider extends ChangeNotifier {
   List<StockModel> _stocks = [];
   bool _isLoading = false;
   String? _errorMessage;
+  StockModel? _selectedStock;
 
   // Getters
   List<StockModel> get stocks => _stocks;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  StockModel? get selectedStock => _selectedStock;
 
   // Carregar estoques do usuário
   Future<void> loadStocks(String userId) async {
@@ -110,9 +112,22 @@ class StockProvider extends ChangeNotifier {
     }
   }
 
+  // Selecionar estoque
+  void selectStock(StockModel stock) {
+    _selectedStock = stock;
+    notifyListeners();
+  }
+
+  // Limpar seleção de estoque
+  void clearSelectedStock() {
+    _selectedStock = null;
+    notifyListeners();
+  }
+
   // Limpar dados
   void clearStocks() {
     _stocks = [];
+    _selectedStock = null;
     _errorMessage = null;
     notifyListeners();
   }
