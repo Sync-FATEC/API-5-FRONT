@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 class BottomNavBarWidget extends StatelessWidget {
   final int currentIndex;
 
-  const BottomNavBarWidget({
-    Key? key,
-    required this.currentIndex,
-  }) : super(key: key);
+  const BottomNavBarWidget({Key? key, required this.currentIndex})
+    : super(key: key);
 
   static const List<String> _routes = [
     '/home',
@@ -30,10 +28,7 @@ class BottomNavBarWidget extends StatelessWidget {
         }
       },
       items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'HOME',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'HOME'),
         BottomNavigationBarItem(
           icon: Icon(Icons.inventory_2_outlined),
           label: 'PEDIDOS',
@@ -42,10 +37,7 @@ class BottomNavBarWidget extends StatelessWidget {
           icon: Icon(Icons.warning_amber_outlined),
           label: 'ALERTAS',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.bar_chart),
-          label: 'GESTÃO',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'GESTÃO'),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_add_alt_1),
           label: 'USUÁRIOS',
@@ -57,5 +49,4 @@ class BottomNavBarWidget extends StatelessWidget {
       ],
     );
   }
-}
 }

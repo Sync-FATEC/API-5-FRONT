@@ -1,3 +1,4 @@
+import 'package:api2025/ui/views/orders/oders_screen.dart';
 import 'package:api2025/ui/views/stock/stock_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,6 +8,7 @@ import 'package:api2025/ui/views/login/login_screen.dart';
 import 'package:api2025/ui/views/home/home_screen.dart';
 import 'package:api2025/ui/views/forgot_password/forgot_password_screen.dart';
 import 'package:api2025/ui/views/section/section_screen.dart';
+import 'package:api2025/ui/views/profile/profile_screen.dart';
 import 'package:api2025/core/providers/user_provider.dart';
 import 'package:api2025/core/providers/stock_provider.dart';
 import 'package:api2025/core/providers/section_provider.dart';
@@ -51,6 +53,8 @@ class MyApp extends StatelessWidget {
           '/forgot-password': (context) => const ForgotPasswordScreen(),
           '/stock-selection': (context) => const StockSelectionScreen(),
           '/sections': (context) => const SectionScreen(),
+          '/profile': (context) => const ProfileScreen(),
+          '/orders': (context) => const OrdersScreen(),
         },
       ),
     );

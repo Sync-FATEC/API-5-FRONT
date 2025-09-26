@@ -39,8 +39,9 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final bool isAdmin = (userProvider.apiUserData?.role?.toLowerCase() ?? '') == 'admin';
-    
+    final bool isAdmin =
+        (userProvider.apiUserData?.role?.toLowerCase() ?? '') == 'admin';
+
     return Scaffold(
       body: Stack(
         children: [
@@ -62,7 +63,9 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
                         title: stock.name,
                         subtitle: stock.location,
                         onTap: () => _navigateToStock(context, stock),
-                        onDelete: isAdmin ? () => _deleteStock(context, stock.id) : null,
+                        onDelete: isAdmin
+                            ? () => _deleteStock(context, stock.id)
+                            : null,
                       ),
                     );
                   },
@@ -79,10 +82,7 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
             heroTag: "btnSection",
             onPressed: () => _navigateToSection(context),
             backgroundColor: AppColors.bluePrimary,
-            child: const Icon(
-              Icons.business,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.business, color: Colors.white),
           ),
           const SizedBox(height: 16),
           // PASSO 2: Substitua o botão antigo pelo novo componente
@@ -108,12 +108,13 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
   }
 
   void _navigateToStock(BuildContext context, stockData) async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Navegando para ${stockData.name}'),
-        backgroundColor: AppColors.bluePrimary,
-      ),
-    );
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
+
+    // Selecionar o estoque no provider
+    stockProvider.selectStock(stockData);
+
+    // Navegar para a tela home
+    Navigator.of(context).pushReplacementNamed('/home');
   }
 
   void _navigateToCreateStock(BuildContext context) async {
@@ -124,19 +125,17 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
   }
 
   void _navigateToSection(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const SectionScreen(),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const SectionScreen()));
   }
 
   void _deleteStock(BuildContext context, String stockId) async {
     final stockProvider = Provider.of<StockProvider>(context, listen: false);
-    
+
     try {
       final success = await stockProvider.deleteStock(stockId);
-      
+
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -147,7 +146,9 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(stockProvider.errorMessage ?? 'Erro ao excluir estoque'),
+            content: Text(
+              stockProvider.errorMessage ?? 'Erro ao excluir estoque',
+            ),
             backgroundColor: Colors.red,
           ),
         );
