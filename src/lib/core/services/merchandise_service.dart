@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../../data/models/merchandise_model.dart';
+import '../../data/models/merchandise_model.dart' hide MerchandiseTypeModel;
 import '../../data/models/merchandise_type_model.dart';
 
 class MerchandiseService {

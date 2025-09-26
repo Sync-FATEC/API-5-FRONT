@@ -1,4 +1,5 @@
-import '../enums/merchandise_enums.dart';
+import 'package:flutter/foundation.dart';
+
 import '../enums/merchandise_enums.dart';
 
 class MerchandiseTypeModel {

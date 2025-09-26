@@ -45,7 +45,11 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          const Header(title: "ESCOLHA O ESTOQUE QUE \nDESEJA GERENCIAR"),
+          Header(
+            title: "ESCOLHA O ESTOQUE QUE \nDESEJA GERENCIAR",
+            showBackButton: true,
+            onBackPressed: () => Navigator.of(context).pop(),
+          ),
           Consumer<StockProvider>(
             builder: (context, stockProvider, child) {
               final stocks = stockProvider.activeStocks;

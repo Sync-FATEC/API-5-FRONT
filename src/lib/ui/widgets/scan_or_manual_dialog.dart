@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-// Adicione o pacote mobile_scanner no pubspec.yaml
-// import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class ScanOrManualDialog extends StatefulWidget {
   final void Function(String ficha) onResult;
@@ -34,19 +33,16 @@ class _ScanOrManualDialogState extends State<ScanOrManualDialog> {
   @override
   Widget build(BuildContext context) {
     if (_showScanner) {
-      // Substitua pelo widget do pacote escolhido
       return Scaffold(
         appBar: AppBar(title: const Text('Escanear QR Code')),
-        body: Center(
-          child: Text('Aqui vai o scanner de QR code'),
-          // Exemplo com mobile_scanner:
-          // MobileScanner(
-          //   onDetect: (barcode, args) {
-          //     if (barcode.rawValue != null) {
-          //       _onScan(barcode.rawValue!);
-          //     }
-          //   },
-          // ),
+        body: MobileScanner(
+          controller: MobileScannerController(),
+          onDetect: (capture) {
+            final List<Barcode> barcodes = capture.barcodes;
+            if (barcodes.isNotEmpty && barcodes.first.rawValue != null) {
+              _onScan(barcodes.first.rawValue!);
+            }
+          },
         ),
       );
     }

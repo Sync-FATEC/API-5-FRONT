@@ -18,8 +18,10 @@ class ForgotPasswordScreen extends StatelessWidget {
           child: Stack(
             children: [
               // Widget 1: O Header Azul
-              const Header(
+              Header(
                 title: "RECUPERAR SENHA",
+                showBackButton: true,
+                onBackPressed: () => Navigator.of(context).pop(),
               ),
 
               // Widget 2: O Card de Forgot Password

@@ -2,71 +2,128 @@ import 'package:flutter/material.dart';
 import '../../widgets/background_header.dart';
 import '../../widgets/custom_card.dart';
 
-class MerchandiseMenuScreen extends StatelessWidget {
-  final VoidCallback onScanQr;
+class MerchandiseMenuScreen extends StatefulWidget {
+  final Function() onScanQr;
   final VoidCallback onAddItem;
+  final Function(Function(String))? onInit;
 
   const MerchandiseMenuScreen({
     super.key,
     required this.onScanQr,
     required this.onAddItem,
+    this.onInit,
   });
+  
+  @override
+  State<MerchandiseMenuScreen> createState() => _MerchandiseMenuScreenState();
 
+}
+
+class _MerchandiseMenuScreenState extends State<MerchandiseMenuScreen> {
+  String? scanResult;
+  
+  @override
+  void initState() {
+    super.initState();
+    if (widget.onInit != null) {
+      widget.onInit!((result) {
+        setState(() {
+          scanResult = result;
+        });
+      });
+    }
+  }
+  
+  void updateScanResult(String result) {
+    setState(() {
+      scanResult = result;
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const Header(
-              title: ' ',
-              subtitle: '',
-              sizeHeader: 120,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0.0),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: TextButton.icon(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  label: const Text('VOLTAR', style: TextStyle(color: Colors.white)),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.only(left: 16, top: 0, bottom: 0),
+      body: Stack(
+        children: [
+          Header(
+            title: 'VOLTAR',
+            showBackButton: true,
+            onBackPressed: () => Navigator.of(context).pop(),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 140.0),
+            child: Column(
+              children: [
+                if (scanResult != null)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 1,
+                            blurRadius: 3,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Resultado do QR Code:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Color(0xFF2563EB),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            scanResult!,
+                            style: const TextStyle(
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      CustomCard(
+                        iconData: Icons.qr_code,
+                        title: 'Escanear QR CODE',
+                        subtitle: 'Preenche informações, solicitando apenas a quantidade recebida',
+                        onTap: widget.onScanQr,
+                        iconBackgroundColor: const Color(0xFF2563EB),
+                        iconColor: Colors.white,
+                        showArrow: true,
+                      ),
+                      const SizedBox(height: 16),
+                      CustomCard(
+                        iconData: Icons.add_box_rounded,
+                        title: 'Cadastrar novo item',
+                        subtitle: 'Formulário de preenchimento manual',
+                        onTap: widget.onAddItem,
+                        iconBackgroundColor: const Color(0xFF2563EB),
+                        iconColor: Colors.white,
+                        showArrow: true,
+                      ),
+                    ],
                   ),
                 ),
-              ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 0),
-                children: [
-                  CustomCard(
-                    iconData: Icons.qr_code,
-                    title: 'Escanear QR CODE',
-                    subtitle: 'Preenche informações automaticamente, solicitando apenas a quantidade recebida',
-                    onTap: onScanQr,
-                    iconBackgroundColor: const Color(0xFF2563EB),
-                    iconColor: Colors.white,
-                    showArrow: true,
-                  ),
-                  CustomCard(
-                    iconData: Icons.add_box_rounded,
-                    title: 'Cadastrar novo item',
-                    subtitle: 'Formulário de preenchimento manual',
-                    onTap: onAddItem,
-                    iconBackgroundColor: const Color(0xFF2563EB),
-                    iconColor: Colors.white,
-                    showArrow: true,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
-  }
+}
 }

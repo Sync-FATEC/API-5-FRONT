@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../enums/merchandise_enums.dart';
 import '../enums/merchandise_enums.dart';
 

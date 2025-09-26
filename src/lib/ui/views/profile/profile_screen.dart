@@ -13,7 +13,11 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          const Header(title: "PERFIL"),
+          Header(
+            title: "PERFIL",
+            showBackButton: true,
+            onBackPressed: () => Navigator.of(context).pop(),
+          ),
           Consumer<UserProvider>(
             builder: (context, userProvider, child) {
               final user = userProvider.apiUserData;

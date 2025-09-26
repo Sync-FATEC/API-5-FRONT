@@ -49,7 +49,7 @@ class HomeScreen extends StatelessWidget {
                       subtitle:
                           'Adicione novos produtos no\nseu estoque do ${stockProvider.selectedStock?.name ?? 'estoque'}',
                       onTap: () {
-                        // TODO: Navegar para tela de cadastro de produto
+                        Navigator.pushNamed(context, '/merchandise-menu');
                         print('Navegando para cadastro de produto');
                       },
                     ),

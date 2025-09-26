@@ -35,7 +35,11 @@ class _SectionScreenState extends State<SectionScreen> {
       body: Stack(
         children: [
           // Camada de baixo: O Header
-          const Header(title: "LISTAGEM DE SEÇÕES"),
+          Header(
+            title: "LISTAGEM DE SEÇÕES",
+            showBackButton: true,
+            onBackPressed: () => Navigator.of(context).pop(),
+          ),
 
           // Camada de cima: A lista de cards
           Consumer<SectionProvider>(

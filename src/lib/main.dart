@@ -1,5 +1,7 @@
+import 'package:api2025/ui/views/merchandise/merchandise_menu_screen.dart';
 import 'package:api2025/ui/views/orders/oders_screen.dart';
 import 'package:api2025/ui/views/stock/stock_screen.dart';
+import 'package:api2025/ui/widgets/scan_or_manual_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -55,6 +57,34 @@ class MyApp extends StatelessWidget {
           '/sections': (context) => const SectionScreen(),
           '/profile': (context) => const ProfileScreen(),
           '/orders': (context) => const OrdersScreen(),
+          '/merchandise-menu': (context) {
+            Function(String)? updateScanResult;
+            
+            return MerchandiseMenuScreen(
+              onInit: (updateFn) {
+                updateScanResult = updateFn;
+              },
+              onScanQr: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => ScanOrManualDialog(
+                    onResult: (ficha) {
+                      // Atualiza o estado da tela com o resultado do scan
+                      if (updateScanResult != null) {
+                        updateScanResult!(ficha);
+                      }
+                      Navigator.of(context).pop(); // Fecha o diálogo
+                    },
+                  ),
+                );
+              },
+            onAddItem: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Função de cadastro em desenvolvimento')),
+              );
+            },
+          );
+        },
         },
       ),
     );
