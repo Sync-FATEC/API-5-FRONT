@@ -38,8 +38,6 @@ class _SectionScreenState extends State<SectionScreen> {
           // Camada de baixo: O Header
           Header(
             title: "LISTAGEM DE SEÇÕES",
-            showBackButton: true,
-            onBackPressed: () => Navigator.of(context).pop(),
           ),
 
           // Botão de voltar

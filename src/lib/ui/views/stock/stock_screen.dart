@@ -47,8 +47,6 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
         children: [
           Header(
             title: "ESCOLHA O ESTOQUE QUE \nDESEJA GERENCIAR",
-            showBackButton: true,
-            onBackPressed: () => Navigator.of(context).pop(),
           ),
           Consumer<StockProvider>(
             builder: (context, stockProvider, child) {

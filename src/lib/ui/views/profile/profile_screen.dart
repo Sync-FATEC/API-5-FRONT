@@ -15,8 +15,6 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Header(
             title: "PERFIL",
-            showBackButton: true,
-            onBackPressed: () => Navigator.of(context).pop(),
           ),
           Consumer<UserProvider>(
             builder: (context, userProvider, child) {
