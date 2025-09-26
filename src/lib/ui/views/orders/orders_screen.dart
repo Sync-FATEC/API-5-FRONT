@@ -46,8 +46,7 @@ class OrdersScreen extends StatelessWidget {
                     CustomCard(
                       iconData: Icons.add_circle_outline,
                       title: 'Cadastro de pedidos',
-                      subtitle:
-                          'Realize novos pedidos',
+                      subtitle: 'Realize novos pedidos',
                       onTap: () {
                         // TODO: Navegar para tela de cadastro de produto
                         print('Navegando para cadastro de produto');
@@ -56,11 +55,9 @@ class OrdersScreen extends StatelessWidget {
                     CustomCard(
                       iconData: Icons.inventory_2_outlined,
                       title: 'Listagem de pedidos',
-                      subtitle:
-                          'Faça a listagem de pedidos',
+                      subtitle: 'Faça a listagem de pedidos',
                       onTap: () {
-                        // TODO: Navegar para tela de controle de estoque
-                        print('Navegando para controle de estoque');
+                        _navigateTo(context, '/orders-list');
                       },
                     ),
                   ],
@@ -72,5 +69,9 @@ class OrdersScreen extends StatelessWidget {
       ),
       bottomNavigationBar: const BottomNavBarWidget(currentIndex: 1),
     );
+  }
+
+  void _navigateTo(BuildContext context, String route) {
+    Navigator.of(context).pushNamed(route);
   }
 }

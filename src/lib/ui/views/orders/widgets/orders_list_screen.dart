@@ -7,21 +7,21 @@ import 'package:api2025/core/providers/order_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
-class OrderListScreen extends StatefulWidget {
+class OrdersListScreen extends StatefulWidget {
   final String title;
   final List<String> filterOptions;
   
-  const OrderListScreen({
+  const OrdersListScreen({
     super.key, 
     this.title = "LISTAGEM DE PEDIDOS",
     this.filterOptions = const ['TODOS', 'EM ABERTO', 'FINALIZADOS'],
   });
 
   @override
-  State<OrderListScreen> createState() => _OrderListScreenState();
+  State<OrdersListScreen> createState() => _OrderListScreenState();
 }
 
-class _OrderListScreenState extends State<OrderListScreen> {
+class _OrderListScreenState extends State<OrdersListScreen> {
   String _selectedFilter = 'TODOS';
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -66,7 +66,10 @@ class _OrderListScreenState extends State<OrderListScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Header(title: widget.title),
+          Header(title: "VOLTAR",
+          showBackButton: true,
+          onBackPressed: () => Navigator.of(context).pop(),
+          ),
           Padding(
             padding: const EdgeInsets.only(top: 100.0),
             child: Column(
