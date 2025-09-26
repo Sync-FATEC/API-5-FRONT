@@ -1,6 +1,7 @@
 import 'package:api2025/ui/views/orders/orders_screen.dart';
 import 'package:api2025/ui/views/stock/stock_screen.dart';
 import 'package:api2025/ui/views/users/users_screen.dart';
+import 'package:api2025/ui/views/order/order_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,7 @@ import 'package:api2025/ui/views/profile/profile_screen.dart';
 import 'package:api2025/core/providers/user_provider.dart';
 import 'package:api2025/core/providers/stock_provider.dart';
 import 'package:api2025/core/providers/section_provider.dart';
+import 'package:api2025/core/providers/order_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -40,6 +42,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => StockProvider()),
         ChangeNotifierProvider(create: (_) => SectionProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -55,8 +58,9 @@ class MyApp extends StatelessWidget {
           '/stock-selection': (context) => const StockSelectionScreen(),
           '/sections': (context) => const SectionScreen(),
           '/profile': (context) => const ProfileScreen(),
-          '/orders': (context) => const OrdersScreen(),
           '/users': (context) => const UsersScreen(),
+          '/orders': (context) => const OrdersScreen(),
+          '/orders-list': (context) => const OrderListScreen(),
         },
       ),
     );
