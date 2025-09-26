@@ -1,5 +1,6 @@
 import 'package:api2025/core/constants/app_colors.dart';
 import 'package:api2025/ui/views/section/widgets/create_section_screen.dart';
+import 'package:api2025/ui/views/section/widgets/edit_section_screen.dart';
 import 'package:api2025/ui/widgets/add_floating_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,48 @@ class _SectionScreenState extends State<SectionScreen> {
             title: "LISTAGEM DE SEÇÕES",
             showBackButton: true,
             onBackPressed: () => Navigator.of(context).pop(),
+          ),
+
+          // Botão de voltar
+          Positioned(
+            top: 160,
+            left: 20,
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.arrow_back_ios,
+                      color: AppColors.bluePrimary,
+                      size: 18,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      'Voltar',
+                      style: TextStyle(
+                        color: AppColors.bluePrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
 
           // Camada de cima: A lista de cards
@@ -93,7 +136,7 @@ class _SectionScreenState extends State<SectionScreen> {
 
               // Usando ListView.builder para melhor performance
               return Padding(
-                padding: const EdgeInsets.only(top: 180.0),
+                padding: const EdgeInsets.only(top: 210.0),
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 5.0),
                   itemCount: sections.length,
@@ -105,8 +148,8 @@ class _SectionScreenState extends State<SectionScreen> {
                         iconData: _getIconForSection(section.name),
                         title: section.name,
                         subtitle: 'Seção',
-                        onTap: () {},
-                        showArrow: false,
+                        onTap: () => _navigateToEditSection(context, section),
+                        showArrow: true,
                         onDelete: () => _deleteSection(context, section.id),
                       ),
                     );
@@ -135,6 +178,15 @@ class _SectionScreenState extends State<SectionScreen> {
     final result = await CreateSectionModal.show(context);
 
     // Se a seção foi criada com sucesso, recarregar a lista
+    if (result == true) {
+      _loadSections();
+    }
+  }
+
+  void _navigateToEditSection(BuildContext context, section) async {
+    final result = await EditSectionModal.show(context, section);
+
+    // Se a seção foi editada com sucesso, recarregar a lista
     if (result == true) {
       _loadSections();
     }

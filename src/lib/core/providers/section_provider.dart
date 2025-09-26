@@ -124,4 +124,37 @@ class SectionProvider extends ChangeNotifier {
       _setLoading(false);
     }
   }
+
+  // Atualizar seção
+  Future<bool> updateSection(String id, String name) async {
+    _setLoading(true);
+    _clearError();
+    
+    try {
+      final response = await _apiService.updateSection(id, name);
+      
+      if (response != null && response.success && response.data.isNotEmpty) {
+        // Atualizando a seção na lista local
+        final updatedSectionData = response.data.first;
+        final index = _sections.indexWhere((section) => section.id == id);
+        
+        if (index != -1) {
+          _sections[index] = SectionModel(
+            id: updatedSectionData.id,
+            name: updatedSectionData.name,
+          );
+          notifyListeners();
+        }
+        return true;
+      } else {
+        _setError('Erro ao atualizar seção');
+        return false;
+      }
+    } catch (e) {
+      _setError('Erro ao atualizar seção: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
 }
