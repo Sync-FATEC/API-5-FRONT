@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/providers/stock_provider.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../widgets/custom_modal.dart';
 
 class CreateStockModal extends StatefulWidget {

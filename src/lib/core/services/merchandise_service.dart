@@ -1,93 +1,86 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../../data/models/merchandise_model.dart' hide MerchandiseTypeModel;
 import '../../data/models/merchandise_type_model.dart';
+import 'http_client.dart';
 
 class MerchandiseService {
-  final String baseUrl;
-
-  MerchandiseService({required this.baseUrl});
+  // Não precisamos mais do baseUrl pois o HttpClient já tem configurado
 
   Future<List<MerchandiseModel>> fetchMerchandiseList() async {
-    final response = await http.get(Uri.parse('$baseUrl/merchandise'));
-    if (response.statusCode == 200) {
-      final List data = json.decode(response.body);
+    final response = await HttpClient.get('/merchandise');
+    if (response.success && response.data != null) {
+      final List data = response.data!['data'] ?? response.data ?? [];
       return data.map((json) => MerchandiseModel.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to load merchandise');
+      throw Exception(response.message);
     }
   }
 
   Future<MerchandiseModel> fetchMerchandiseById(String id) async {
-    final response = await http.get(Uri.parse('$baseUrl/merchandise/$id'));
-    if (response.statusCode == 200) {
-      return MerchandiseModel.fromJson(json.decode(response.body));
+    final response = await HttpClient.get('/merchandise/$id');
+    if (response.success && response.data != null) {
+      return MerchandiseModel.fromJson(response.data!);
     } else {
-      throw Exception('Failed to load merchandise');
+      throw Exception(response.message);
     }
   }
 
   Future<void> createMerchandise(MerchandiseModel merchandise) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/merchandise'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(merchandise.toJson()),
+    final response = await HttpClient.post(
+      '/merchandise',
+      body: merchandise.toJson(),
     );
-    if (response.statusCode != 201) {
-      throw Exception('Failed to create merchandise');
+    if (!response.success) {
+      throw Exception(response.message);
     }
   }
 
   Future<void> updateMerchandise(MerchandiseModel merchandise) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/merchandise/${merchandise.id}'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(merchandise.toJson()),
+    final response = await HttpClient.put(
+      '/merchandise/${merchandise.id}',
+      body: merchandise.toJson(),
     );
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update merchandise');
+    if (!response.success) {
+      throw Exception(response.message);
     }
   }
 
   // Métodos para MerchandiseTypeModel
   Future<List<MerchandiseTypeModel>> fetchMerchandiseTypeList() async {
-    final response = await http.get(Uri.parse('$baseUrl/merchandise-types'));
-    if (response.statusCode == 200) {
-      final List data = json.decode(response.body);
+    final response = await HttpClient.get('/merchandise-types');
+    if (response.success && response.data != null) {
+      final List data = response.data!['data'] ?? response.data ?? [];
       return data.map((json) => MerchandiseTypeModel.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to load merchandise types');
+      throw Exception(response.message);
     }
   }
 
   Future<MerchandiseTypeModel> fetchMerchandiseTypeById(String id) async {
-    final response = await http.get(Uri.parse('$baseUrl/merchandise-types/$id'));
-    if (response.statusCode == 200) {
-      return MerchandiseTypeModel.fromJson(json.decode(response.body));
+    final response = await HttpClient.get('/merchandise-types/$id');
+    if (response.success && response.data != null) {
+      return MerchandiseTypeModel.fromJson(response.data!);
     } else {
-      throw Exception('Failed to load merchandise type');
+      throw Exception(response.message);
     }
   }
 
   Future<void> createMerchandiseType(MerchandiseTypeModel type) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/merchandise-types'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(type.toJson()),
+    final response = await HttpClient.post(
+      '/merchandise-types',
+      body: type.toJson(),
     );
-    if (response.statusCode != 201) {
-      throw Exception('Failed to create merchandise type');
+    if (!response.success) {
+      throw Exception(response.message);
     }
   }
 
   Future<void> updateMerchandiseType(MerchandiseTypeModel type) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/merchandise-types/${type.id}'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(type.toJson()),
+    final response = await HttpClient.put(
+      '/merchandise-types/${type.id}',
+      body: type.toJson(),
     );
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update merchandise type');
+    if (!response.success) {
+      throw Exception(response.message);
     }
   }
 }

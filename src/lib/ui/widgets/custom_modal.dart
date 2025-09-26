@@ -45,6 +45,9 @@ class CustomModal extends StatelessWidget {
       child: Container(
         width: width ?? MediaQuery.of(context).size.width * 0.85,
         height: height,
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -64,14 +67,19 @@ class CustomModal extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                   ),
                 ),
+                const SizedBox(width: 8),
                 GestureDetector(
                   onTap: onClose ?? () => Navigator.of(context).pop(),
                   child: Container(
@@ -97,7 +105,9 @@ class CustomModal extends StatelessWidget {
             const SizedBox(height: 20),
             // Conteúdo do modal
             Flexible(
-              child: child,
+              child: SingleChildScrollView(
+                child: child,
+              ),
             ),
           ],
         ),

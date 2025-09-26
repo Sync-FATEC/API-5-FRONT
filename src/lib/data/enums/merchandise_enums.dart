@@ -1,19 +1,29 @@
 enum MerchandiseGroup {
-  groupA,
-  groupB,
-  groupC,
+  medical,
+  almox,
 }
 
 MerchandiseGroup merchandiseGroupFromString(String value) {
   switch (value) {
-    case 'groupA':
-      return MerchandiseGroup.groupA;
-    case 'groupB':
-      return MerchandiseGroup.groupB;
-    case 'groupC':
-      return MerchandiseGroup.groupC;
+    case 'Medical':
+    case 'medical':
+    case 'MEDICAL':
+      return MerchandiseGroup.medical;
+    case 'Almox':
+    case 'almox':
+    case 'ALMOX':
+      return MerchandiseGroup.almox;
     default:
       throw Exception('Invalid MerchandiseGroup: $value');
+  }
+}
+
+String merchandiseGroupToString(MerchandiseGroup group) {
+  switch (group) {
+    case MerchandiseGroup.medical:
+      return 'Medical';
+    case MerchandiseGroup.almox:
+      return 'Almox';
   }
 }
 

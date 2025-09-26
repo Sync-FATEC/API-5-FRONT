@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import '../enums/merchandise_enums.dart';
 
 class MerchandiseTypeModel {
@@ -40,7 +38,7 @@ class MerchandiseTypeModel {
             'recordNumber': recordNumber,
             'unitOfMeasure': unitOfMeasure,
             'controlled': controlled,
-            'group': describeEnum(group),
+            'group': merchandiseGroupToString(group),
             'minimumStock': minimumStock,
         };
     }

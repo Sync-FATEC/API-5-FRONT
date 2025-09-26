@@ -15,6 +15,7 @@ import 'package:api2025/ui/views/profile/profile_screen.dart';
 import 'package:api2025/core/providers/user_provider.dart';
 import 'package:api2025/core/providers/stock_provider.dart';
 import 'package:api2025/core/providers/section_provider.dart';
+import 'package:api2025/core/providers/merchandise_type_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => StockProvider()),
         ChangeNotifierProvider(create: (_) => SectionProvider()),
+        ChangeNotifierProvider(create: (_) => MerchandiseTypeProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -80,13 +82,8 @@ class MyApp extends StatelessWidget {
                   ),
                 );
               },
-            onAddItem: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Função de cadastro em desenvolvimento')),
-              );
-            },
-          );
-        },
+            );
+          },
         },
       ),
     );

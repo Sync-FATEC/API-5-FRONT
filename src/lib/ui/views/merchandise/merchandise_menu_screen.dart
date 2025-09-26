@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../widgets/background_header.dart';
 import '../../widgets/custom_card.dart';
+import 'widgets/create_merchandise_type_modal.dart';
 
 class MerchandiseMenuScreen extends StatefulWidget {
   final Function() onScanQr;
-  final VoidCallback onAddItem;
   final Function(Function(String))? onInit;
 
   const MerchandiseMenuScreen({
     super.key,
     required this.onScanQr,
-    required this.onAddItem,
     this.onInit,
   });
   
@@ -38,6 +37,19 @@ class _MerchandiseMenuScreenState extends State<MerchandiseMenuScreen> {
     setState(() {
       scanResult = result;
     });
+  }
+
+  Future<void> _openCreateMerchandiseTypeModal() async {
+    final result = await CreateMerchandiseTypeModal.show(context);
+    if (result == true) {
+      // Mostrar mensagem de sucesso adicional se necessário
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tipo de mercadoria cadastrado com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
   
   @override
@@ -111,7 +123,7 @@ class _MerchandiseMenuScreenState extends State<MerchandiseMenuScreen> {
                         iconData: Icons.add_box_rounded,
                         title: 'Cadastrar novo item',
                         subtitle: 'Formulário de preenchimento manual',
-                        onTap: widget.onAddItem,
+                        onTap: _openCreateMerchandiseTypeModal,
                         iconBackgroundColor: const Color(0xFF2563EB),
                         iconColor: Colors.white,
                         showArrow: true,
