@@ -3,7 +3,7 @@ import 'package:api2025/ui/views/orders/orders_screen.dart';
 import 'package:api2025/ui/views/stock/stock_screen.dart';
 import 'package:api2025/ui/views/users/users_screen.dart';
 import 'package:api2025/ui/widgets/scan_or_manual_dialog.dart';
-import 'package:api2025/ui/views/order/order_list_screen.dart';
+import 'package:api2025/ui/views/orders/widgets/orders_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
           '/profile': (context) => const ProfileScreen(),
           '/users': (context) => const UsersScreen(),
           '/orders': (context) => const OrdersScreen(),
-          '/orders-list': (context) => const OrderListScreen(),
+          '/orders-list': (context) => const OrdersListScreen(),
           '/merchandise-menu': (context) {
             Function(String)? updateScanResult;
             
