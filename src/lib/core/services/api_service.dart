@@ -189,4 +189,29 @@ class ApiService {
       throw Exception('Erro ao excluir seção: $e');
     }
   }
+
+  // Atualizar seção
+  Future<SectionApiResponse?> updateSection(String sectionId, String name) async {
+    print('ApiService: Fazendo chamada para PUT /sections/$sectionId - Nome: $name');
+    try {
+      final response = await HttpClient.put('/sections/$sectionId', body: {'name': name});
+      print(
+        'ApiService: Resposta recebida - Success: ${response.success}, Data: ${response.data}',
+      );
+
+      if (response.success && response.data != null) {
+        final formattedResponse = {
+          'success': true,
+          'message': 'Seção atualizada com sucesso',
+          'data': [response.data], // Envolvendo em array para manter consistência
+        };
+        return SectionApiResponse.fromJson(formattedResponse);
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('ApiService: Erro na chamada: $e');
+      throw Exception('Erro ao atualizar seção: $e');
+    }
+  }
 }
