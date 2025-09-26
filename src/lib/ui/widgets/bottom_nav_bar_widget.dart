@@ -8,7 +8,7 @@ class BottomNavBarWidget extends StatelessWidget {
 
   static const List<String> _routes = [
     '/home',
-    '/orders',
+    '/orders-list',
     '/alerts',
     '/management',
     '/users',
