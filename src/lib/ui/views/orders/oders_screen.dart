@@ -8,8 +8,8 @@ import '../../widgets/header_icon.dart';
 import '../../widgets/bottom_nav_bar_widget.dart';
 import '../../widgets/custom_card.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class OrdersScreen extends StatelessWidget {
+  const OrdersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +45,9 @@ class HomeScreen extends StatelessWidget {
                     // Cards principais
                     CustomCard(
                       iconData: Icons.add_circle_outline,
-                      title: 'Cadastro novo produto',
+                      title: 'Cadastro de pedidos',
                       subtitle:
-                          'Adicione novos produtos no\nseu estoque do ${stockProvider.selectedStock?.name ?? 'estoque'}',
+                          'Realize novos pedidos',
                       onTap: () {
                         // TODO: Navegar para tela de cadastro de produto
                         print('Navegando para cadastro de produto');
@@ -55,9 +55,9 @@ class HomeScreen extends StatelessWidget {
                     ),
                     CustomCard(
                       iconData: Icons.inventory_2_outlined,
-                      title: 'Controle do Estoque',
+                      title: 'Listagem de pedidos',
                       subtitle:
-                          'Adicione novos produtos no\nseu estoque do ${stockProvider.selectedStock?.name ?? 'estoque'}',
+                          'Faça a listagem de pedidos',
                       onTap: () {
                         // TODO: Navegar para tela de controle de estoque
                         print('Navegando para controle de estoque');
@@ -70,7 +70,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: const BottomNavBarWidget(currentIndex: 0),
+      bottomNavigationBar: const BottomNavBarWidget(currentIndex: 1),
     );
   }
 }

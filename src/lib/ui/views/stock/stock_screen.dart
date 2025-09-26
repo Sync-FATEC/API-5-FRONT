@@ -113,13 +113,6 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
     // Selecionar o estoque no provider
     stockProvider.selectStock(stockData);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Navegando para ${stockData.name}'),
-        backgroundColor: AppColors.bluePrimary,
-      ),
-    );
-
     // Navegar para a tela home
     Navigator.of(context).pushReplacementNamed('/home');
   }
