@@ -1,3 +1,4 @@
+import 'package:api2025/ui/views/alerts/alerts_screen.dart';
 import 'package:api2025/ui/views/merchandise/merchandise_menu_screen.dart';
 import 'package:api2025/ui/views/orders/orders_screen.dart';
 import 'package:api2025/ui/views/stock/stock_screen.dart';
@@ -18,19 +19,18 @@ import 'package:api2025/core/providers/stock_provider.dart';
 import 'package:api2025/core/providers/section_provider.dart';
 import 'package:api2025/core/providers/merchandise_type_provider.dart';
 import 'package:api2025/core/providers/order_provider.dart';
+import 'package:api2025/core/providers/alert_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Carregar variáveis de ambiente
   await dotenv.load(fileName: ".env");
-  
+
   // Inicializar Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(const MyApp());
 }
 
@@ -47,6 +47,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SectionProvider()),
         ChangeNotifierProvider(create: (_) => MerchandiseTypeProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => AlertProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -65,9 +66,10 @@ class MyApp extends StatelessWidget {
           '/users': (context) => const UsersScreen(),
           '/orders': (context) => const OrdersScreen(),
           '/orders-list': (context) => const OrdersListScreen(),
+          '/alerts': (context) => const AlertsScreen(),
           '/merchandise-menu': (context) {
             Function(String)? updateScanResult;
-            
+
             return MerchandiseMenuScreen(
               onInit: (updateFn) {
                 updateScanResult = updateFn;

@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/providers/section_provider.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../widgets/custom_modal.dart';
 
 class CreateSectionModal extends StatefulWidget {
@@ -54,8 +53,11 @@ class _CreateSectionFormState extends State<_CreateSectionForm> {
     });
 
     try {
-      final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
-      
+      final sectionProvider = Provider.of<SectionProvider>(
+        context,
+        listen: false,
+      );
+
       await sectionProvider.createSection(_nameController.text.trim());
 
       if (mounted) {

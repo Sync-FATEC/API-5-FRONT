@@ -40,14 +40,12 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final bool isAdmin =
-        (userProvider.apiUserData?.role?.toLowerCase() ?? '') == 'admin';
+        (userProvider.apiUserData?.role.toLowerCase() ?? '') == 'admin';
 
     return Scaffold(
       body: Stack(
         children: [
-          Header(
-            title: "ESCOLHA O ESTOQUE QUE \nDESEJA GERENCIAR",
-          ),
+          Header(title: "ESCOLHA O ESTOQUE QUE \nDESEJA GERENCIAR"),
           Consumer<StockProvider>(
             builder: (context, stockProvider, child) {
               final stocks = stockProvider.activeStocks;

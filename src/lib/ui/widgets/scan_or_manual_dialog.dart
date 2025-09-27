@@ -13,7 +13,6 @@ class ScanOrManualDialog extends StatefulWidget {
 class _ScanOrManualDialogState extends State<ScanOrManualDialog> {
   final TextEditingController _controller = TextEditingController();
   bool _showScanner = false;
-  String? _scanResult;
 
   void _openScanner() async {
     setState(() {
@@ -23,7 +22,6 @@ class _ScanOrManualDialogState extends State<ScanOrManualDialog> {
 
   void _onScan(String code) {
     setState(() {
-      _scanResult = code;
       _showScanner = false;
     });
     widget.onResult(code);
@@ -53,9 +51,7 @@ class _ScanOrManualDialogState extends State<ScanOrManualDialog> {
         children: [
           TextField(
             controller: _controller,
-            decoration: const InputDecoration(
-              labelText: 'Número da ficha',
-            ),
+            decoration: const InputDecoration(labelText: 'Número da ficha'),
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 16),
