@@ -107,4 +107,22 @@ class MerchandiseService {
       throw Exception(response.message);
     }
   }
+
+  Future<void> deleteMerchandiseType(String typeId) async {
+    final response = await HttpClient.delete('/merchandise-types/$typeId');
+    if (!response.success) {
+      // Verificar se é erro de produto em uso
+      String errorMessage = response.message.toLowerCase();
+      if (errorMessage.contains('pedido') || 
+          errorMessage.contains('order') || 
+          errorMessage.contains('em uso') ||
+          errorMessage.contains('in use') ||
+          errorMessage.contains('constraint') ||
+          errorMessage.contains('foreign key')) {
+        throw Exception('Produto está sendo usado em pedidos');
+      } else {
+        throw Exception(response.message);
+      }
+    }
+  }
 }

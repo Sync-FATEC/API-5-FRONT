@@ -8,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../widgets/header_icon.dart';
 import '../../widgets/bottom_nav_bar_widget.dart';
 import '../../widgets/custom_card.dart';
+import '../merchandise/merchandise_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -101,9 +102,14 @@ class HomeScreen extends StatelessWidget {
                       iconData: Icons.inventory_2_outlined,
                       title: 'Controle do Estoque',
                       subtitle:
-                          'Adicione novos produtos no\nseu estoque do ${stockProvider.selectedStock?.name ?? 'estoque'}',
+                          'Visualizar e gerenciar tipos de mercadoria cadastrados no\n${stockProvider.selectedStock?.name ?? 'estoque'}',
                       onTap: () {
-                        // TODO: Navegar para tela de controle de estoque
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MerchandiseListScreen(),
+                          ),
+                        );
                         print('Navegando para controle de estoque');
                       },
                     ),
