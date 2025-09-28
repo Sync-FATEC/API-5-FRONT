@@ -153,6 +153,6 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _navigateToChangeStock(BuildContext context) {
-    Navigator.of(context).pushNamed('/stock-selection');
+    Navigator.of(context).pushNamedAndRemoveUntil('/stock-selection',(route) => false,);
   }
 }
