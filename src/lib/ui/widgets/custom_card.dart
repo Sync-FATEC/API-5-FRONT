@@ -23,155 +23,84 @@ class CustomCard extends StatelessWidget {
     this.onDelete,
   });
 
-  void _showOptionsMenu(BuildContext context, RenderBox renderBox, Size size) {
-    final theme = Theme.of(context);
-    final position = renderBox.localToGlobal(Offset.zero);
-    
-    // Considerando as margens do card (16.0 horizontal)
-    final cardMargin = 16.0;
-    final cardWidth = size.width - (cardMargin * 2);
-    
-    showMenu(
+  void _showOptionsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
       context: context,
-      position: RelativeRect.fromLTRB(
-        position.dx + cardMargin,
-        position.dy + size.height,
-        MediaQuery.of(context).size.width - position.dx - size.width + cardMargin,
-        0,
-      ),
-      elevation: 8.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      color: Colors.white, // Mesma cor do card
-      constraints: BoxConstraints(
-        minWidth: cardWidth,
-        maxWidth: cardWidth,
-      ),
-      items: [
-        PopupMenuItem(
-          height: 60, // Aumentando altura para mais padding
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0), // Padding maior
-          child: Row(
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.delete_outline, color: Colors.red, size: 24),
-              const SizedBox(width: 16),
               Text(
-                'Excluir',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.red,
-                  fontSize: 16,
+                'Opções',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Excluir'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showDeleteConfirmation(context);
+                },
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+                child: const Text('Cancelar'),
               ),
             ],
           ),
-          onTap: () {
-            Future.delayed(
-              const Duration(seconds: 0),
-              () => _showDeleteConfirmationMenu(context),
-            );
-          },
-        ),
-      ],
+        );
+      },
     );
   }
 
-  void _showDeleteConfirmationMenu(BuildContext context) {
-    final theme = Theme.of(context);
-    final RenderBox renderBox = context.findRenderObject() as RenderBox;
-    final position = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
-    
-    // Considerando as margens do card (16.0 horizontal)
-    final cardMargin = 16.0;
-    final cardWidth = size.width - (cardMargin * 2);
-    
-    showMenu(
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
       context: context,
-      position: RelativeRect.fromLTRB(
-        position.dx + cardMargin,
-        position.dy + size.height,
-        MediaQuery.of(context).size.width - position.dx - size.width + cardMargin,
-        0,
-      ),
-      elevation: 8.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      color: theme.cardColor,
-      constraints: BoxConstraints(
-        minWidth: cardWidth,
-        maxWidth: cardWidth,
-      ),
-      items: [
-        PopupMenuItem(
-          enabled: false,
-          height: 40,
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            'Excluir $title?',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Excluir $title?'),
+          content: const Text('Tem certeza que deseja excluir este item?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
             ),
-          ),
-        ),
-        PopupMenuItem(
-          enabled: false,
-          height: 40,
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            'Tem certeza que deseja excluir este item?',
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
-        const PopupMenuItem(
-          enabled: false,
-          height: 1,
-          child: Divider(),
-        ),
-        PopupMenuItem(
-          height: 50,
-          padding: EdgeInsets.zero,
-          child: ListTile(
-            leading: Icon(Icons.cancel, color: theme.colorScheme.primary),
-            title: Text(
-              'Cancelar',
-              style: theme.textTheme.bodyMedium,
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (onDelete != null) {
+                  onDelete!();
+                }
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Excluir'),
             ),
-          ),
-          onTap: () {},
-        ),
-        PopupMenuItem(
-          height: 50,
-          padding: EdgeInsets.zero,
-          child: ListTile(
-            leading: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-            title: Text(
-              'Excluir',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          onTap: () {
-            if (onDelete != null) {
-              onDelete!();
-            }
-          },
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: () {
-        final RenderBox renderBox = context.findRenderObject() as RenderBox;
-        final size = renderBox.size;
-        
-        _showOptionsMenu(context, renderBox, size);
-      },
+      onLongPress: onDelete != null
+          ? () {
+              _showOptionsBottomSheet(context);
+            }
+          : null,
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

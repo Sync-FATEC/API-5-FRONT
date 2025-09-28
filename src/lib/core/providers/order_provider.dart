@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:api2025/core/services/http_client.dart';
+import 'package:api2025/core/services/order_service.dart';
 import 'package:api2025/data/models/order_model.dart';
 
 class OrderProvider extends ChangeNotifier {
@@ -99,6 +100,93 @@ class OrderProvider extends ChangeNotifier {
     } catch (e) {
       print("Exceção ao criar pedido: $e");
       _errorMessage = 'Erro ao criar pedido';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Atualizar pedido
+  Future<bool> updateOrder(String orderId, Map<String, dynamic> orderData, {String? stockId}) async {
+    print("Iniciando atualização de pedido $orderId");
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final success = await OrderService.updateOrder(orderId, orderData);
+      
+      if (success) {
+        print("Pedido $orderId atualizado com sucesso");
+        // Recarregar a lista de pedidos após atualizar, mantendo o mesmo contexto de stockId
+        await loadOrders(stockId: stockId);
+        return true;
+      } else {
+        _errorMessage = 'Erro ao atualizar pedido';
+        return false;
+      }
+    } catch (e) {
+      print("Exceção ao atualizar pedido: $e");
+      _errorMessage = 'Erro ao atualizar pedido';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Excluir pedido
+  Future<bool> deleteOrder(String orderId, {String? stockId}) async {
+    print("Iniciando exclusão de pedido $orderId");
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final success = await OrderService.deleteOrder(orderId);
+      
+      if (success) {
+        print("Pedido $orderId excluído com sucesso");
+        // Recarregar a lista de pedidos após excluir, mantendo o mesmo contexto de stockId
+        await loadOrders(stockId: stockId);
+        return true;
+      } else {
+        _errorMessage = 'Erro ao excluir pedido';
+        return false;
+      }
+    } catch (e) {
+      print("Exceção ao excluir pedido: $e");
+      _errorMessage = 'Erro ao excluir pedido';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Alterar status do pedido
+  Future<bool> updateOrderStatus(String orderId, String status, {String? stockId}) async {
+    print("Iniciando alteração de status do pedido $orderId para $status");
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final success = await OrderService.updateOrderStatus(orderId, status);
+      
+      if (success) {
+        print("Status do pedido $orderId alterado com sucesso para $status");
+        // Recarregar a lista de pedidos após alterar status, mantendo o mesmo contexto de stockId
+        await loadOrders(stockId: stockId);
+        return true;
+      } else {
+        _errorMessage = 'Erro ao alterar status do pedido';
+        return false;
+      }
+    } catch (e) {
+      print("Exceção ao alterar status do pedido: $e");
+      _errorMessage = 'Erro ao alterar status do pedido';
       return false;
     } finally {
       _isLoading = false;

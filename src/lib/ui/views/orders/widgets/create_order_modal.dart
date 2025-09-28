@@ -2,26 +2,30 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/providers/order_provider.dart';
 import '../../../../core/providers/section_provider.dart';
 import '../../../../core/providers/stock_provider.dart';
 import '../../../../core/providers/merchandise_type_provider.dart';
 import '../../../../data/models/section_model.dart';
 import '../../../../data/models/merchandise_type_model.dart';
+import '../../../../data/models/order_model.dart';
 import '../../../widgets/custom_modal.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class CreateOrderModal extends StatefulWidget {
-  const CreateOrderModal({Key? key}) : super(key: key);
+  final Order? orderToEdit;
+  
+  const CreateOrderModal({Key? key, this.orderToEdit}) : super(key: key);
 
   @override
   State<CreateOrderModal> createState() => _CreateOrderModalState();
 
-  static Future<bool?> show(BuildContext context) {
+  static Future<bool?> show(BuildContext context, {Order? orderToEdit}) {
     return CustomModal.show<bool>(
       context: context,
-      title: 'Cadastro pedido',
-      child: const _CreateOrderForm(),
+      title: orderToEdit != null ? 'Editar pedido' : 'Cadastro pedido',
+      child: _CreateOrderForm(orderToEdit: orderToEdit),
     );
   }
 }
@@ -34,7 +38,9 @@ class _CreateOrderModalState extends State<CreateOrderModal> {
 }
 
 class _CreateOrderForm extends StatefulWidget {
-  const _CreateOrderForm({Key? key}) : super(key: key);
+  final Order? orderToEdit;
+  
+  const _CreateOrderForm({Key? key, this.orderToEdit}) : super(key: key);
 
   @override
   _CreateOrderFormState createState() => _CreateOrderFormState();
@@ -55,20 +61,72 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
   void initState() {
     super.initState();
     // Carregar seções e tipos de mercadoria
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
       final merchandiseProvider = Provider.of<MerchandiseTypeProvider>(context, listen: false);
       
       print('🔄 [CREATE_ORDER_MODAL] Iniciando carregamento de seções e produtos...');
       
-      sectionProvider.loadSections();
-      merchandiseProvider.loadMerchandiseTypes();
+      await sectionProvider.loadSections();
+      await merchandiseProvider.loadMerchandiseTypes();
       
       print('📦 [CREATE_ORDER_MODAL] Produtos carregados: ${merchandiseProvider.merchandiseTypes.length}');
       for (var product in merchandiseProvider.merchandiseTypes) {
         print('   - Produto: ${product.name} (ID: ${product.id})');
       }
+      
+      // Se estamos editando um pedido, carregar os dados após carregar seções
+      if (widget.orderToEdit != null) {
+        _loadOrderData();
+      }
     });
+  }
+
+  void _loadOrderData() {
+    final order = widget.orderToEdit!;
+    final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
+    
+    print('🔄 [LOAD_ORDER_DATA] Carregando dados do pedido: ${order.id}');
+    print('📍 [LOAD_ORDER_DATA] Seção do pedido: ${order.sectionId}');
+    print('📋 [LOAD_ORDER_DATA] Seções disponíveis: ${sectionProvider.sections.length}');
+    
+    // Encontrar e definir a seção
+    try {
+      _selectedSection = sectionProvider.sections.firstWhere(
+        (section) => section.id == order.sectionId,
+      );
+      print('✅ [LOAD_ORDER_DATA] Seção encontrada: ${_selectedSection?.name}');
+    } catch (e) {
+      print('⚠️ [LOAD_ORDER_DATA] Seção não encontrada, usando primeira disponível');
+      if (sectionProvider.sections.isNotEmpty) {
+        _selectedSection = sectionProvider.sections.first;
+      }
+    }
+    
+    // Definir data de retirada se existir
+    if (order.withdrawalDate != null) {
+      try {
+        _selectedWithdrawalDate = DateTime.parse(order.withdrawalDate!);
+        _withdrawalDateController.text = DateFormat('dd/MM/yyyy').format(_selectedWithdrawalDate!);
+        print('📅 [LOAD_ORDER_DATA] Data de retirada carregada: ${_withdrawalDateController.text}');
+      } catch (e) {
+        print('❌ [LOAD_ORDER_DATA] Erro ao parsear data de retirada: $e');
+      }
+    }
+    
+    // Carregar itens do pedido
+    _orderItems = order.orderItems.map((item) => OrderItemData(
+      merchandiseId: item.merchandiseId,
+      merchandiseName: item.merchandiseName,
+      quantity: item.quantity,
+    )).toList();
+    
+    print('📦 [LOAD_ORDER_DATA] Itens carregados: ${_orderItems.length}');
+    for (var item in _orderItems) {
+      print('   - ${item.merchandiseName}: ${item.quantity}');
+    }
+    
+    setState(() {});
   }
 
   @override
@@ -168,7 +226,7 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
     });
   }
 
-  Future<void> _createOrder(BuildContext context) async {
+  Future<void> _saveOrder(BuildContext context) async {
     
     if (_selectedSection == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -204,9 +262,9 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
       }
 
       final orderData = {
-        'creationDate': DateTime.now().toIso8601String(),
+        'creationDate': widget.orderToEdit?.creationDate ?? DateTime.now().toIso8601String(),
         'withdrawalDate': _selectedWithdrawalDate?.toIso8601String(),
-        'status': 'PENDING',
+        'status': widget.orderToEdit?.status ?? 'PENDING',
         'sectionId': _selectedSection!.id,
         'stockId': selectedStock.id,
         'orderItems': _orderItems.map((item) => {
@@ -215,13 +273,30 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
         }).toList(),
       };
 
-      final success = await orderProvider.createOrder(orderData);
+      bool success;
+      String successMessage;
+      
+      if (widget.orderToEdit != null) {
+        // Editando pedido existente
+        final stockProvider = Provider.of<StockProvider>(context, listen: false);
+        final selectedStock = stockProvider.selectedStock;
+        success = await orderProvider.updateOrder(
+          widget.orderToEdit!.id, 
+          orderData, 
+          stockId: selectedStock?.id
+        );
+        successMessage = 'Pedido atualizado com sucesso!';
+      } else {
+        // Criando novo pedido
+        success = await orderProvider.createOrder(orderData);
+        successMessage = 'Pedido criado com sucesso!';
+      }
 
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Pedido criado com sucesso!'),
+            SnackBar(
+              content: Text(successMessage),
               backgroundColor: Colors.green,
             ),
           );
@@ -229,7 +304,7 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(orderProvider.errorMessage ?? 'Erro ao criar pedido'),
+              content: Text(orderProvider.errorMessage ?? 'Erro ao salvar pedido'),
               backgroundColor: Colors.red,
             ),
           );
@@ -239,7 +314,7 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao criar pedido: $e'),
+            content: Text('Erro ao salvar pedido: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -537,10 +612,10 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
             ),
             const SizedBox(height: 24),
             
-            // Botão de cadastrar
+            // Botão de salvar
             CustomModalButton(
-              text: 'CADASTRAR',
-              onPressed: () => _createOrder(context),
+              text: widget.orderToEdit != null ? 'ATUALIZAR' : 'CADASTRAR',
+              onPressed: () => _saveOrder(context),
               isLoading: _isLoading,
             ),
           ],
