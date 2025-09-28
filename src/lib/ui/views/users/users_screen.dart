@@ -1,4 +1,4 @@
-// lib/ui/views/home/home_screen.dart
+// lib/ui/views/users/users_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,9 +7,22 @@ import '../../../core/providers/stock_provider.dart';
 import '../../widgets/header_icon.dart';
 import '../../widgets/bottom_nav_bar_widget.dart';
 import '../../widgets/custom_card.dart';
+import '../../modals/user_registration_modal.dart';
+import 'users_management_screen.dart';
 
 class UsersScreen extends StatelessWidget {
   const UsersScreen({super.key});
+
+  void _showUserRegistrationModal(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    UserRegistrationHelper.showModal(
+      context: context,
+      onRegister: (String name, String email, String role) async {
+        await userProvider.createUser(name, email, role);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,21 +59,22 @@ class UsersScreen extends StatelessWidget {
                     CustomCard(
                       iconData: Icons.person_add_alt_1_outlined,
                       title: 'Cadastro de usuários',
-                      subtitle:
-                          'Realize novos pedidos',
+                      subtitle: 'Cadastre novos usuários no sistema',
                       onTap: () {
-                        // TODO: Navegar para tela de cadastro de produto
-                        print('Navegando para cadastro de produto');
+                        _showUserRegistrationModal(context);
                       },
                     ),
                     CustomCard(
                       iconData: Icons.person_sharp,
                       title: 'Gerenciar usuários',
-                      subtitle:
-                          'Faça a listagem de pedidos',
+                      subtitle: 'Visualize e gerencie usuários cadastrados',
                       onTap: () {
-                        // TODO: Navegar para tela de controle de estoque
-                        print('Navegando para controle de estoque');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const UsersManagementScreen(),
+                          ),
+                        );
                       },
                     ),
                   ],

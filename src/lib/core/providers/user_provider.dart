@@ -294,4 +294,206 @@ class UserProvider extends ChangeNotifier {
     await prefs.remove('api_user_created_at');
     await prefs.remove('api_user_is_active');
   }
+
+  // Criar novo usuário
+  Future<bool> createUser(String name, String email, String role) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      print(
+        'UserProvider: Criando usuário - Nome: $name, Email: $email, Role: $role',
+      );
+
+      final apiResponse = await _apiService.createUser(name, email, role);
+
+      if (apiResponse != null && apiResponse.data != null) {
+        print(
+          'UserProvider: Usuário criado com sucesso - ${apiResponse.data!.name}',
+        );
+        _setLoading(false);
+        return true;
+      } else {
+        throw Exception('Falha ao criar usuário');
+      }
+    } catch (e) {
+      print('UserProvider: Erro ao criar usuário - $e');
+      _setError('Erro ao criar usuário: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Listar todos os usuários
+  Future<List<UserModel>> getAllUsers() async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      print('UserProvider: Buscando todos os usuários');
+
+      final users = await _apiService.getAllUsers();
+      print('UserProvider: ${users.length} usuários encontrados');
+
+      _setLoading(false);
+      return users;
+    } catch (e) {
+      print('UserProvider: Erro ao buscar usuários - $e');
+      _setError('Erro ao buscar usuários: $e');
+      return [];
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Atualizar usuário
+  Future<bool> updateUser(
+    String userId,
+    String name,
+    String email,
+    String role,
+    bool isActive,
+  ) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      print('UserProvider: Atualizando usuário $userId');
+
+      final apiResponse = await _apiService.updateUser(
+        userId,
+        name,
+        email,
+        role,
+        isActive,
+      );
+
+      if (apiResponse != null && apiResponse.data != null) {
+        print('UserProvider: Usuário atualizado com sucesso');
+        _setLoading(false);
+        return true;
+      } else {
+        throw Exception('Falha ao atualizar usuário');
+      }
+    } catch (e) {
+      print('UserProvider: Erro ao atualizar usuário - $e');
+      _setError('Erro ao atualizar usuário: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Deletar usuário
+  Future<bool> deleteUser(String userId) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      print('UserProvider: Deletando usuário $userId');
+
+      final success = await _apiService.deleteUser(userId);
+
+      if (success) {
+        print('UserProvider: Usuário deletado com sucesso');
+        _setLoading(false);
+        return true;
+      } else {
+        throw Exception('Falha ao deletar usuário');
+      }
+    } catch (e) {
+      print('UserProvider: Erro ao deletar usuário - $e');
+      _setError('Erro ao deletar usuário: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Vincular usuário a estoque
+  Future<bool> linkUserToStock(
+    String userId,
+    String stockId,
+    String responsibility,
+  ) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      print(
+        'UserProvider: Vinculando usuário $userId ao estoque $stockId com responsabilidade $responsibility',
+      );
+
+      final success = await _apiService.linkUserToStock(
+        userId,
+        stockId,
+        responsibility,
+      );
+
+      if (success) {
+        print('UserProvider: Usuário vinculado ao estoque com sucesso');
+        _setLoading(false);
+        return true;
+      } else {
+        throw Exception('Falha ao vincular usuário ao estoque');
+      }
+    } catch (e) {
+      print('UserProvider: Erro ao vincular usuário ao estoque - $e');
+      _setError('Erro ao vincular usuário ao estoque: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Desvincular usuário de estoque
+  Future<bool> unlinkUserFromStock(String userId, String stockId) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      print('UserProvider: Desvinculando usuário $userId do estoque $stockId');
+
+      final success = await _apiService.unlinkUserFromStock(userId, stockId);
+
+      if (success) {
+        print('UserProvider: Usuário desvinculado do estoque com sucesso');
+        _setLoading(false);
+        return true;
+      } else {
+        throw Exception('Falha ao desvincular usuário do estoque');
+      }
+    } catch (e) {
+      print('UserProvider: Erro ao desvincular usuário do estoque - $e');
+      _setError('Erro ao desvincular usuário do estoque: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Buscar estoques do usuário
+  Future<List<dynamic>> getUserStocks(String userId) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      print('UserProvider: Buscando estoques do usuário $userId');
+
+      final stocks = await _apiService.getUserStocks(userId);
+
+      print(
+        'UserProvider: ${stocks.length} estoques encontrados para o usuário',
+      );
+      _setLoading(false);
+      return stocks;
+    } catch (e) {
+      print('UserProvider: Erro ao buscar estoques do usuário - $e');
+      _setError('Erro ao buscar estoques do usuário: $e');
+      return [];
+    } finally {
+      _setLoading(false);
+    }
+  }
 }

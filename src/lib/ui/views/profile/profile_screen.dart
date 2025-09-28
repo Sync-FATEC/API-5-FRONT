@@ -75,33 +75,47 @@ class ProfileScreen extends StatelessWidget {
             right: 0,
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  _buildMenuItem(
-                    icon: Icons.lock,
-                    title: 'Alterar senha',
-                    onTap: () async {
-                      final result = await ChangePasswordModal.show(context);
-                      if (result == true) {
-                        // Senha alterada com sucesso - feedback já mostrado no modal
-                      }
-                    },
-                  ),
-                  _buildMenuItem(
-                    icon: Icons.sync,
-                    title: 'Alterar acesso',
-                    onTap: () {
-                      // Navegação para alterar acesso
-                    },
-                  ),
-                  _buildMenuItem(
-                    icon: Icons.exit_to_app,
-                    title: 'Sair',
-                    onTap: () {
-                      _logout(context);
-                    },
-                  ),
-                ],
+              child: Consumer<UserProvider>(
+                builder: (context, userProvider, child) {
+                  // Verificar se o usuário é admin ou supervisor
+                  final userRole =
+                      userProvider.apiUserData?.role.toLowerCase() ?? '';
+                  final canChangeAccess =
+                      userRole == 'admin' || userRole == 'supervisor';
+
+                  return Column(
+                    children: [
+                      _buildMenuItem(
+                        icon: Icons.lock,
+                        title: 'Alterar senha',
+                        onTap: () async {
+                          final result = await ChangePasswordModal.show(
+                            context,
+                          );
+                          if (result == true) {
+                            // Senha alterada com sucesso - feedback já mostrado no modal
+                          }
+                        },
+                      ),
+                      // Só mostra "Alterar acesso" para admin ou supervisor
+                      if (canChangeAccess)
+                        _buildMenuItem(
+                          icon: Icons.sync,
+                          title: 'Alterar acesso',
+                          onTap: () {
+                            _navigateToChangeStock(context);
+                          },
+                        ),
+                      _buildMenuItem(
+                        icon: Icons.exit_to_app,
+                        title: 'Sair',
+                        onTap: () {
+                          _logout(context);
+                        },
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -136,5 +150,9 @@ class ProfileScreen extends StatelessWidget {
 
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     await userProvider.logout();
+  }
+
+  void _navigateToChangeStock(BuildContext context) {
+    Navigator.of(context).pushNamed('/stock-selection');
   }
 }
