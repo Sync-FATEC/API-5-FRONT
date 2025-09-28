@@ -185,6 +185,40 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  // Reautenticar usuário
+  Future<bool> reauthenticateUser(String password) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      await _authService.reauthenticateUser(password);
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Alterar senha do usuário
+  Future<bool> updatePassword(String newPassword) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      await _authService.updatePassword(newPassword);
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   // Atualizar dados do usuário
   Future<void> updateUserData() async {
     if (_currentUser != null) {

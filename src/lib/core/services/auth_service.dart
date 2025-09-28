@@ -26,10 +26,10 @@ class AuthService {
         email: email,
         password: password,
       );
-      
+
       // Salvar informações do usuário localmente
       await _saveUserData(credential.user);
-      
+
       return credential;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
@@ -48,10 +48,10 @@ class AuthService {
         email: email,
         password: password,
       );
-      
+
       // Salvar informações do usuário localmente
       await _saveUserData(credential.user);
-      
+
       return credential;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
@@ -74,6 +74,46 @@ class AuthService {
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Erro inesperado: $e');
+    }
+  }
+
+  // Reautenticar usuário com senha
+  Future<bool> reauthenticateUser(String password) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null || user.email == null) {
+        throw Exception('Usuário não está logado');
+      }
+
+      // Criar credencial com email e senha
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+
+      // Reautenticar
+      await user.reauthenticateWithCredential(credential);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Erro inesperado: $e');
+    }
+  }
+
+  // Alterar senha do usuário logado
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('Usuário não está logado');
+      }
+
+      await user.updatePassword(newPassword);
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     } catch (e) {

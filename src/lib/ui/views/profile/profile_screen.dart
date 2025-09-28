@@ -1,6 +1,7 @@
 import 'package:api2025/core/constants/app_colors.dart';
 import 'package:api2025/ui/widgets/background_header.dart';
 import 'package:api2025/ui/widgets/bottom_nav_bar_widget.dart';
+import 'package:api2025/ui/widgets/change_password_modal.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +14,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Header(
-            title: "PERFIL",
-          ),
+          Header(title: "PERFIL"),
           Consumer<UserProvider>(
             builder: (context, userProvider, child) {
               final user = userProvider.apiUserData;
@@ -79,17 +78,13 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   _buildMenuItem(
-                    icon: Icons.assignment,
-                    title: 'Pedidos abertos por mim',
-                    onTap: () {
-                      // Navegação para pedidos
-                    },
-                  ),
-                  _buildMenuItem(
                     icon: Icons.lock,
                     title: 'Alterar senha',
-                    onTap: () {
-                      // Navegação para alterar senha
+                    onTap: () async {
+                      final result = await ChangePasswordModal.show(context);
+                      if (result == true) {
+                        // Senha alterada com sucesso - feedback já mostrado no modal
+                      }
                     },
                   ),
                   _buildMenuItem(
@@ -127,16 +122,11 @@ class ProfileScreen extends StatelessWidget {
         leading: Icon(icon, color: AppColors.gray),
         title: Text(
           title,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.black87,
-          ),
+          style: const TextStyle(fontSize: 16, color: Colors.black87),
         ),
         onTap: onTap,
         tileColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
