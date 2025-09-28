@@ -16,6 +16,8 @@ class UserProvider extends ChangeNotifier {
   String? _errorMessage;
   Map<String, String?> _userData = {};
   UserModel? _apiUserData;
+  List<UserModel> _allUsers = [];
+  String _searchQuery = '';
 
   // Getters
   User? get currentUser => _currentUser;
@@ -40,6 +42,24 @@ class UserProvider extends ChangeNotifier {
     _initializeUser();
     _listenToAuthChanges();
   }
+
+  List<UserModel> get filteredUsers {
+    if (_searchQuery.isEmpty) {
+      return _allUsers;
+    }
+    return _allUsers.where((user) {
+      final query = _searchQuery.toLowerCase();
+      return user.name.toLowerCase().contains(query) ||
+          user.email.toLowerCase().contains(query) ||
+          user.role.toLowerCase().contains(query);
+    }).toList();
+  }
+
+  void updateSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
 
   // Inicializar usuário ao abrir o app
   Future<void> _initializeUser() async {
@@ -346,6 +366,23 @@ class UserProvider extends ChangeNotifier {
       _setLoading(false);
     }
   }
+
+    Future<void> fetchAllUsers() async {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      try {
+        // Supondo que o serviço retorne List<UserModel>
+        _allUsers = await _apiService.getAllUsers();
+      } catch (e) {
+        _errorMessage = 'Erro ao carregar usuários: ${e.toString()}';
+        _allUsers = [];
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
+    }
 
   // Atualizar usuário
   Future<bool> updateUser(
