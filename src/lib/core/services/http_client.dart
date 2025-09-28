@@ -115,6 +115,29 @@ class HttpClient {
     }
   }
 
+  // PATCH Request
+  static Future<HttpResponse> patch(
+    String endpoint, {
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+  }) async {
+    try {
+      final uri = _buildUri(endpoint);
+      final defaultHeaders = await _defaultHeaders;
+      final response = await http
+          .patch(
+            uri,
+            headers: {...defaultHeaders, ...?headers},
+            body: body != null ? json.encode(body) : null,
+          )
+          .timeout(timeoutDuration);
+
+      return _handleResponse(response);
+    } catch (e) {
+      return _handleError(e);
+    }
+  }
+
   // Construir URI
   static Uri _buildUri(String endpoint, [Map<String, dynamic>? queryParams]) {
     final uri = Uri.parse('$baseUrl$endpoint');

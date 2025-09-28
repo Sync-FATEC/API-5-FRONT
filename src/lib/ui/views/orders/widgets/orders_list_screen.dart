@@ -7,6 +7,8 @@ import 'package:api2025/data/models/order_model.dart';
 import 'package:api2025/core/providers/order_provider.dart';
 import 'package:api2025/core/providers/stock_provider.dart';
 import 'package:provider/provider.dart';
+import 'create_order_modal.dart';
+import 'change_status_modal.dart';
 
 class OrdersListScreen extends StatefulWidget {
   final String title;
@@ -194,6 +196,10 @@ class _OrderListScreenState extends State<OrdersListScreen> {
                                 // Navegação para detalhes do pedido
                                 // TODO: Implementar navegação para detalhes
                               },
+                              onEdit: () => _editOrder(context, order),
+                              onDelete: () => _deleteOrder(context, order),
+                              onChangeStatus: () => _changeOrderStatus(context, order),
+                              onFinalize: () => _finalizeOrder(context, order),
                             ),
                           );
                         },
@@ -229,4 +235,179 @@ class _OrderListScreenState extends State<OrdersListScreen> {
       ),
     );
   }
+
+  void _showOrderOptions(BuildContext context, Order order) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Opções do Pedido',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.edit, color: AppColors.bluePrimary),
+                title: const Text('Editar'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editOrder(context, order);
+                },
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+                child: const Text('Cancelar'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteOrder(BuildContext context, Order order) async {
+    try {
+      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+      final stockProvider = Provider.of<StockProvider>(context, listen: false);
+      final selectedStock = stockProvider.selectedStock;
+      
+      // Passar o stockId se houver um estoque selecionado
+      final success = await orderProvider.deleteOrder(
+        order.id, 
+        stockId: selectedStock?.id
+      );
+      
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pedido excluído com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(orderProvider.errorMessage ?? 'Erro ao excluir pedido'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao excluir pedido: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _editOrder(BuildContext context, Order order) async {
+    final result = await CreateOrderModal.show(context, orderToEdit: order);
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pedido atualizado com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  Future<void> _changeOrderStatus(BuildContext context, Order order) async {
+    final newStatus = await ChangeStatusModal.show(context, order.status);
+    if (newStatus != null && mounted) {
+      try {
+        final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+        final stockProvider = Provider.of<StockProvider>(context, listen: false);
+        final selectedStock = stockProvider.selectedStock;
+        
+        final success = await orderProvider.updateOrderStatus(
+          order.id, 
+          newStatus,
+          stockId: selectedStock?.id
+        );
+        
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Status do pedido alterado com sucesso!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(orderProvider.errorMessage ?? 'Erro ao alterar status do pedido'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao alterar status do pedido: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _finalizeOrder(BuildContext context, Order order) async {
+    try {
+      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+      final stockProvider = Provider.of<StockProvider>(context, listen: false);
+      final selectedStock = stockProvider.selectedStock;
+      
+      final success = await orderProvider.updateOrderStatus(
+        order.id, 
+        'COMPLETED',
+        stockId: selectedStock?.id,
+      );
+      
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pedido finalizado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(orderProvider.errorMessage ?? 'Erro ao finalizar pedido'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao finalizar pedido: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
 }
