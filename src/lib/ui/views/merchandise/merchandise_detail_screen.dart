@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:api2025/ui/widgets/background_header.dart';
 import 'package:api2025/core/constants/app_colors.dart';
@@ -5,6 +7,11 @@ import 'package:api2025/data/models/merchandise_type_model.dart';
 import 'package:api2025/data/enums/merchandise_enums.dart';
 import 'package:provider/provider.dart';
 import 'package:api2025/core/providers/merchandise_type_provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class MerchandiseDetailScreen extends StatefulWidget {
   final MerchandiseTypeModel merchandise;
@@ -19,12 +26,169 @@ class MerchandiseDetailScreen extends StatefulWidget {
 }
 
 class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
+  final ScreenshotController _qrScreenshotController = ScreenshotController();
+
   String _getGroupDisplayName(MerchandiseGroup group) {
     switch (group) {
       case MerchandiseGroup.medical:
         return 'Médico';
       case MerchandiseGroup.almox:
         return 'Almoxarifado';
+    }
+  }
+
+  Future<void> _showQrCodeDialog() async {
+    final recordNumber = widget.merchandise.recordNumber;
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('QR Code do Produto'),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 340),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Ficha: $recordNumber',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Screenshot(
+                    controller: _qrScreenshotController,
+                    child: Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.all(12),
+                      child: SizedBox(
+                        width: 220,
+                        height: 220,
+                        child: Center(
+                          child: QrImageView(
+                            data: recordNumber,
+                            version: QrVersions.auto,
+                            size: 200,
+                            backgroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SelectableText(
+                    recordNumber,
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton.icon(
+              onPressed: () => _saveQrToGallery(recordNumber),
+              icon: const Icon(Icons.save_alt),
+              label: const Text('Salvar na galeria'),
+            ),
+            TextButton.icon(
+              onPressed: () => _printQr(recordNumber),
+              icon: const Icon(Icons.print),
+              label: const Text('Imprimir'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Fechar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _saveQrToGallery(String recordNumber) async {
+    try {
+      final Uint8List? bytes = await _qrScreenshotController.capture();
+      if (bytes == null) {
+        throw Exception('Não foi possível capturar o QR Code');
+      }
+
+      final result = await ImageGallerySaverPlus.saveImage(
+        bytes,
+        name: 'qr_${recordNumber.replaceAll(RegExp(r"[^0-9A-Za-z]"), '_')}',
+        quality: 100,
+      );
+
+      if (!mounted) return;
+
+      bool success = false;
+      if (result is Map) {
+        success = result['isSuccess'] == true || result['success'] == true;
+      } else if (result is bool) {
+        success = result;
+      }
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('QR Code salvo na galeria com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        throw Exception('Falha ao salvar imagem na galeria.');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao salvar QR Code: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _printQr(String recordNumber) async {
+    try {
+      final Uint8List? bytes = await _qrScreenshotController.capture();
+      if (bytes == null) {
+        throw Exception('Não foi possível capturar o QR Code');
+      }
+
+      final pdf = pw.Document();
+      final image = pw.MemoryImage(bytes);
+
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Column(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                pw.Text('Ficha: $recordNumber', style: pw.TextStyle(fontSize: 18)),
+                pw.SizedBox(height: 20),
+                pw.Image(image, width: 200, height: 200),
+              ],
+            );
+          },
+        ),
+      );
+
+      await Printing.layoutPdf(onLayout: (format) => pdf.save());
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao imprimir QR Code: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -216,15 +380,7 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
                             _buildSectionItem(
                               icon: Icons.qr_code,
                               title: 'Visualizar QR Code',
-                              onTap: () {
-                                // TODO: Implementar visualização de QR Code
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Funcionalidade em desenvolvimento'),
-                                    backgroundColor: Colors.orange,
-                                  ),
-                                );
-                              },
+                              onTap: _showQrCodeDialog,
                             ),
                           ],
                         ),
