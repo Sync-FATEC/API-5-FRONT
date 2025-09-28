@@ -108,10 +108,11 @@ class ApiService {
   }
 
   // Buscar seções
-  Future<SectionApiResponse?> getSections() async {
-    print('ApiService: Fazendo chamada para /sections');
+  Future<SectionApiResponse?> getSections({String? stockId}) async {
+    final url = stockId != null ? '/sections/$stockId' : '/sections';
+    print('ApiService: Fazendo chamada para $url');
     try {
-      final response = await HttpClient.get('/sections');
+      final response = await HttpClient.get(url);
 
       if (response.success && response.data != null) {
         // Verificar se a resposta contém a chave 'message' com uma lista de seções

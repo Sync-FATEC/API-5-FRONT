@@ -10,6 +10,7 @@ class SectionProvider extends ChangeNotifier {
   List<SectionModel> _sections = [];
   bool _isLoading = false;
   String? _errorMessage;
+  String? _currentStockId;
 
   // Getters
   List<SectionModel> get sections => _sections;
@@ -17,12 +18,13 @@ class SectionProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   // Carregar seções
-  Future<void> loadSections() async {
+  Future<void> loadSections({String? stockId}) async {
+    _currentStockId = stockId;
     _setLoading(true);
     _clearError();
     
     try {
-      final response = await _apiService.getSections();
+      final response = await _apiService.getSections(stockId: stockId);
       
       if (response != null && response.success) {
         _sections = response.data.map((sectionData) => 
@@ -73,14 +75,8 @@ class SectionProvider extends ChangeNotifier {
       final response = await _apiService.createSection(name);
       
       if (response != null && response.success && response.data.isNotEmpty) {
-        // Adicionando a nova seção à lista local
-        final newSectionData = response.data.first;
-        final newSection = SectionModel(
-          id: newSectionData.id,
-          name: newSectionData.name,
-        );
-        _sections.add(newSection);
-        notifyListeners();
+        // Recarregar a lista para garantir consistência
+        await loadSections(stockId: _currentStockId);
         return true;
       } else {
         _setError('Erro ao criar seção');
@@ -104,9 +100,8 @@ class SectionProvider extends ChangeNotifier {
       final success = await _apiService.deleteSection(id);
       
       if (success) {
-        // Removendo a seção da lista local apenas se a API retornou sucesso
-        _sections.removeWhere((section) => section.id == id);
-        notifyListeners();
+        // Recarregar a lista para garantir consistência
+        await loadSections(stockId: _currentStockId);
         return true;
       } else {
         _setError('Erro ao excluir seção');
@@ -129,17 +124,8 @@ class SectionProvider extends ChangeNotifier {
       final response = await _apiService.updateSection(id, name);
       
       if (response != null && response.success && response.data.isNotEmpty) {
-        // Atualizando a seção na lista local
-        final updatedSectionData = response.data.first;
-        final index = _sections.indexWhere((section) => section.id == id);
-        
-        if (index != -1) {
-          _sections[index] = SectionModel(
-            id: updatedSectionData.id,
-            name: updatedSectionData.name,
-          );
-          notifyListeners();
-        }
+        // Recarregar a lista para garantir consistência
+        await loadSections(stockId: _currentStockId);
         return true;
       } else {
         _setError('Erro ao atualizar seção');

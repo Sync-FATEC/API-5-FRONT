@@ -45,9 +45,10 @@ class MerchandiseService {
   }
 
   // Métodos para MerchandiseTypeModel
-  Future<List<MerchandiseTypeModel>> fetchMerchandiseTypeList() async {
+  Future<List<MerchandiseTypeModel>> fetchMerchandiseTypeList({String? stockId}) async {
     
-    final response = await HttpClient.get('/merchandise-types');
+    final url = stockId != null ? '/merchandise-types/$stockId' : '/merchandise-types';
+    final response = await HttpClient.get(url);
     
     print('📡 [MERCHANDISE_SERVICE] Resposta recebida:');
     print('   - Success: ${response.success}');

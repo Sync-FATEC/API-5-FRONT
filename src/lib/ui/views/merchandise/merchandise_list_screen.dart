@@ -4,6 +4,7 @@ import 'package:api2025/core/constants/app_colors.dart';
 import 'package:api2025/ui/widgets/merchandise_card.dart';
 import 'package:api2025/data/models/merchandise_type_model.dart';
 import 'package:api2025/core/providers/merchandise_type_provider.dart';
+import 'package:api2025/core/providers/stock_provider.dart';
 import 'package:api2025/data/enums/merchandise_enums.dart';
 import 'package:provider/provider.dart';
 import 'widgets/create_merchandise_type_modal.dart';
@@ -11,12 +12,10 @@ import 'merchandise_detail_screen.dart';
 
 class MerchandiseListScreen extends StatefulWidget {
   final String title;
-  final List<String> filterOptions;
 
   const MerchandiseListScreen({
     super.key,
     this.title = "CONTROLE DE ESTOQUE",
-    this.filterOptions = const ['TODOS', 'MÉDICO', 'ALMOXARIFADO', 'CONTROLADO'],
   });
 
   @override
@@ -24,7 +23,6 @@ class MerchandiseListScreen extends StatefulWidget {
 }
 
 class _MerchandiseListScreenState extends State<MerchandiseListScreen> {
-  String _selectedFilter = 'TODOS';
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -40,29 +38,20 @@ class _MerchandiseListScreenState extends State<MerchandiseListScreen> {
   void _loadMerchandiseTypes() {
     print("Método _loadMerchandiseTypes chamado");
     final merchandiseProvider = Provider.of<MerchandiseTypeProvider>(context, listen: false);
-    print("Carregando tipos de mercadoria");
-    merchandiseProvider.loadMerchandiseTypes();
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
+    final selectedStock = stockProvider.selectedStock;
+    
+    if (selectedStock != null) {
+      print("Carregando tipos de mercadoria para o stock: ${selectedStock.id}");
+      merchandiseProvider.loadMerchandiseTypes(stockId: selectedStock.id);
+    } else {
+      print("Nenhum stock selecionado, carregando todos os tipos de mercadoria");
+      merchandiseProvider.loadMerchandiseTypes();
+    }
   }
 
   List<MerchandiseTypeModel> _filterMerchandise(List<MerchandiseTypeModel> merchandises) {
     List<MerchandiseTypeModel> filtered = merchandises;
-
-    // Aplicar filtro por categoria
-    switch (_selectedFilter) {
-      case 'MÉDICO':
-        filtered = filtered.where((m) => m.group == MerchandiseGroup.medical).toList();
-        break;
-      case 'ALMOXARIFADO':
-        filtered = filtered.where((m) => m.group == MerchandiseGroup.almox).toList();
-        break;
-      case 'CONTROLADO':
-        filtered = filtered.where((m) => m.controlled == true).toList();
-        break;
-      case 'TODOS':
-      default:
-        // Não aplica filtro
-        break;
-    }
 
     // Aplicar busca por texto
     if (_searchQuery.isNotEmpty) {
@@ -118,29 +107,6 @@ class _MerchandiseListScreenState extends State<MerchandiseListScreen> {
                       ),
                       filled: true,
                       fillColor: Colors.white,
-                    ),
-                  ),
-                ),
-                // Filtros
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
-                  ),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: widget.filterOptions.map((filter) {
-                        final isSelected = _selectedFilter == filter;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: _buildFilterButton(filter, isSelected, () {
-                            setState(() {
-                              _selectedFilter = filter;
-                            });
-                          }),
-                        );
-                      }).toList(),
                     ),
                   ),
                 ),
@@ -278,26 +244,7 @@ class _MerchandiseListScreenState extends State<MerchandiseListScreen> {
     );
   }
 
-  Widget _buildFilterButton(String label, bool selected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.bluePrimary : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.bluePrimary),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : AppColors.bluePrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Future<void> _createMerchandise(BuildContext context) async {
     final result = await CreateMerchandiseTypeModal.show(context);

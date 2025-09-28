@@ -11,6 +11,7 @@ class MerchandiseTypeProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   MerchandiseTypeModel? _selectedMerchandiseType;
+  String? _currentStockId;
 
   // Getters
   List<MerchandiseTypeModel> get merchandiseTypes => _merchandiseTypes;
@@ -19,16 +20,20 @@ class MerchandiseTypeProvider extends ChangeNotifier {
   MerchandiseTypeModel? get selectedMerchandiseType => _selectedMerchandiseType;
 
   // Carregar tipos de mercadoria
-  Future<void> loadMerchandiseTypes() async {
+  Future<void> loadMerchandiseTypes({String? stockId}) async {
     print('🔄 [MERCHANDISE_TYPE_PROVIDER] Iniciando carregamento de tipos de mercadoria...');
     print('📊 [MERCHANDISE_TYPE_PROVIDER] Estado atual: ${_merchandiseTypes.length} tipos na lista');
+    print('🏪 [MERCHANDISE_TYPE_PROVIDER] StockId: $stockId');
+    
+    // Armazenar o stockId atual para uso em outros métodos
+    _currentStockId = stockId;
     
     _setLoading(true);
     _setError(null);
 
     try {
       print('🌐 [MERCHANDISE_TYPE_PROVIDER] Chamando MerchandiseService...');
-      _merchandiseTypes = await _merchandiseService.fetchMerchandiseTypeList();
+      _merchandiseTypes = await _merchandiseService.fetchMerchandiseTypeList(stockId: stockId);
       
       print('✅ [MERCHANDISE_TYPE_PROVIDER] Carregamento concluído!');
       print('📦 [MERCHANDISE_TYPE_PROVIDER] Total de tipos carregados: ${_merchandiseTypes.length}');
@@ -61,7 +66,7 @@ class MerchandiseTypeProvider extends ChangeNotifier {
   }
 
   // Criar novo tipo de mercadoria
-  Future<bool> createMerchandiseType(MerchandiseTypeModel merchandiseType) async {
+  Future<bool> createMerchandiseType(MerchandiseTypeModel merchandiseType, {String? stockId}) async {
     _setLoading(true);
     _setError(null);
 
@@ -70,7 +75,7 @@ class MerchandiseTypeProvider extends ChangeNotifier {
       await _merchandiseService.createMerchandiseType(merchandiseType);
       
       // Recarregar a lista após criar
-      await loadMerchandiseTypes();
+      await loadMerchandiseTypes(stockId: _currentStockId);
       
       print('MerchandiseTypeProvider: Tipo de mercadoria criado com sucesso');
       return true;
@@ -84,7 +89,7 @@ class MerchandiseTypeProvider extends ChangeNotifier {
   }
 
   // Atualizar tipo de mercadoria
-  Future<bool> updateMerchandiseType(MerchandiseTypeModel merchandiseType) async {
+  Future<bool> updateMerchandiseType(MerchandiseTypeModel merchandiseType, {String? stockId}) async {
     _setLoading(true);
     _setError(null);
 
@@ -93,7 +98,7 @@ class MerchandiseTypeProvider extends ChangeNotifier {
       await _merchandiseService.updateMerchandiseType(merchandiseType);
       
       // Recarregar a lista após atualizar
-      await loadMerchandiseTypes();
+      await loadMerchandiseTypes(stockId: _currentStockId);
       
       print('MerchandiseTypeProvider: Tipo de mercadoria atualizado com sucesso');
       return true;
@@ -107,7 +112,7 @@ class MerchandiseTypeProvider extends ChangeNotifier {
   }
 
   // Excluir tipo de mercadoria
-  Future<bool> deleteMerchandiseType(String merchandiseTypeId) async {
+  Future<bool> deleteMerchandiseType(String merchandiseTypeId, {String? stockId}) async {
     _setLoading(true);
     _setError(null);
 
@@ -116,7 +121,7 @@ class MerchandiseTypeProvider extends ChangeNotifier {
       await _merchandiseService.deleteMerchandiseType(merchandiseTypeId);
       
       // Recarregar a lista após excluir
-      await loadMerchandiseTypes();
+      await loadMerchandiseTypes(stockId: _currentStockId);
       
       print('MerchandiseTypeProvider: Tipo de mercadoria excluído com sucesso');
       return true;

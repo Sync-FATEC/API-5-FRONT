@@ -9,6 +9,7 @@ import 'package:api2025/core/providers/stock_provider.dart';
 import 'package:provider/provider.dart';
 import 'create_order_modal.dart';
 import 'change_status_modal.dart';
+import 'order_detail_screen.dart';
 
 class OrdersListScreen extends StatefulWidget {
   final String title;
@@ -194,7 +195,11 @@ class _OrderListScreenState extends State<OrdersListScreen> {
                               order: order,
                               onTap: () {
                                 // Navegação para detalhes do pedido
-                                // TODO: Implementar navegação para detalhes
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => OrderDetailScreen(order: order),
+                                  ),
+                                );
                               },
                               onEdit: () => _editOrder(context, order),
                               onDelete: () => _deleteOrder(context, order),
