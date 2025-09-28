@@ -12,16 +12,17 @@ class OrderProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<void> loadOrders() async {
-    print("Iniciando carregamento de pedidos");
+  Future<void> loadOrders({String? stockId}) async {
+    print("Iniciando carregamento de pedidos${stockId != null ? ' para stock: $stockId' : ''}");
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
       // Usar o HttpClient que já gerencia o token de autenticação
-      print("Fazendo requisição para: /orders");
-      final response = await HttpClient.get('/orders');
+      final endpoint = stockId != null ? '/orders/$stockId' : '/orders';
+      print("Fazendo requisição para: $endpoint");
+      final response = await HttpClient.get(endpoint);
       
       if (response.success) {
         try {
@@ -73,6 +74,36 @@ class OrderProvider extends ChangeNotifier {
           order.orderItems.any((item) =>
               item.merchandiseName.toLowerCase().contains(query.toLowerCase()));
     }).toList();
+  }
+
+  // Criar novo pedido
+  Future<bool> createOrder(Map<String, dynamic> orderData) async {
+    print("Iniciando criação de pedido");
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await HttpClient.post('/orders', body: orderData);
+      
+      if (response.success) {
+        print("Pedido criado com sucesso");
+        // Recarregar a lista de pedidos após criar um novo
+        await loadOrders();
+        return true;
+      } else {
+        print("Erro ao criar pedido: ${response.message}");
+        _errorMessage = response.message;
+        return false;
+      }
+    } catch (e) {
+      print("Exceção ao criar pedido: $e");
+      _errorMessage = 'Erro ao criar pedido';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   // Métodos auxiliares

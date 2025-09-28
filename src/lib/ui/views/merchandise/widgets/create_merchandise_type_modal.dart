@@ -71,6 +71,7 @@ class _CreateMerchandiseTypeFormState extends State<_CreateMerchandiseTypeForm> 
         name: _nameController.text.trim(),
         recordNumber: _recordNumberController.text.trim(),
         unitOfMeasure: _unitOfMeasureController.text.trim(),
+        quantityTotal: 0, // Valor inicial padrão
         controlled: _controlled,
         group: _selectedGroup,
         minimumStock: int.parse(_minimumStockController.text.trim()),

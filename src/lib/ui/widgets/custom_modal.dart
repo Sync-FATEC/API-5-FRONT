@@ -176,6 +176,7 @@ class CustomModalTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final int? maxLines;
+  final bool enabled;
 
   const CustomModalTextField({
     Key? key,
@@ -186,6 +187,7 @@ class CustomModalTextField extends StatelessWidget {
     this.obscureText = false,
     this.suffixIcon,
     this.maxLines = 1,
+    this.enabled = true,
   }) : super(key: key);
 
   @override
@@ -208,6 +210,7 @@ class CustomModalTextField extends StatelessWidget {
           keyboardType: keyboardType,
           obscureText: obscureText,
           maxLines: maxLines,
+          enabled: enabled,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.grey.shade50,

@@ -5,6 +5,7 @@ import 'package:api2025/ui/widgets/bottom_nav_bar_widget.dart';
 import 'package:api2025/ui/widgets/order_card.dart';
 import 'package:api2025/data/models/order_model.dart';
 import 'package:api2025/core/providers/order_provider.dart';
+import 'package:api2025/core/providers/stock_provider.dart';
 import 'package:provider/provider.dart';
 
 class OrdersListScreen extends StatefulWidget {
@@ -38,7 +39,16 @@ class _OrderListScreenState extends State<OrdersListScreen> {
   void _loadOrders() {
     print("Método _loadOrders chamado");
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-    orderProvider.loadOrders();
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
+    final selectedStock = stockProvider.selectedStock;
+    
+    if (selectedStock != null) {
+      print("Carregando pedidos para o stock: ${selectedStock.id}");
+      orderProvider.loadOrders(stockId: selectedStock.id);
+    } else {
+      print("Nenhum stock selecionado, carregando todos os pedidos");
+      orderProvider.loadOrders();
+    }
   }
 
   @override

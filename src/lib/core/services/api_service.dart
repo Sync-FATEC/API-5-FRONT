@@ -16,9 +16,6 @@ class ApiService {
     print('ApiService: Fazendo chamada para /auth/user-data/$email');
     try {
       final response = await HttpClient.get('/auth/user-data/$email');
-      print(
-        'ApiService: Resposta recebida - Success: ${response.success}, Data: ${response.data}',
-      );
 
       if (response.success && response.data != null) {
         return UserApiResponse.fromJson(response.data!);
@@ -36,9 +33,6 @@ class ApiService {
     print('ApiService: Fazendo chamada para /stocks/$userId');
     try {
       final response = await HttpClient.get('/stocks/$userId');
-      print(
-        'ApiService: Resposta recebida - Success: ${response.success}, Data: ${response.data}',
-      );
 
       if (response.success && response.data != null) {
         return StockApiResponse.fromJson(response.data!);
@@ -61,9 +55,6 @@ class ApiService {
         '/stocks',
         body: {'name': name, 'location': location},
       );
-      print(
-        'ApiService: Resposta recebida - Success: ${response.success}, Data: ${response.data}',
-      );
 
       if (response.success && response.data != null) {
         return StockApiResponse.fromJson(response.data!);
@@ -81,9 +72,6 @@ class ApiService {
     print('ApiService: Fazendo chamada para DELETE /stocks/$stockId');
     try {
       final response = await HttpClient.delete('/stocks/$stockId');
-      print(
-        'ApiService: Resposta recebida - Success: ${response.success}, Message: ${response.message}',
-      );
 
       if (response.success) {
         return true;
@@ -101,9 +89,6 @@ class ApiService {
     print('ApiService: Fazendo chamada para /sections - Nome: $name');
     try {
       final response = await HttpClient.post('/sections', body: {'name': name});
-      print(
-        'ApiService: Resposta recebida - Success: ${response.success}, Data: ${response.data}',
-      );
 
       if (response.success && response.data != null) {
         // Formatando a resposta para o padrão esperado
@@ -127,9 +112,6 @@ class ApiService {
     print('ApiService: Fazendo chamada para /sections');
     try {
       final response = await HttpClient.get('/sections');
-      print(
-        'ApiService: Resposta recebida - Success: ${response.success}, Data: ${response.data}',
-      );
 
       if (response.success && response.data != null) {
         // Verificar se a resposta contém a chave 'message' com uma lista de seções
@@ -175,9 +157,6 @@ class ApiService {
     print('ApiService: Fazendo chamada para DELETE /sections/$sectionId');
     try {
       final response = await HttpClient.delete('/sections/$sectionId');
-      print(
-        'ApiService: Resposta recebida - Success: ${response.success}, Message: ${response.message}',
-      );
 
       if (response.success) {
         return true;
@@ -195,9 +174,6 @@ class ApiService {
     print('ApiService: Fazendo chamada para PUT /sections/$sectionId - Nome: $name');
     try {
       final response = await HttpClient.put('/sections/$sectionId', body: {'name': name});
-      print(
-        'ApiService: Resposta recebida - Success: ${response.success}, Data: ${response.data}',
-      );
 
       if (response.success && response.data != null) {
         final formattedResponse = {

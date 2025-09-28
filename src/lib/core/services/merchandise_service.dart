@@ -46,11 +46,35 @@ class MerchandiseService {
 
   // Métodos para MerchandiseTypeModel
   Future<List<MerchandiseTypeModel>> fetchMerchandiseTypeList() async {
+    
     final response = await HttpClient.get('/merchandise-types');
+    
+    print('📡 [MERCHANDISE_SERVICE] Resposta recebida:');
+    print('   - Success: ${response.success}');
+    print('   - Message: ${response.message}');
+    print('   - Data: ${response.data}');
+    
     if (response.success && response.data != null) {
       final List data = response.data!['data'] ?? response.data ?? [];
-      return data.map((json) => MerchandiseTypeModel.fromJson(json)).toList();
+      
+      print('📦 [MERCHANDISE_SERVICE] Dados extraídos da resposta:');
+      print('   - Tipo dos dados: ${data.runtimeType}');
+      print('   - Quantidade de itens: ${data.length}');
+      
+      if (data.isNotEmpty) {
+        print('   - Primeiro item: ${data.first}');
+      }
+      
+      final products = data.map((json) => MerchandiseTypeModel.fromJson(json)).toList();
+      
+      print('✅ [MERCHANDISE_SERVICE] Produtos convertidos:');
+      for (var product in products) {
+        print('   - ${product.name} (ID: ${product.id})');
+      }
+      
+      return products;
     } else {
+      print('❌ [MERCHANDISE_SERVICE] Erro na resposta: ${response.message}');
       throw Exception(response.message);
     }
   }

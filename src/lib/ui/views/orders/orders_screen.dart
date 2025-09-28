@@ -1,4 +1,4 @@
-// lib/ui/views/home/home_screen.dart
+// lib/ui/views/orders/orders_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +7,7 @@ import '../../../core/providers/stock_provider.dart';
 import '../../widgets/header_icon.dart';
 import '../../widgets/bottom_nav_bar_widget.dart';
 import '../../widgets/custom_card.dart';
+import 'widgets/create_order_modal.dart';
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
@@ -47,10 +48,7 @@ class OrdersScreen extends StatelessWidget {
                       iconData: Icons.add_circle_outline,
                       title: 'Cadastro de pedidos',
                       subtitle: 'Realize novos pedidos',
-                      onTap: () {
-                        // TODO: Navegar para tela de cadastro de produto
-                        print('Navegando para cadastro de produto');
-                      },
+                      onTap: () => _openCreateOrderModal(context),
                     ),
                     CustomCard(
                       iconData: Icons.inventory_2_outlined,
@@ -73,5 +71,17 @@ class OrdersScreen extends StatelessWidget {
 
   void _navigateTo(BuildContext context, String route) {
     Navigator.of(context).pushNamed(route);
+  }
+
+  Future<void> _openCreateOrderModal(BuildContext context) async {
+    final result = await CreateOrderModal.show(context);
+    if (result == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pedido criado com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 }

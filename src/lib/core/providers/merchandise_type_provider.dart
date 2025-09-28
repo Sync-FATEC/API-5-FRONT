@@ -20,18 +20,33 @@ class MerchandiseTypeProvider extends ChangeNotifier {
 
   // Carregar tipos de mercadoria
   Future<void> loadMerchandiseTypes() async {
+    print('🔄 [MERCHANDISE_TYPE_PROVIDER] Iniciando carregamento de tipos de mercadoria...');
+    print('📊 [MERCHANDISE_TYPE_PROVIDER] Estado atual: ${_merchandiseTypes.length} tipos na lista');
+    
     _setLoading(true);
     _setError(null);
 
     try {
-      print('MerchandiseTypeProvider: Carregando tipos de mercadoria');
+      print('🌐 [MERCHANDISE_TYPE_PROVIDER] Chamando MerchandiseService...');
       _merchandiseTypes = await _merchandiseService.fetchMerchandiseTypeList();
-      print('MerchandiseTypeProvider: ${_merchandiseTypes.length} tipos carregados');
+      
+      print('✅ [MERCHANDISE_TYPE_PROVIDER] Carregamento concluído!');
+      print('📦 [MERCHANDISE_TYPE_PROVIDER] Total de tipos carregados: ${_merchandiseTypes.length}');
+      
+      if (_merchandiseTypes.isNotEmpty) {
+        print('📋 [MERCHANDISE_TYPE_PROVIDER] Lista de tipos carregados:');
+        for (var type in _merchandiseTypes) {
+          print('   - ${type.name} (ID: ${type.id}, Grupo: ${type.group})');
+        }
+      } else {
+        print('⚠️ [MERCHANDISE_TYPE_PROVIDER] Nenhum tipo de mercadoria foi carregado');
+      }
     } catch (e) {
-      print('MerchandiseTypeProvider: Erro ao carregar tipos: $e');
+      print('❌ [MERCHANDISE_TYPE_PROVIDER] Erro ao carregar tipos: $e');
       _setError('Erro ao carregar tipos de mercadoria: $e');
       _merchandiseTypes = [];
     } finally {
+      print('🏁 [MERCHANDISE_TYPE_PROVIDER] Finalizando carregamento (loading = false)');
       _setLoading(false);
     }
   }

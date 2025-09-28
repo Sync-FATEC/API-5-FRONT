@@ -5,6 +5,7 @@ class MerchandiseTypeModel {
     final String name;
     final String recordNumber;
     final String unitOfMeasure;
+    final int quantityTotal;
     final bool controlled;
     final MerchandiseGroup group;
     final int minimumStock;
@@ -14,6 +15,7 @@ class MerchandiseTypeModel {
         required this.name,
         required this.recordNumber,
         required this.unitOfMeasure,
+        required this.quantityTotal,
         required this.controlled,
         required this.group,
         required this.minimumStock,
@@ -25,6 +27,7 @@ class MerchandiseTypeModel {
             name: json['name'],
             recordNumber: json['recordNumber'],
             unitOfMeasure: json['unitOfMeasure'],
+            quantityTotal: json['quantityTotal'] ?? 0,
             controlled: json['controlled'],
             group: merchandiseGroupFromString(json['group']),
             minimumStock: json['minimumStock'],
@@ -37,6 +40,7 @@ class MerchandiseTypeModel {
             'name': name,
             'recordNumber': recordNumber,
             'unitOfMeasure': unitOfMeasure,
+            'quantityTotal': quantityTotal,
             'controlled': controlled,
             'group': merchandiseGroupToString(group),
             'minimumStock': minimumStock,

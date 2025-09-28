@@ -32,11 +32,6 @@ class SectionProvider extends ChangeNotifier {
           )
         ).toList();
         
-        print('SectionProvider: Seções carregadas: ${_sections.length}');
-        for (var section in _sections) {
-          print('Seção: ${section.id} - ${section.name}');
-        }
-        
         notifyListeners();
       } else {
         _setError('Erro ao carregar seções');

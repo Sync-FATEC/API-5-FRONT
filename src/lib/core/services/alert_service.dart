@@ -7,7 +7,6 @@ class AlertService {
       final response = await HttpClient.get('/merchandise/stock-alerts');
 
       if (response.success && response.data != null) {
-        print('AlertService: Resposta recebida: ${response.data}');
         final data = response.data!['data'];
         if (data != null && data['alerts'] != null) {
           final List alertsJson = data['alerts'];
