@@ -10,6 +10,7 @@ class CustomCard extends StatelessWidget {
   final Color iconColor;
   final bool showArrow;
   final Function? onDelete;
+  final Function? onEdit;
 
   const CustomCard({
     super.key,
@@ -21,6 +22,7 @@ class CustomCard extends StatelessWidget {
     this.iconColor = AppColors.white,
     this.showArrow = true,
     this.onDelete,
+    this.onEdit,
   });
 
   void _showOptionsBottomSheet(BuildContext context) {
@@ -40,14 +42,24 @@ class CustomCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Excluir'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showDeleteConfirmation(context);
-                },
-              ),
+              if (onEdit != null)
+                ListTile(
+                  leading: const Icon(Icons.edit, color: Colors.blue),
+                  title: const Text('Editar'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onEdit!();
+                  },
+                ),
+              if (onDelete != null)
+                ListTile(
+                  leading: const Icon(Icons.delete, color: Colors.red),
+                  title: const Text('Excluir'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showDeleteConfirmation(context);
+                  },
+                ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
@@ -96,7 +108,7 @@ class CustomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: onDelete != null
+      onLongPress: (onDelete != null || onEdit != null)
           ? () {
               _showOptionsBottomSheet(context);
             }

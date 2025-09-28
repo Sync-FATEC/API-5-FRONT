@@ -124,10 +124,13 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
     }
   }
 
-  void _navigateToSection(BuildContext context) {
-    Navigator.of(
+  void _navigateToSection(BuildContext context) async {
+    await Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (context) => const SectionScreen()));
+    
+    // Recarregar os estoques quando retornar da tela de seção
+    _loadStocks();
   }
 
   void _deleteStock(BuildContext context, String stockId) async {

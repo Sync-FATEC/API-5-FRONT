@@ -148,6 +148,7 @@ class _SectionScreenState extends State<SectionScreen> {
                         subtitle: 'Seção',
                         onTap: () => _navigateToEditSection(context, section),
                         showArrow: true,
+                        onEdit: () => _navigateToEditSection(context, section),
                         onDelete: () => _deleteSection(context, section.id),
                       ),
                     );
