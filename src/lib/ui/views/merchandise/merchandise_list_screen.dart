@@ -7,6 +7,7 @@ import 'package:api2025/core/providers/merchandise_type_provider.dart';
 import 'package:api2025/data/enums/merchandise_enums.dart';
 import 'package:provider/provider.dart';
 import 'widgets/create_merchandise_type_modal.dart';
+import 'merchandise_detail_screen.dart';
 
 class MerchandiseListScreen extends StatefulWidget {
   final String title;
@@ -239,9 +240,21 @@ class _MerchandiseListScreenState extends State<MerchandiseListScreen> {
                             padding: const EdgeInsets.only(bottom: 12.0),
                             child: MerchandiseCard(
                               merchandise: merchandise,
-                              onTap: () {
-                                // Navegação para detalhes da mercadoria
-                                // TODO: Implementar navegação para detalhes
+                              onTap: () async {
+                                // Navegar para tela de detalhes
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MerchandiseDetailScreen(
+                                      merchandise: merchandise,
+                                    ),
+                                  ),
+                                );
+                                
+                                // Se houve alteração (edição ou exclusão), recarregar lista
+                                if (result == true) {
+                                  _loadMerchandiseTypes();
+                                }
                               },
                               onEdit: () => _editMerchandise(context, merchandise),
                               onDelete: () => _deleteMerchandise(context, merchandise),
@@ -347,19 +360,33 @@ class _MerchandiseListScreenState extends State<MerchandiseListScreen> {
 
     if (confirmed == true && merchandise.id != null && mounted) {
       try {
-        // final merchandiseProvider = Provider.of<MerchandiseTypeProvider>(context, listen: false);
-        // TODO: Implementar método de delete no provider
-        // final success = await merchandiseProvider.deleteMerchandiseType(merchandise.id!);
+        final merchandiseProvider = Provider.of<MerchandiseTypeProvider>(context, listen: false);
+        final success = await merchandiseProvider.deleteMerchandiseType(merchandise.id!);
         
-        // Por enquanto, apenas recarrega a lista
-        _loadMerchandiseTypes();
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Mercadoria excluída com sucesso!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Mercadoria excluída com sucesso!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          // Verificar se é erro específico de produto em uso
+          String errorMessage = merchandiseProvider.errorMessage ?? 'Erro ao excluir mercadoria';
+          Color backgroundColor = Colors.red;
+          
+          if (errorMessage.toLowerCase().contains('pedido')) {
+            backgroundColor = Colors.orange;
+          }
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: backgroundColor,
+              duration: const Duration(seconds: 4), // Mais tempo para ler a mensagem
+            ),
+          );
+        }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

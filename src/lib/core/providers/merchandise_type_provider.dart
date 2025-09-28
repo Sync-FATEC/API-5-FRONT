@@ -106,6 +106,42 @@ class MerchandiseTypeProvider extends ChangeNotifier {
     }
   }
 
+  // Excluir tipo de mercadoria
+  Future<bool> deleteMerchandiseType(String merchandiseTypeId) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      print('MerchandiseTypeProvider: Excluindo tipo de mercadoria - ID: $merchandiseTypeId');
+      await _merchandiseService.deleteMerchandiseType(merchandiseTypeId);
+      
+      // Recarregar a lista após excluir
+      await loadMerchandiseTypes();
+      
+      print('MerchandiseTypeProvider: Tipo de mercadoria excluído com sucesso');
+      return true;
+    } catch (e) {
+      print('MerchandiseTypeProvider: Erro ao excluir tipo: $e');
+      
+      // Verificar se é erro de produto em uso em pedidos
+      String errorMessage = e.toString().toLowerCase();
+      if (errorMessage.contains('pedido') || 
+          errorMessage.contains('order') || 
+          errorMessage.contains('em uso') ||
+          errorMessage.contains('in use') ||
+          errorMessage.contains('constraint') ||
+          errorMessage.contains('foreign key')) {
+        _setError('Não é possível excluir este produto pois ele está sendo usado em um ou mais pedidos.');
+      } else {
+        _setError('Erro ao excluir tipo de mercadoria: $e');
+      }
+      
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   // Selecionar tipo de mercadoria
   void selectMerchandiseType(MerchandiseTypeModel merchandiseType) {
     _selectedMerchandiseType = merchandiseType;
