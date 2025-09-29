@@ -21,7 +21,8 @@ class MerchandiseCard extends StatelessWidget {
     this.showArrow = true,
   });
 
-  String _getGroupText(MerchandiseGroup group) {
+  String _getGroupText(MerchandiseGroup? group) {
+    if (group == null) return 'Sem Grupo';
     switch (group) {
       case MerchandiseGroup.medical:
         return 'Médico';
@@ -30,7 +31,8 @@ class MerchandiseCard extends StatelessWidget {
     }
   }
 
-  Color _getGroupBackgroundColor(MerchandiseGroup group) {
+  Color _getGroupBackgroundColor(MerchandiseGroup? group) {
+    if (group == null) return Colors.grey[100]!;
     switch (group) {
       case MerchandiseGroup.medical:
         return Colors.blue[100]!;
@@ -39,7 +41,8 @@ class MerchandiseCard extends StatelessWidget {
     }
   }
 
-  Color _getGroupTextColor(MerchandiseGroup group) {
+  Color _getGroupTextColor(MerchandiseGroup? group) {
+    if (group == null) return Colors.grey[800]!;
     switch (group) {
       case MerchandiseGroup.medical:
         return Colors.blue[800]!;

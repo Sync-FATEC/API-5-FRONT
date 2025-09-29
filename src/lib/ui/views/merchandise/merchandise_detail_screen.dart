@@ -28,7 +28,8 @@ class MerchandiseDetailScreen extends StatefulWidget {
 class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
   final ScreenshotController _qrScreenshotController = ScreenshotController();
 
-  String _getGroupDisplayName(MerchandiseGroup group) {
+  String _getGroupDisplayName(MerchandiseGroup? group) {
+    if (group == null) return 'Sem Grupo';
     switch (group) {
       case MerchandiseGroup.medical:
         return 'Médico';
@@ -577,7 +578,7 @@ class _EditMerchandiseTypeFormState extends State<_EditMerchandiseTypeForm> {
   late TextEditingController _minimumStockController;
   
   late bool _controlled;
-  late MerchandiseGroup _selectedGroup;
+  late MerchandiseGroup? _selectedGroup;
   bool _isLoading = false;
 
   @override
@@ -649,7 +650,8 @@ class _EditMerchandiseTypeFormState extends State<_EditMerchandiseTypeForm> {
     }
   }
 
-  String _getGroupDisplayName(MerchandiseGroup group) {
+  String _getGroupDisplayName(MerchandiseGroup? group) {
+    if (group == null) return 'No Group';
     switch (group) {
       case MerchandiseGroup.medical:
         return 'Medical';
@@ -771,21 +773,25 @@ class _EditMerchandiseTypeFormState extends State<_EditMerchandiseTypeForm> {
                         border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: DropdownButtonHideUnderline(
-                        child: DropdownButton<MerchandiseGroup>(
+                        child: DropdownButton<MerchandiseGroup?>(
                           value: _selectedGroup,
                           isExpanded: true,
-                          items: MerchandiseGroup.values.map((group) {
-                            return DropdownMenuItem<MerchandiseGroup>(
-                              value: group,
-                              child: Text(_getGroupDisplayName(group)),
-                            );
-                          }).toList(),
+                          items: [
+                            const DropdownMenuItem<MerchandiseGroup?>(
+                              value: null,
+                              child: Text('Sem Grupo'),
+                            ),
+                            ...MerchandiseGroup.values.map((group) {
+                              return DropdownMenuItem<MerchandiseGroup?>(
+                                value: group,
+                                child: Text(_getGroupDisplayName(group)),
+                              );
+                            }).toList(),
+                          ],
                           onChanged: (MerchandiseGroup? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _selectedGroup = newValue;
-                              });
-                            }
+                            setState(() {
+                              _selectedGroup = newValue;
+                            });
                           },
                         ),
                       ),

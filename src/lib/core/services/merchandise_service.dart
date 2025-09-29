@@ -1,5 +1,6 @@
 import '../../data/models/merchandise_model.dart' hide MerchandiseTypeModel;
 import '../../data/models/merchandise_type_model.dart';
+import '../../data/models/merchandise_entry_model.dart';
 import 'http_client.dart';
 
 class MerchandiseService {
@@ -124,6 +125,30 @@ class MerchandiseService {
       } else {
         throw Exception(response.message);
       }
+    }
+  }
+
+  // Método para criar entrada de mercadoria via QR code ou manual
+  Future<void> createMerchandiseEntry(MerchandiseEntryModel entry) async {
+    print('MerchandiseService: Fazendo chamada para POST /merchandise');
+    print('MerchandiseService: Dados da entrada: ${entry.toJson()}');
+    
+    try {
+      final response = await HttpClient.post(
+        '/merchandise',
+        body: entry.toJson(),
+      );
+
+      if (response.success) {
+        print('MerchandiseService: Entrada de mercadoria criada com sucesso');
+        return;
+      } else {
+        print('MerchandiseService: Erro na resposta: ${response.message}');
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('MerchandiseService: Erro na chamada: $e');
+      throw Exception('Erro ao criar entrada de mercadoria: $e');
     }
   }
 }

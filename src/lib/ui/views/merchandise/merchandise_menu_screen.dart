@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/background_header.dart';
 import '../../widgets/custom_card.dart';
 import 'widgets/create_merchandise_type_modal.dart';
+import 'widgets/merchandise_entry_modal.dart';
 
 class MerchandiseMenuScreen extends StatefulWidget {
   final Function() onScanQr;
@@ -37,6 +38,13 @@ class _MerchandiseMenuScreenState extends State<MerchandiseMenuScreen> {
     setState(() {
       scanResult = result;
     });
+  }
+
+  Future<void> _openMerchandiseEntryModal() async {
+    final result = await MerchandiseEntryModal.show(context);
+    if (result == true) {
+      // Atualizar a lista ou fazer outras ações necessárias
+    }
   }
 
   Future<void> _openCreateMerchandiseTypeModal() async {
@@ -113,7 +121,7 @@ class _MerchandiseMenuScreenState extends State<MerchandiseMenuScreen> {
                         iconData: Icons.qr_code,
                         title: 'Escanear QR CODE',
                         subtitle: 'Preenche informações, solicitando apenas a quantidade recebida',
-                        onTap: widget.onScanQr,
+                        onTap: _openMerchandiseEntryModal,
                         iconBackgroundColor: const Color(0xFF2563EB),
                         iconColor: Colors.white,
                         showArrow: true,
