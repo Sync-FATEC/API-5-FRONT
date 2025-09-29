@@ -1,5 +1,6 @@
 import '../../data/models/merchandise_model.dart' hide MerchandiseTypeModel;
 import '../../data/models/merchandise_type_model.dart';
+import '../../data/models/merchandise_entry_model.dart';
 import 'http_client.dart';
 
 class MerchandiseService {
@@ -45,9 +46,10 @@ class MerchandiseService {
   }
 
   // Métodos para MerchandiseTypeModel
-  Future<List<MerchandiseTypeModel>> fetchMerchandiseTypeList() async {
+  Future<List<MerchandiseTypeModel>> fetchMerchandiseTypeList({String? stockId}) async {
     
-    final response = await HttpClient.get('/merchandise-types');
+    final url = stockId != null ? '/merchandise-types/$stockId' : '/merchandise-types';
+    final response = await HttpClient.get(url);
     
     print('📡 [MERCHANDISE_SERVICE] Resposta recebida:');
     print('   - Success: ${response.success}');
@@ -105,6 +107,48 @@ class MerchandiseService {
     );
     if (!response.success) {
       throw Exception(response.message);
+    }
+  }
+
+  Future<void> deleteMerchandiseType(String typeId) async {
+    final response = await HttpClient.delete('/merchandise-types/$typeId');
+    if (!response.success) {
+      // Verificar se é erro de produto em uso
+      String errorMessage = response.message.toLowerCase();
+      if (errorMessage.contains('pedido') || 
+          errorMessage.contains('order') || 
+          errorMessage.contains('em uso') ||
+          errorMessage.contains('in use') ||
+          errorMessage.contains('constraint') ||
+          errorMessage.contains('foreign key')) {
+        throw Exception('Produto está sendo usado em pedidos');
+      } else {
+        throw Exception(response.message);
+      }
+    }
+  }
+
+  // Método para criar entrada de mercadoria via QR code ou manual
+  Future<void> createMerchandiseEntry(MerchandiseEntryModel entry) async {
+    print('MerchandiseService: Fazendo chamada para POST /merchandise');
+    print('MerchandiseService: Dados da entrada: ${entry.toJson()}');
+    
+    try {
+      final response = await HttpClient.post(
+        '/merchandise',
+        body: entry.toJson(),
+      );
+
+      if (response.success) {
+        print('MerchandiseService: Entrada de mercadoria criada com sucesso');
+        return;
+      } else {
+        print('MerchandiseService: Erro na resposta: ${response.message}');
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('MerchandiseService: Erro na chamada: $e');
+      throw Exception('Erro ao criar entrada de mercadoria: $e');
     }
   }
 }

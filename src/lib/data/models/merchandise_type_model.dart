@@ -7,8 +7,9 @@ class MerchandiseTypeModel {
     final String unitOfMeasure;
     final int quantityTotal;
     final bool controlled;
-    final MerchandiseGroup group;
+    final MerchandiseGroup? group;
     final int minimumStock;
+    final String? stockId;
 
     MerchandiseTypeModel({
         this.id,
@@ -17,8 +18,9 @@ class MerchandiseTypeModel {
         required this.unitOfMeasure,
         required this.quantityTotal,
         required this.controlled,
-        required this.group,
+        this.group,
         required this.minimumStock,
+        this.stockId,
     });
 
     factory MerchandiseTypeModel.fromJson(Map<String, dynamic> json) {
@@ -29,8 +31,9 @@ class MerchandiseTypeModel {
             unitOfMeasure: json['unitOfMeasure'],
             quantityTotal: json['quantityTotal'] ?? 0,
             controlled: json['controlled'],
-            group: merchandiseGroupFromString(json['group']),
+            group: json['group'] != null ? merchandiseGroupFromString(json['group']) : null,
             minimumStock: json['minimumStock'],
+            stockId: json['stockId'],
         );
     }
 
@@ -42,8 +45,9 @@ class MerchandiseTypeModel {
             'unitOfMeasure': unitOfMeasure,
             'quantityTotal': quantityTotal,
             'controlled': controlled,
-            'group': merchandiseGroupToString(group),
+            'group': group != null ? merchandiseGroupToString(group!) : null,
             'minimumStock': minimumStock,
+            'stockId': stockId,
         };
     }
 }

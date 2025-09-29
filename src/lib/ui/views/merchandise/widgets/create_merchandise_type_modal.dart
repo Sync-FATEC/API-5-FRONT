@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/providers/merchandise_type_provider.dart';
+import '../../../../core/providers/stock_provider.dart';
 import '../../../../data/enums/merchandise_enums.dart';
 import '../../../../data/models/merchandise_type_model.dart';
 import '../../../widgets/custom_modal.dart';
@@ -45,7 +46,6 @@ class _CreateMerchandiseTypeFormState extends State<_CreateMerchandiseTypeForm> 
   final _minimumStockController = TextEditingController();
   
   bool _controlled = false;
-  MerchandiseGroup _selectedGroup = MerchandiseGroup.medical;
   bool _isLoading = false;
 
   @override
@@ -65,16 +65,24 @@ class _CreateMerchandiseTypeFormState extends State<_CreateMerchandiseTypeForm> 
     });
 
     final merchandiseTypeProvider = Provider.of<MerchandiseTypeProvider>(context, listen: false);
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
 
     try {
+      // Obter o stockId do estoque selecionado
+      final stockId = stockProvider.selectedStock?.id;
+      
+      if (stockId == null) {
+        throw Exception('Nenhum estoque selecionado');
+      }
+
       final newType = MerchandiseTypeModel(
         name: _nameController.text.trim(),
         recordNumber: _recordNumberController.text.trim(),
         unitOfMeasure: _unitOfMeasureController.text.trim(),
         quantityTotal: 0, // Valor inicial padrão
         controlled: _controlled,
-        group: _selectedGroup,
         minimumStock: int.parse(_minimumStockController.text.trim()),
+        stockId: stockId, // Incluindo o stockId
       );
 
       final success = await merchandiseTypeProvider.createMerchandiseType(newType);
@@ -110,14 +118,7 @@ class _CreateMerchandiseTypeFormState extends State<_CreateMerchandiseTypeForm> 
     }
   }
 
-  String _getGroupDisplayName(MerchandiseGroup group) {
-    switch (group) {
-      case MerchandiseGroup.medical:
-        return 'Medical';
-      case MerchandiseGroup.almox:
-        return 'Almox';
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -173,50 +174,6 @@ class _CreateMerchandiseTypeFormState extends State<_CreateMerchandiseTypeForm> 
               }
               return null;
             },
-          ),
-          const SizedBox(height: 16),
-          // Campo de grupo (dropdown)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Grupo:',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<MerchandiseGroup>(
-                    value: _selectedGroup,
-                    isExpanded: true,
-                    items: MerchandiseGroup.values.map((group) {
-                      return DropdownMenuItem<MerchandiseGroup>(
-                        value: group,
-                        child: Text(_getGroupDisplayName(group)),
-                      );
-                    }).toList(),
-                    onChanged: (MerchandiseGroup? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          _selectedGroup = newValue;
-                        });
-                      }
-                    },
-                  ),
-                ),
-              ),
-            ],
           ),
           const SizedBox(height: 16),
           // Campo de controlado (checkbox)

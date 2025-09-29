@@ -64,11 +64,20 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
       final merchandiseProvider = Provider.of<MerchandiseTypeProvider>(context, listen: false);
+      final stockProvider = Provider.of<StockProvider>(context, listen: false);
+      final selectedStock = stockProvider.selectedStock;
       
       print('🔄 [CREATE_ORDER_MODAL] Iniciando carregamento de seções e produtos...');
       
       await sectionProvider.loadSections();
-      await merchandiseProvider.loadMerchandiseTypes();
+      
+      if (selectedStock != null) {
+        print("Carregando tipos de mercadoria para o stock: ${selectedStock.id}");
+        await merchandiseProvider.loadMerchandiseTypes(stockId: selectedStock.id);
+      } else {
+        print("Nenhum stock selecionado, carregando todos os tipos de mercadoria");
+        await merchandiseProvider.loadMerchandiseTypes();
+      }
       
       print('📦 [CREATE_ORDER_MODAL] Produtos carregados: ${merchandiseProvider.merchandiseTypes.length}');
       for (var product in merchandiseProvider.merchandiseTypes) {

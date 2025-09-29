@@ -5,6 +5,7 @@ import 'package:api2025/ui/widgets/add_floating_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/section_provider.dart';
+import '../../../core/providers/stock_provider.dart';
 import '../../widgets/custom_card.dart';
 import '../../widgets/background_header.dart';
 
@@ -27,7 +28,10 @@ class _SectionScreenState extends State<SectionScreen> {
 
   void _loadSections() {
     final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
-    sectionProvider.loadSections();
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
+    
+    final stockId = stockProvider.selectedStock?.id;
+    sectionProvider.loadSections(stockId: stockId);
   }
 
   @override
