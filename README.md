@@ -33,37 +33,44 @@ O frontend é responsável por:
 - Alertas de estoque
 - Relatórios visuais
 
-## 📚 Rotas
-```typescript
-/              # Landing Page
-/login         # Página de login
-/estoque       # Gerenciamento de estoque
-/itens         # Cadastro de itens
-/alertas       # Alertas de estoque
-/usuarios      # Gestão de usuários
-# a completar
-```
+# 🚦 Como Executar
 
-## 🚦 Como Executar
+## 📋 Pré-requisitos
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (3.x)  
+- [Node.js](https://nodejs.org/) (necessário apenas para versão web)  
+- [Android Studio](https://developer.android.com/studio) ou [VSCode](https://code.visualstudio.com/) configurado  
 
-### Pré-requisitos
-- Flutter SDK (3.x)
-- Node.js (se for usar versão web)
-- Android Studio ou VSCode configurado
-
-### Instalação
+## 📥 Instalação
+Clone o repositório e instale as dependências:  
 ```bash
 git clone https://github.com/seu-usuario/projeto-frontend.git
 cd projeto-frontend
 flutter pub get
 ```
 
-Rodar aplicação em dispositivo ou emulador:
+## ⚙️ Configuração
+Antes de rodar o projeto, é necessário configurar alguns arquivos **não incluídos no repositório** por conterem informações sensíveis:  
+
+- Coloque o arquivo `firebase.json` dentro da pasta:  
+  ```
+  src/lib/core/client/
+  ```
+
+- Crie ou adicione o arquivo `.env` na **raiz do projeto**:  
+  ```
+  projeto-frontend/.env
+  ```
+
+> ⚠️ Esses arquivos não estão disponíveis neste repositório. Solicite ao responsável pelo projeto ou configure-os conforme a documentação oficial (Firebase e variáveis de ambiente necessárias).  
+
+## ▶️ Execução
+Rodar aplicação em dispositivo ou emulador:  
 ```bash
 flutter run
 ```
 
-Build web:
+## 🌐 Build para Web
+Gerar build para versão web:  
 ```bash
 flutter build web
 ```
@@ -82,13 +89,10 @@ lib/
 ## 👥 Time
 | Nome | Função |
 |------|--------|
-| João Gabriel Solis | Scrum Master |
+| José Eduardo Fernandes| Scrum Master |
 | Ana Laura Moratelli | Product Owner |
 | Arthur Karnas | Desenvolvedora |
 | Erik Yokota | Desenvolvedor |
 | Filipe Colla | Desenvolvedor |
-| José Eduardo Fernandes | Desenvolvedor |
+| João Gabriel Solis  | Desenvolvedor |
 | Kauê Francisco | Desenvolvedor |
-
-## 📄 Licença
-MIT
