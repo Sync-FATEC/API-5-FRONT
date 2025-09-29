@@ -43,8 +43,8 @@ O frontend é responsável por:
 ## 📥 Instalação
 Clone o repositório e instale as dependências:  
 ```bash
-git clone https://github.com/seu-usuario/projeto-frontend.git
-cd projeto-frontend
+git clone https://github.com/Sync-FATEC/API-5-FRONT/
+cd API-5-FRONT/src
 flutter pub get
 ```
 
@@ -58,7 +58,7 @@ Antes de rodar o projeto, é necessário configurar alguns arquivos **não inclu
 
 - Crie ou adicione o arquivo `.env` na **raiz do projeto**:  
   ```
-  projeto-frontend/.env
+  API-5-FRONT/.env
   ```
 
 > ⚠️ Esses arquivos não estão disponíveis neste repositório. Solicite ao responsável pelo projeto ou configure-os conforme a documentação oficial (Firebase e variáveis de ambiente necessárias).  
