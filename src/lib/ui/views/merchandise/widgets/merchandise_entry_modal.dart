@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/services/merchandise_service.dart';
 import '../../../../data/models/merchandise_entry_model.dart';
+import 'qr_scanner_screen.dart';
 
 class MerchandiseEntryModal extends StatefulWidget {
   const MerchandiseEntryModal({super.key});
@@ -66,48 +67,23 @@ class _MerchandiseEntryModalState extends State<MerchandiseEntryModal> {
   }
 
   Future<void> _scanQrCode() async {
-    // Simular escaneamento de QR code
-    // Em uma implementação real, você usaria um plugin como qr_code_scanner
-    final result = await _showQrCodeInputDialog();
-    if (result != null && result.isNotEmpty) {
-      setState(() {
-        _recordNumberController.text = result;
-      });
+    try {
+      final result = await QrScannerScreen.show(context);
+      if (result != null && result.isNotEmpty) {
+        setState(() {
+          _recordNumberController.text = result;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao escanear QR code: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
-  }
-
-  Future<String?> _showQrCodeInputDialog() async {
-    final controller = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Simular QR Code'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Digite o código que seria lido do QR:'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Código do QR',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('Confirmar'),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _createEntry() async {
