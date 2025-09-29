@@ -97,15 +97,13 @@ class ProfileScreen extends StatelessWidget {
                           }
                         },
                       ),
-                      // Só mostra "Alterar acesso" para admin ou supervisor
-                      if (canChangeAccess)
-                        _buildMenuItem(
-                          icon: Icons.sync,
-                          title: 'Alterar acesso',
-                          onTap: () {
-                            _navigateToChangeStock(context);
-                          },
-                        ),
+                      _buildMenuItem(
+                        icon: Icons.sync,
+                        title: 'Alterar acesso',
+                        onTap: () {
+                          _navigateToChangeStock(context);
+                        },
+                      ),
                       _buildMenuItem(
                         icon: Icons.exit_to_app,
                         title: 'Sair',
