@@ -31,49 +31,6 @@ class HomeScreen extends StatelessWidget {
               );
             },
           ),
-          // Botão de voltar
-          Positioned(
-            top: 50,
-            left: 20,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pushReplacementNamed(context, '/stock-selection');
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.arrow_back_ios,
-                      color: AppColors.bluePrimary,
-                      size: 18,
-                    ),
-                    SizedBox(width: 4),
-                    Text(
-                      'Voltar',
-                      style: TextStyle(
-                        color: AppColors.bluePrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.only(top: 200.0),
             child: Consumer2<UserProvider, StockProvider>(

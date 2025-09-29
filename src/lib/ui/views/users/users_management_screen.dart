@@ -1,11 +1,12 @@
+import 'package:api2025/ui/views/users/form_edit_user/form_edit_user.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/user_provider.dart';
 import '../../../core/providers/stock_provider.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
 import '../../widgets/background_header.dart';
 import '../../widgets/bottom_nav_bar_widget.dart';
-import '../../modals/user_edit_modal.dart';
 
 class UsersManagementScreen extends StatefulWidget {
   const UsersManagementScreen({super.key});
@@ -16,6 +17,13 @@ class UsersManagementScreen extends StatefulWidget {
 
 class _UsersManagementScreenState extends State<UsersManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
+  String _selectedFilter = 'TODOS';
+  final List<String> _filterOptions = [
+    'TODOS',
+    'ADMIN',
+    'SUPERVISOR',
+    'SOLDADO',
+  ];
 
   @override
   void initState() {
@@ -36,14 +44,13 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final stockProvider = Provider.of<StockProvider>(context, listen: false);
 
-    UserEditHelper.showModal(
+    UserEditHelper.show(
       context: context,
       user: user,
       availableStocks: stockProvider.stocks,
-      onUpdate: userProvider.updateUser,
-      onDelete: userProvider.deleteUser,
-      onLinkStock: userProvider.linkUserToStock,
-      onUnlinkStock: userProvider.unlinkUserFromStock,
+      onSuccess: () {
+        userProvider.fetchAllUsers();
+      },
     );
   }
 
@@ -56,6 +63,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
             title: "VOLTAR",
             showBackButton: true,
             onBackPressed: () => Navigator.of(context).pop(),
+            sizeHeader: 450,
           ),
           Padding(
             padding: const EdgeInsets.only(top: 100.0),
@@ -63,6 +71,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
               children: [
                 // Barra de pesquisa
                 _buildSearchBar(),
+                // Filtros
+                _buildFilters(),
                 // Lista de usuários
                 Expanded(
                   child: Consumer<UserProvider>(
@@ -74,18 +84,25 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                       if (provider.errorMessage != null) {
                         return Center(child: Text(provider.errorMessage!));
                       }
-                      
-                      if (provider.filteredUsers.isEmpty) {
-                        return const Center(child: Text('Nenhum usuário encontrado.'));
+
+                      // Aplicar filtro de role aos usuários já filtrados pelo provider (busca)
+                      final filteredUsers = _getFilteredUsers(
+                        provider.filteredUsers,
+                      );
+
+                      if (filteredUsers.isEmpty) {
+                        return const Center(
+                          child: Text('Nenhum usuário encontrado.'),
+                        );
                       }
 
                       return RefreshIndicator(
                         onRefresh: () => provider.fetchAllUsers(),
                         child: ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: provider.filteredUsers.length,
+                          itemCount: filteredUsers.length,
                           itemBuilder: (context, index) {
-                            final user = provider.filteredUsers[index];
+                            final user = filteredUsers[index];
                             return _UserCard(
                               user: user,
                               onTap: () => _showEditUserModal(context, user),
@@ -100,8 +117,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
             ),
           ),
         ],
-      ),
-      bottomNavigationBar: const BottomNavBarWidget(currentIndex: 4),
+      )
     );
   }
 
@@ -118,7 +134,10 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     _searchController.clear();
-                    Provider.of<UserProvider>(context, listen: false).updateSearchQuery('');
+                    Provider.of<UserProvider>(
+                      context,
+                      listen: false,
+                    ).updateSearchQuery('');
                   },
                 )
               : null,
@@ -127,8 +146,63 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
           fillColor: Colors.grey.shade50,
         ),
         onChanged: (value) {
-          Provider.of<UserProvider>(context, listen: false).updateSearchQuery(value);
+          Provider.of<UserProvider>(
+            context,
+            listen: false,
+          ).updateSearchQuery(value);
         },
+      ),
+    );
+  }
+
+  List<UserModel> _getFilteredUsers(List<UserModel> users) {
+    if (_selectedFilter == 'TODOS') {
+      return users;
+    }
+    return users
+        .where((user) => user.role.toUpperCase() == _selectedFilter)
+        .toList();
+  }
+
+  Widget _buildFilters() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: _filterOptions.map((filter) {
+            final isSelected = _selectedFilter == filter;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: _buildFilterButton(filter, isSelected, () {
+                setState(() {
+                  _selectedFilter = filter;
+                });
+              }),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(String label, bool selected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.bluePrimary : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.bluePrimary),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : AppColors.bluePrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }
@@ -139,10 +213,7 @@ class _UserCard extends StatelessWidget {
   final UserModel user;
   final VoidCallback onTap;
 
-  const _UserCard({
-    required this.user,
-    required this.onTap,
-  });
+  const _UserCard({required this.user, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +235,10 @@ class _UserCard extends StatelessWidget {
                     backgroundColor: user.roleColor.withOpacity(0.1),
                     child: Text(
                       user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                      style: TextStyle(color: user.roleColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: user.roleColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -172,9 +246,21 @@ class _UserCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(user.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        Text(
+                          user.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         const SizedBox(height: 2),
-                        Text(user.email, style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
+                        Text(
+                          user.email,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -182,16 +268,40 @@ class _UserCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(color: user.roleColor, borderRadius: BorderRadius.circular(12)),
-                        child: Text(user.roleDisplayName, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: user.roleColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          user.roleDisplayName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(user.isActive ? Icons.check_circle : Icons.cancel, color: user.isActive ? Colors.green : Colors.red, size: 16),
+                          Icon(
+                            user.isActive ? Icons.check_circle : Icons.cancel,
+                            color: user.isActive ? Colors.green : Colors.red,
+                            size: 16,
+                          ),
                           const SizedBox(width: 4),
-                          Text(user.isActive ? 'Ativo' : 'Inativo', style: TextStyle(fontSize: 12, color: user.isActive ? Colors.green : Colors.red, fontWeight: FontWeight.w500)),
+                          Text(
+                            user.isActive ? 'Ativo' : 'Inativo',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: user.isActive ? Colors.green : Colors.red,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -200,15 +310,18 @@ class _UserCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Row(
-                 children: [
-                    Icon(Icons.calendar_today, size: 16, color: Colors.grey.shade500),
-                    const SizedBox(width: 4),
-                    Text('Criado em: ${user.formattedCreatedAt}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                    const Spacer(),
-                    Icon(Icons.access_time, size: 16, color: Colors.grey.shade500),
-                    const SizedBox(width: 4),
-                    Text('Válido até: ${user.formattedValidUntil}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                 ],
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    size: 16,
+                    color: Colors.grey.shade500,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Criado em: ${user.formattedCreatedAt}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                ],
               ),
             ],
           ),
