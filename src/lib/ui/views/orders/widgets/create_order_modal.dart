@@ -7,6 +7,7 @@ import '../../../../core/providers/order_provider.dart';
 import '../../../../core/providers/section_provider.dart';
 import '../../../../core/providers/stock_provider.dart';
 import '../../../../core/providers/merchandise_type_provider.dart';
+import '../../../../core/providers/user_provider.dart';
 import '../../../../data/models/section_model.dart';
 import '../../../../data/models/merchandise_type_model.dart';
 import '../../../../data/models/order_model.dart';
@@ -429,19 +430,40 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
             const SizedBox(height: 8),
             
             // Dropdown de Produtos
-            Consumer<MerchandiseTypeProvider>(
-              builder: (context, merchandiseProvider, child) {
+            Consumer2<MerchandiseTypeProvider, UserProvider>(
+              builder: (context, merchandiseProvider, userProvider, child) {
                 print('🛒 [CREATE_ORDER_MODAL] Renderizando dropdown de produtos...');
                 print('📋 [CREATE_ORDER_MODAL] Total de produtos disponíveis: ${merchandiseProvider.merchandiseTypes.length}');
                 print('🔄 [CREATE_ORDER_MODAL] Estado de carregamento: ${merchandiseProvider.isLoading}');
+                print('👤 [CREATE_ORDER_MODAL] Papel do usuário: ${userProvider.userRole}');
+                print('🔐 [CREATE_ORDER_MODAL] É admin/supervisor: ${userProvider.isAdmin || userProvider.userRole == 'SUPERVISOR'}');
                 
-                if (merchandiseProvider.merchandiseTypes.isNotEmpty) {
-                  print('📦 [CREATE_ORDER_MODAL] Lista de produtos no dropdown:');
-                  for (var product in merchandiseProvider.merchandiseTypes) {
-                    print(product);
+                // Filtrar produtos baseado no papel do usuário
+                final isAuthorizedUser = userProvider.isAdmin || userProvider.userRole == 'SUPERVISOR';
+                final filteredProducts = merchandiseProvider.merchandiseTypes.where((product) {
+                  // Se o produto não é controlado, sempre mostrar
+                  if (!product.controlled) return true;
+                  // Se o produto é controlado, só mostrar para admin/supervisor
+                  return isAuthorizedUser;
+                }).toList();
+                
+                // Verificar se o produto selecionado ainda está disponível após o filtro
+                if (_selectedMerchandise != null && !filteredProducts.contains(_selectedMerchandise)) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    setState(() {
+                      _selectedMerchandise = null;
+                    });
+                  });
+                }
+                
+                print('📦 [CREATE_ORDER_MODAL] Produtos após filtro: ${filteredProducts.length}');
+                if (filteredProducts.isNotEmpty) {
+                  print('📋 [CREATE_ORDER_MODAL] Lista de produtos filtrados:');
+                  for (var product in filteredProducts) {
+                    print('  - ${product.name} (Controlado: ${product.controlled})');
                   }
                 } else {
-                  print('⚠️ [CREATE_ORDER_MODAL] Nenhum produto encontrado para o dropdown');
+                  print('⚠️ [CREATE_ORDER_MODAL] Nenhum produto encontrado após filtro');
                 }
                 
                 return Container(
@@ -457,18 +479,41 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
                       value: _selectedMerchandise,
                       isExpanded: true,
                       hint: const Text('Selecione um produto'),
-                      items: merchandiseProvider.merchandiseTypes.map((merchandise) {
+                      items: filteredProducts.map((merchandise) {
                         return DropdownMenuItem<MerchandiseTypeModel>(
                           value: merchandise,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                merchandise.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      merchandise.name,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                  if (merchandise.controlled)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.shade100,
+                                        borderRadius: BorderRadius.circular(4),
+                                        border: Border.all(color: Colors.orange.shade300),
+                                      ),
+                                      child: Text(
+                                        'CONTROLADO',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.orange.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               ),
                               Text(
                                 'Disponível: ${merchandise.quantityTotal} ${merchandise.unitOfMeasure}',
