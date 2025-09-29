@@ -7,6 +7,7 @@ import 'package:api2025/data/models/merchandise_type_model.dart';
 import 'package:api2025/data/enums/merchandise_enums.dart';
 import 'package:provider/provider.dart';
 import 'package:api2025/core/providers/merchandise_type_provider.dart';
+import 'package:api2025/core/providers/user_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
@@ -282,6 +283,100 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
     }
   }
 
+  Future<void> _editQuantityTotal() async {
+    final TextEditingController quantityController = TextEditingController(
+      text: widget.merchandise.quantityTotal.toString(),
+    );
+
+    final result = await showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Editar Quantidade Total'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Digite a nova quantidade total:'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: quantityController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Quantidade Total',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                final quantity = int.tryParse(quantityController.text);
+                if (quantity != null && quantity >= 0) {
+                  Navigator.of(context).pop(quantity);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Digite uma quantidade válida (número positivo)'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Salvar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != null && mounted) {
+      try {
+        final merchandiseProvider = Provider.of<MerchandiseTypeProvider>(context, listen: false);
+        
+        if (widget.merchandise.id != null) {
+          final success = await merchandiseProvider.updateQuantityTotal(widget.merchandise.id!, result);
+          
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Quantidade total atualizada com sucesso!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            // Volta para a tela anterior (listagem) para atualizar a lista
+            Navigator.of(context).pop(true);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(merchandiseProvider.errorMessage ?? 'Erro ao atualizar quantidade total'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('ID do produto não encontrado'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao atualizar quantidade total: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -316,74 +411,79 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Nome do produto
-                            _buildDetailField('Nome do produto', widget.merchandise.name),
-                            const SizedBox(height: 16),
-                            
-                            // Número da ficha
-                            _buildDetailField('Número da ficha:', widget.merchandise.recordNumber),
-                            const SizedBox(height: 16),
-                            
-                            // Data da criação (placeholder - não temos esse campo no modelo)
-                            _buildDetailField('Data da criação:', 'N/A'),
-                            const SizedBox(height: 16),
-                            
-                            // Unidade de medida
-                            _buildDetailField('Unidade de medida:', widget.merchandise.unitOfMeasure),
-                            const SizedBox(height: 16),
-                            
-                            // Quantidade
-                            _buildDetailField('Quantidade:', widget.merchandise.quantityTotal.toString()),
-                            const SizedBox(height: 16),
-                            
-                            // Estoque mínimo
-                            _buildDetailField('Estoque mínimo:', widget.merchandise.minimumStock.toString()),
-                            const SizedBox(height: 16),
-                            
-                            // Grupo
-                            _buildDetailField('Grupo:', _getGroupDisplayName(widget.merchandise.group)),
-                            const SizedBox(height: 20),
-                            
-                            // Seções adicionais
-                            _buildSectionItem(
-                              icon: Icons.history,
-                              title: 'Histórico de alterações',
-                              onTap: () {
-                                // TODO: Implementar histórico de alterações
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Funcionalidade em desenvolvimento'),
-                                    backgroundColor: Colors.orange,
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                            
-                            _buildSectionItem(
-                              icon: Icons.inventory,
-                              title: 'Histórico de inventário',
-                              onTap: () {
-                                // TODO: Implementar histórico de inventário
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Funcionalidade em desenvolvimento'),
-                                    backgroundColor: Colors.orange,
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                            
-                            _buildSectionItem(
-                              icon: Icons.qr_code,
-                              title: 'Visualizar QR Code',
-                              onTap: _showQrCodeDialog,
-                            ),
-                          ],
+                        child: Consumer<UserProvider>(
+                          builder: (context, userProvider, child) {
+                            final isAdmin = userProvider.isAdmin;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Nome do produto
+                                _buildDetailField('Nome do produto', widget.merchandise.name),
+                                const SizedBox(height: 16),
+                                
+                                // Número da ficha
+                                _buildDetailField('Número da ficha:', widget.merchandise.recordNumber),
+                                const SizedBox(height: 16),
+                                
+                                // Data da criação (placeholder - não temos esse campo no modelo)
+                                _buildDetailField('Data da criação:', 'N/A'),
+                                const SizedBox(height: 16),
+                                
+                                // Unidade de medida
+                                _buildDetailField('Unidade de medida:', widget.merchandise.unitOfMeasure),
+                                const SizedBox(height: 16),
+                                
+                                // Quantidade
+                                _buildQuantityField(isAdmin),
+                                const SizedBox(height: 16),
+                                
+                                // Estoque mínimo
+                                _buildDetailField('Estoque mínimo:', widget.merchandise.minimumStock.toString()),
+                                const SizedBox(height: 16),
+                                
+                                // Grupo
+                                _buildDetailField('Grupo:', _getGroupDisplayName(widget.merchandise.group)),
+                                const SizedBox(height: 20),
+                                
+                                // Seções adicionais
+                                _buildSectionItem(
+                                  icon: Icons.history,
+                                  title: 'Histórico de alterações',
+                                  onTap: () {
+                                    // TODO: Implementar histórico de alterações
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Funcionalidade em desenvolvimento'),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                
+                                _buildSectionItem(
+                                  icon: Icons.inventory,
+                                  title: 'Histórico de inventário',
+                                  onTap: () {
+                                    // TODO: Implementar histórico de inventário
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Funcionalidade em desenvolvimento'),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                
+                                _buildSectionItem(
+                                  icon: Icons.qr_code,
+                                  title: 'Visualizar QR Code',
+                                  onTap: _showQrCodeDialog,
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -534,6 +634,55 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildQuantityField(bool isAdmin) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Quantidade:',
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  widget.merchandise.quantityTotal.toString(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              if (isAdmin)
+                IconButton(
+                  onPressed: _editQuantityTotal,
+                  icon: const Icon(
+                    Icons.edit,
+                    color: Colors.blue,
+                    size: 20,
+                  ),
+                  tooltip: 'Editar quantidade total',
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -147,6 +147,29 @@ class MerchandiseTypeProvider extends ChangeNotifier {
     }
   }
 
+  // Atualizar quantidade total (apenas para administradores)
+  Future<bool> updateQuantityTotal(String merchandiseTypeId, int quantityTotal) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      print('MerchandiseTypeProvider: Atualizando quantidade total - ID: $merchandiseTypeId, Quantidade: $quantityTotal');
+      await _merchandiseService.updateQuantityTotal(merchandiseTypeId, quantityTotal);
+      
+      // Recarregar a lista após atualizar
+      await loadMerchandiseTypes(stockId: _currentStockId);
+      
+      print('MerchandiseTypeProvider: Quantidade total atualizada com sucesso');
+      return true;
+    } catch (e) {
+      print('MerchandiseTypeProvider: Erro ao atualizar quantidade total: $e');
+      _setError('Erro ao atualizar quantidade total: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   // Selecionar tipo de mercadoria
   void selectMerchandiseType(MerchandiseTypeModel merchandiseType) {
     _selectedMerchandiseType = merchandiseType;

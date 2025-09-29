@@ -128,6 +128,17 @@ class MerchandiseService {
     }
   }
 
+  // Atualizar quantidade total do tipo de mercadoria (apenas para administradores)
+  Future<void> updateQuantityTotal(String typeId, int quantityTotal) async {
+    final response = await HttpClient.patch(
+      '/merchandise-types/$typeId/quantity-total',
+      body: {'quantityTotal': quantityTotal},
+    );
+    if (!response.success) {
+      throw Exception(response.message);
+    }
+  }
+
   // Método para criar entrada de mercadoria via QR code ou manual
   Future<void> createMerchandiseEntry(MerchandiseEntryModel entry) async {
     print('MerchandiseService: Fazendo chamada para POST /merchandise');
