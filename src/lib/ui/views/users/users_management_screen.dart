@@ -20,7 +20,6 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
   String _selectedFilter = 'TODOS';
   final List<String> _filterOptions = [
     'TODOS',
-    'ADMIN',
     'SUPERVISOR',
     'SOLDADO',
   ];
@@ -156,10 +155,15 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
   }
 
   List<UserModel> _getFilteredUsers(List<UserModel> users) {
+    // Primeiro, remover administradores da listagem
+    final usersWithoutAdmins = users
+        .where((user) => user.role.toUpperCase() != 'ADMIN')
+        .toList();
+    
     if (_selectedFilter == 'TODOS') {
-      return users;
+      return usersWithoutAdmins;
     }
-    return users
+    return usersWithoutAdmins
         .where((user) => user.role.toUpperCase() == _selectedFilter)
         .toList();
   }

@@ -61,7 +61,11 @@ class _UserEditModalState extends State<UserEditModal> {
     _emailController = TextEditingController(text: widget.user.email);
     _selectedRole = widget.user.role;
     _isActive = widget.user.isActive;
-    _loadUserStocks();
+    
+    // Carregar estoques após o build estar completo
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserStocks();
+    });
   }
 
   @override
@@ -77,14 +81,20 @@ class _UserEditModalState extends State<UserEditModal> {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final stocks = await userProvider.getUserStocks(widget.user.id);
       
+      print('Estoques carregados: $stocks');
+      
       setState(() {
         _userStockIds = stocks.map((stock) => stock['stockId'] as String).toList();
         _userStocks = widget.availableStocks
             .where((stock) => _userStockIds.contains(stock.id))
             .toList();
+        
+        print('IDs dos estoques do usuário: $_userStockIds');
+        print('Estoques vinculados: ${_userStocks.map((s) => s.name).toList()}');
       });
     } catch (e) {
       print('Erro ao carregar estoques do usuário: $e');
+      _showSnackBar('Erro ao carregar estoques do usuário: $e');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -168,20 +178,24 @@ class _UserEditModalState extends State<UserEditModal> {
   Future<void> _linkStock(StockModel stock) async {
     setState(() => _isLoading = true);
     try {
+      print('Vinculando usuário ${widget.user.name} ao estoque ${stock.name}');
+      
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final success = await userProvider.linkUserToStock(
         widget.user.id,
         stock.id,
-        _selectedRole == 'SUPERVISOR' ? 'SUPERVISOR' : 'SOLDADO',
+        _selectedRole == 'SUPERVISOR' ? 'MANAGER' : 'USER',
       );
 
       if (success) {
         _showSnackBar('Usuário vinculado ao estoque "${stock.name}" com sucesso!');
-        _loadUserStocks();
+        // Recarregar os estoques do usuário
+        await _loadUserStocks();
       } else {
         _showSnackBar('Erro ao vincular usuário ao estoque.');
       }
     } catch (e) {
+      print('Erro ao vincular estoque: $e');
       _showSnackBar('Erro ao vincular usuário ao estoque: $e');
     } finally {
       setState(() => _isLoading = false);
@@ -191,16 +205,20 @@ class _UserEditModalState extends State<UserEditModal> {
   Future<void> _unlinkStock(StockModel stock) async {
     setState(() => _isLoading = true);
     try {
+      print('Desvinculando usuário ${widget.user.name} do estoque ${stock.name}');
+      
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final success = await userProvider.unlinkUserFromStock(widget.user.id, stock.id);
 
       if (success) {
         _showSnackBar('Usuário desvinculado do estoque "${stock.name}" com sucesso!');
-        _loadUserStocks();
+        // Recarregar os estoques do usuário
+        await _loadUserStocks();
       } else {
         _showSnackBar('Erro ao desvincular usuário do estoque.');
       }
     } catch (e) {
+      print('Erro ao desvincular estoque: $e');
       _showSnackBar('Erro ao desvincular usuário do estoque: $e');
     } finally {
       setState(() => _isLoading = false);
@@ -545,9 +563,14 @@ class _UserEditModalState extends State<UserEditModal> {
   }
 
   void _showStockSelection() {
+    print('Estoques disponíveis: ${widget.availableStocks.map((s) => s.name).toList()}');
+    print('IDs dos estoques já vinculados: $_userStockIds');
+    
     final availableStocks = widget.availableStocks
         .where((stock) => !_userStockIds.contains(stock.id))
         .toList();
+
+    print('Estoques disponíveis para seleção: ${availableStocks.map((s) => s.name).toList()}');
 
     if (availableStocks.isEmpty) {
       _showSnackBar('Todos os estoques já estão vinculados a este usuário.');

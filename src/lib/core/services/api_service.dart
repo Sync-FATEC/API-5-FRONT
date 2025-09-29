@@ -372,8 +372,16 @@ class ApiService {
     try {
       final response = await HttpClient.get('/auth/users/$userId/stocks');
 
+      print('ApiService: Response success: ${response.success}');
+      print('ApiService: Response data: ${response.data}');
+
       if (response.success && response.data != null) {
-        return response.data!['stocks'] ?? [];
+        // O backend retorna { data: { stocks: [...] } }
+        final Map<String, dynamic> responseData = response.data!['data'] ?? {};
+        final List<dynamic> stocks = responseData['stocks'] ?? [];
+        print('ApiService: Stocks encontrados: ${stocks.length}');
+        print('ApiService: Stocks data: $stocks');
+        return stocks;
       } else {
         throw Exception(response.message);
       }
