@@ -88,10 +88,7 @@ class CustomModal extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        width: 1,
-                      ),
+                      border: Border.all(color: Colors.grey.shade300, width: 1),
                     ),
                     child: const Icon(
                       Icons.close,
@@ -104,11 +101,7 @@ class CustomModal extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             // Conteúdo do modal
-            Flexible(
-              child: SingleChildScrollView(
-                child: child,
-              ),
-            ),
+            Expanded(child: SingleChildScrollView(child: child)),
           ],
         ),
       ),
@@ -143,9 +136,7 @@ class CustomModalButton extends StatelessWidget {
           backgroundColor: backgroundColor ?? AppColors.greenPrimary,
           foregroundColor: textColor ?? Colors.white,
           elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         child: isLoading
             ? const SizedBox(

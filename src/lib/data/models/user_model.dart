@@ -1,3 +1,7 @@
+import 'dart:ui';
+
+import 'package:api2025/core/constants/app_colors.dart';
+
 class UserModel {
   final String id;
   final String email;
@@ -48,5 +52,51 @@ class UserModel {
       'createdAt': createdAt,
       'isActive': isActive,
     };
+  }
+}
+
+// EXTENSÃO PARA LÓGICA DE APRESENTAÇÃO
+extension UserDisplayExtension on UserModel {
+  Color get roleColor {
+    switch (role.toUpperCase()) {
+      case 'ADMIN':
+        return AppColors.red;
+      case 'SUPERVISOR':
+        return AppColors.orange;
+      case 'SOLDADO':
+        return AppColors.bluePrimary;
+      default:
+        return AppColors.gray;
+    }
+  }
+
+  String get roleDisplayName {
+    switch (role.toUpperCase()) {
+      case 'ADMIN':
+        return 'Administrador';
+      case 'SUPERVISOR':
+        return 'Supervisor';
+      case 'SOLDADO':
+        return 'Soldado';
+      default:
+        return role;
+    }
+  }
+
+  String get formattedCreatedAt {
+    return _formatDate(createdAt);
+  }
+
+  String get formattedValidUntil {
+    return _formatDate(validUntil);
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    } catch (e) {
+      return dateString; // Retorna a string original se houver erro
+    }
   }
 }

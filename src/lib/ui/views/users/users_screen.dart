@@ -1,5 +1,6 @@
-// lib/ui/views/home/home_screen.dart
+// lib/ui/views/users/users_screen.dart
 
+import 'package:api2025/ui/widgets/custom_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/user_provider.dart';
@@ -7,9 +8,135 @@ import '../../../core/providers/stock_provider.dart';
 import '../../widgets/header_icon.dart';
 import '../../widgets/bottom_nav_bar_widget.dart';
 import '../../widgets/custom_card.dart';
+import 'users_management_screen.dart';
 
 class UsersScreen extends StatelessWidget {
   const UsersScreen({super.key});
+
+    void _showUserRegistrationModal(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    
+    // Controllers para os campos do formulário
+    final nameController = TextEditingController();
+    final emailController = TextEditingController();
+    final roleController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    final List<Map<String, String>> _roles = [
+      {'value': 'SOLDADO', 'label': 'Soldado'},
+      {'value': 'SUPERVISOR', 'label': 'Supervisor'},
+      {'value': 'ADMIN', 'label': 'Administrador'},
+    ];
+
+    CustomModal.show(
+      context: context,
+      title: 'Cadastro de Usuário',
+      width: MediaQuery.of(context).size.width * 0.7, // 70% da largura da tela
+      height: 450, // Altura fixa menor
+      child: Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CustomModalTextField(
+              label: 'Nome',
+              controller: nameController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Campo obrigatório';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            CustomModalTextField(
+              label: 'Email',
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Campo obrigatório';
+                }
+                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                  return 'Email inválido';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Função',
+                border: OutlineInputBorder(),
+              ),
+              value: null,
+              items: _roles.map((role) {
+                return DropdownMenuItem<String>(
+                  value: role['value'],
+                  child: Text(role['label']!),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  roleController.text = newValue;
+                }
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Campo obrigatório';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: CustomModalButton(
+                    text: 'Cancelar',
+                    onPressed: () => Navigator.of(context).pop(),
+                    backgroundColor: Colors.grey.shade300,
+                    textColor: Colors.black87,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: CustomModalButton(
+                    text: 'Cadastrar',
+                    onPressed: () async {
+                      if (formKey.currentState!.validate()) {
+                        try {
+                          await userProvider.createUser(
+                            nameController.text,
+                            emailController.text,
+                            roleController.text,
+                          );
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Usuário cadastrado com sucesso!'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Erro ao cadastrar usuário: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,21 +173,22 @@ class UsersScreen extends StatelessWidget {
                     CustomCard(
                       iconData: Icons.person_add_alt_1_outlined,
                       title: 'Cadastro de usuários',
-                      subtitle:
-                          'Realize novos pedidos',
+                      subtitle: 'Cadastre novos usuários no sistema',
                       onTap: () {
-                        // TODO: Navegar para tela de cadastro de produto
-                        print('Navegando para cadastro de produto');
+                        _showUserRegistrationModal(context);
                       },
                     ),
                     CustomCard(
                       iconData: Icons.person_sharp,
                       title: 'Gerenciar usuários',
-                      subtitle:
-                          'Faça a listagem de pedidos',
+                      subtitle: 'Visualize e gerencie usuários cadastrados',
                       onTap: () {
-                        // TODO: Navegar para tela de controle de estoque
-                        print('Navegando para controle de estoque');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const UsersManagementScreen(),
+                          ),
+                        );
                       },
                     ),
                   ],

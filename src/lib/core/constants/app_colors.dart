@@ -19,4 +19,7 @@ class AppColors {
   // Verde
   static const Color greenPrimary = Color(0xFF00C896);
 
+  // Laranja
+  static const Color orange = Color(0xFFFFA800);
+
 }
