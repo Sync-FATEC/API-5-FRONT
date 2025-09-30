@@ -23,17 +23,21 @@ class HomeScreen extends StatelessWidget {
               final selectedStock = stockProvider.selectedStock;
 
               if (selectedStock == null) {
-                return const HeaderIcon(title: 'NENHUM ESTOQUE SELECIONADO');
+                return const HeaderIcon(
+                  title: 'NENHUM ESTOQUE SELECIONADO',
+                  sizeHeader: 180,
+                );
               }
 
               return HeaderIcon(
                 title: selectedStock.name.toUpperCase(),
                 subtitle: selectedStock.location,
+                sizeHeader: 180,
               );
             },
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 200.0),
+            padding: const EdgeInsets.only(top: 140.0),
             child: Consumer2<UserProvider, StockProvider>(
               builder: (context, userProvider, stockProvider, child) {
                 final user = userProvider.apiUserData;

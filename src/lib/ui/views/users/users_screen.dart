@@ -31,8 +31,6 @@ class UsersScreen extends StatelessWidget {
     CustomModal.show(
       context: context,
       title: 'Cadastro de Usuário',
-      width: MediaQuery.of(context).size.width * 0.7, // 70% da largura da tela
-      height: 450, // Altura fixa menor
       child: Form(
         key: formKey,
         child: Column(
@@ -89,48 +87,33 @@ class UsersScreen extends StatelessWidget {
               },
             ),
             const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: CustomModalButton(
-                    text: 'Cancelar',
-                    onPressed: () => Navigator.of(context).pop(),
-                    backgroundColor: Colors.grey.shade300,
-                    textColor: Colors.black87,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: CustomModalButton(
-                    text: 'Cadastrar',
-                    onPressed: () async {
-                      if (formKey.currentState!.validate()) {
-                        try {
-                          await userProvider.createUser(
-                            nameController.text,
-                            emailController.text,
-                            roleController.text,
-                          );
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Usuário cadastrado com sucesso!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Erro ao cadastrar usuário: $e'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      }
-                    },
-                  ),
-                ),
-              ],
+            CustomModalButton(
+              text: 'Cadastrar',
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  try {
+                    await userProvider.createUser(
+                      nameController.text,
+                      emailController.text,
+                      roleController.text,
+                    );
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Usuário cadastrado com sucesso!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Erro ao cadastrar usuário: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
             ),
           ],
         ),
@@ -158,7 +141,7 @@ class UsersScreen extends StatelessWidget {
             },
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 200.0),
+            padding: const EdgeInsets.only(top: 140.0),
             child: Consumer2<UserProvider, StockProvider>(
               builder: (context, userProvider, stockProvider, child) {
                 final user = userProvider.apiUserData;

@@ -32,7 +32,7 @@ class OrdersScreen extends StatelessWidget {
             },
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 200.0),
+            padding: const EdgeInsets.only(top: 140.0),
             child: Consumer2<UserProvider, StockProvider>(
               builder: (context, userProvider, stockProvider, child) {
                 final user = userProvider.apiUserData;
