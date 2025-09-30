@@ -17,16 +17,16 @@ class HeaderIcon extends StatelessWidget {
         height: sizeHeader?.toDouble() ?? 300,
         width: double.infinity,
         child: Padding(
-          padding: const EdgeInsets.only(top: 60.0, left: 20.0, right: 20.0),
+          padding: const EdgeInsets.only(top: 40.0, left: 20.0, right: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               // Layout similar ao login_form.dart com imagens nas laterais
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Image.asset('assets/LOGO1.png', height: 90),
+                  Image.asset('assets/LOGO1.png', height: 70),
                   Expanded(
                     child: Column(
                       children: [
@@ -45,7 +45,7 @@ class HeaderIcon extends StatelessWidget {
                             subtitle!,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: AppColors.white,
+                              color: AppColors.black,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
@@ -53,7 +53,7 @@ class HeaderIcon extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Image.asset('assets/LOGO2.png', height: 90),
+                  Image.asset('assets/LOGO2.png', height: 70),
                 ],
               ),
             ],

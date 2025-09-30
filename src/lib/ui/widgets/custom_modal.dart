@@ -100,8 +100,10 @@ class CustomModal extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            // Conteúdo do modal
-            Expanded(child: SingleChildScrollView(child: child)),
+            // Conteúdo do modal - adaptável ao tamanho do conteúdo
+            height != null 
+              ? Expanded(child: SingleChildScrollView(child: child))
+              : Flexible(child: SingleChildScrollView(child: child)),
           ],
         ),
       ),
