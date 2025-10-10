@@ -222,7 +222,7 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  // Alterar senha do usuário
+  // do usuário
   Future<bool> updatePassword(String newPassword) async {
     _setLoading(true);
     _clearError();
@@ -231,6 +231,36 @@ class UserProvider extends ChangeNotifier {
       await _authService.updatePassword(newPassword);
       _setLoading(false);
       return true;
+    } catch (e) {
+      _setError(e.toString());
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Alterar senha via API
+  Future<bool> changePasswordViaAPI({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final email = userEmail;
+      if (email.isEmpty) {
+        throw Exception('Email do usuário não encontrado');
+      }
+
+      final success = await _authService.changePassword(
+        email: email,
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+
+      _setLoading(false);
+      return success;
     } catch (e) {
       _setError(e.toString());
       return false;
