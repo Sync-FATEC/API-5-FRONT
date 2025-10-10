@@ -8,6 +8,7 @@ import 'package:api2025/core/providers/stock_provider.dart';
 import 'package:api2025/data/enums/merchandise_enums.dart';
 import 'package:provider/provider.dart';
 import 'widgets/create_merchandise_type_modal.dart';
+import 'widgets/edit_merchandise_type_modal.dart';
 import 'merchandise_detail_screen.dart';
 
 class MerchandiseListScreen extends StatefulWidget {
@@ -259,17 +260,10 @@ class _MerchandiseListScreenState extends State<MerchandiseListScreen> {
   }
 
   Future<void> _editMerchandise(BuildContext context, MerchandiseTypeModel merchandise) async {
-    // TODO: Implementar modal de edição ou melhorar o modal existente
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Funcionalidade de edição ainda não implementada'),
-        backgroundColor: Colors.orange,
-      ),
-    );
-    
-    /*
-    final result = await CreateMerchandiseTypeModal.show(context);
+    final result = await EditMerchandiseTypeModal.show(context, merchandise);
     if (result == true && mounted) {
+      // Recarregar a lista após edição bem-sucedida
+      _loadMerchandiseTypes();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Mercadoria atualizada com sucesso!'),
@@ -277,7 +271,6 @@ class _MerchandiseListScreenState extends State<MerchandiseListScreen> {
         ),
       );
     }
-    */
   }
 
   Future<void> _deleteMerchandise(BuildContext context, MerchandiseTypeModel merchandise) async {

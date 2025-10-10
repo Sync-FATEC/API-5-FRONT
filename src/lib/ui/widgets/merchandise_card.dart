@@ -23,20 +23,19 @@ class MerchandiseCard extends StatelessWidget {
 
   String _getGroupText(MerchandiseGroup? group) {
     if (group == null) return 'Sem Grupo';
-    switch (group) {
-      case MerchandiseGroup.medical:
-        return 'Médico';
-      case MerchandiseGroup.almox:
-        return 'Almoxarifado';
-    }
+    return merchandiseGroupDisplayName(group);
   }
 
   Color _getGroupBackgroundColor(MerchandiseGroup? group) {
     if (group == null) return Colors.grey[100]!;
     switch (group) {
-      case MerchandiseGroup.medical:
+      case MerchandiseGroup.expediente:
         return Colors.blue[100]!;
-      case MerchandiseGroup.almox:
+      case MerchandiseGroup.limpeza:
+        return Colors.green[100]!;
+      case MerchandiseGroup.almoxVirtual:
+        return Colors.purple[100]!;
+      case MerchandiseGroup.permanente:
         return Colors.orange[100]!;
     }
   }
@@ -44,9 +43,13 @@ class MerchandiseCard extends StatelessWidget {
   Color _getGroupTextColor(MerchandiseGroup? group) {
     if (group == null) return Colors.grey[800]!;
     switch (group) {
-      case MerchandiseGroup.medical:
+      case MerchandiseGroup.expediente:
         return Colors.blue[800]!;
-      case MerchandiseGroup.almox:
+      case MerchandiseGroup.limpeza:
+        return Colors.green[800]!;
+      case MerchandiseGroup.almoxVirtual:
+        return Colors.purple[800]!;
+      case MerchandiseGroup.permanente:
         return Colors.orange[800]!;
     }
   }
