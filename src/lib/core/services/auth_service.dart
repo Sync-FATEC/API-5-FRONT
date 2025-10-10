@@ -2,6 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'http_client.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -118,6 +119,29 @@ class AuthService {
       throw _handleAuthException(e);
     } catch (e) {
       throw Exception('Erro inesperado: $e');
+    }
+  }
+
+  // Alterar senha via API
+  Future<bool> changePassword({
+    required String email,
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await HttpClient.put('/auth/change-password', body: {
+        'email': email,
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      });
+
+      if (response.success) {
+        return true;
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      throw Exception('Erro ao alterar senha: $e');
     }
   }
 

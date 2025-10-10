@@ -66,18 +66,11 @@ class ChangePasswordViewModel extends ChangeNotifier {
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-      // Primeiro, reautenticar o usuário com a senha atual
-      final reauthSuccess = await userProvider.reauthenticateUser(
-        currentPassword,
+      // Usar a nova API para alterar a senha
+      final changeSuccess = await userProvider.changePasswordViaAPI(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
       );
-
-      if (!reauthSuccess) {
-        _setError('Senha atual incorreta');
-        return false;
-      }
-
-      // Se a reautenticação foi bem-sucedida, alterar a senha
-      final changeSuccess = await userProvider.updatePassword(newPassword);
 
       if (changeSuccess) {
         _setLoading(false);
