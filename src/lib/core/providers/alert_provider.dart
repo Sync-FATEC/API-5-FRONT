@@ -12,6 +12,11 @@ class AlertProvider extends ChangeNotifier {
   List<Alert> get alerts => _alerts;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  bool get hasAlerts => _alerts.isNotEmpty;
+  bool get isEmpty => _alerts.isEmpty;
+
+  /// Retorna uma mensagem informativa quando não há alertas
+  String get noAlertsMessage => 'Nenhum alerta de estoque encontrado';
 
   Future<void> loadAlerts() async {
     print("Iniciando carregamento de alertas");
@@ -23,59 +28,17 @@ class AlertProvider extends ChangeNotifier {
       _alerts = await _alertService.fetchStockAlerts();
       print("Alertas carregados: ${_alerts.length}");
 
-      // Se não há dados do backend, criar alertas de exemplo para teste
       if (_alerts.isEmpty) {
-        print("Criando alertas de exemplo para demonstração");
-        _alerts = _createSampleAlerts();
+        print("Nenhum alerta encontrado");
       }
     } catch (e) {
       print("Erro ao carregar alertas: $e");
       _errorMessage = 'Erro ao carregar alertas de estoque';
-      // Criar alertas de exemplo em caso de erro para demonstração
-      _alerts = _createSampleAlerts();
+      _alerts = []; // Garantir que a lista esteja vazia em caso de erro
     } finally {
       _isLoading = false;
       notifyListeners();
     }
-  }
-
-  // Criar alertas de exemplo para demonstração
-  List<Alert> _createSampleAlerts() {
-    return [
-      Alert(
-        id: '1',
-        merchandiseName: 'Paracetamol 500mg',
-        merchandiseId: 'med001',
-        currentStock: 5,
-        minimumStock: 20,
-        alertType: 'critical',
-        sectionName: 'Farmácia Central',
-        sectionId: 'sec001',
-        lastUpdated: DateTime.now(),
-      ),
-      Alert(
-        id: '2',
-        merchandiseName: 'Gaze Estéril 10x10cm',
-        merchandiseId: 'mat001',
-        currentStock: 15,
-        minimumStock: 30,
-        alertType: 'warning',
-        sectionName: 'Almoxarifado',
-        sectionId: 'sec002',
-        lastUpdated: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      Alert(
-        id: '3',
-        merchandiseName: 'Seringa 10ml Descartável',
-        merchandiseId: 'mat002',
-        currentStock: 25,
-        minimumStock: 35,
-        alertType: 'low',
-        sectionName: 'Centro Cirúrgico',
-        sectionId: 'sec003',
-        lastUpdated: DateTime.now().subtract(const Duration(hours: 5)),
-      ),
-    ];
   }
 
   // Filtrar alertas por tipo
