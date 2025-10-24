@@ -21,6 +21,7 @@ import 'package:api2025/core/providers/merchandise_type_provider.dart';
 import 'package:api2025/core/providers/order_provider.dart';
 import 'package:api2025/core/providers/alert_provider.dart';
 import 'firebase_options.dart';
+import 'package:api2025/core/constants/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,9 +52,10 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'App de Controle de Estoque',
+  title: 'Controle de estoque',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          scaffoldBackgroundColor: const Color(0xFFF9F9F9),
+          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.bluePrimary),
         ),
         initialRoute: '/login',
         routes: {

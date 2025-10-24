@@ -46,6 +46,7 @@ class _CreateMerchandiseTypeFormState extends State<_CreateMerchandiseTypeForm> 
   final _minimumStockController = TextEditingController();
   
   bool _controlled = false;
+  MerchandiseGroup? _selectedGroup;
   bool _isLoading = false;
 
   @override
@@ -81,6 +82,7 @@ class _CreateMerchandiseTypeFormState extends State<_CreateMerchandiseTypeForm> 
         unitOfMeasure: _unitOfMeasureController.text.trim(),
         quantityTotal: 0, // Valor inicial padrão
         controlled: _controlled,
+        group: _selectedGroup,
         minimumStock: int.parse(_minimumStockController.text.trim()),
         stockId: stockId, // Incluindo o stockId
       );
@@ -174,6 +176,54 @@ class _CreateMerchandiseTypeFormState extends State<_CreateMerchandiseTypeForm> 
               }
               return null;
             },
+          ),
+          const SizedBox(height: 16),
+          // Campo de grupo (dropdown)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Grupo:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<MerchandiseGroup?>(
+                    value: _selectedGroup,
+                    hint: const Text('Selecione um grupo'),
+                    isExpanded: true,
+                    items: [
+                      const DropdownMenuItem<MerchandiseGroup?>(
+                        value: null,
+                        child: Text('Sem Grupo'),
+                      ),
+                      ...MerchandiseGroup.values.map((group) {
+                        return DropdownMenuItem<MerchandiseGroup?>(
+                          value: group,
+                          child: Text(merchandiseGroupDisplayName(group)),
+                        );
+                      }).toList(),
+                    ],
+                    onChanged: (MerchandiseGroup? newValue) {
+                      setState(() {
+                        _selectedGroup = newValue;
+                      });
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           // Campo de controlado (checkbox)

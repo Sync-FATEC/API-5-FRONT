@@ -8,6 +8,7 @@ class Header extends StatelessWidget {
   final int? sizeHeader;
   final VoidCallback? onBackPressed;
   final bool showBackButton;
+  final Widget? trailingAction;
 
   const Header({
     super.key, 
@@ -16,6 +17,7 @@ class Header extends StatelessWidget {
     this.sizeHeader,
     this.onBackPressed,
     this.showBackButton = false,
+    this.trailingAction,
   });
 
   @override
@@ -34,32 +36,36 @@ class Header extends StatelessWidget {
               // Botão de voltar e título
               if (showBackButton || (title != null && title!.isNotEmpty))
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (showBackButton)
-                      GestureDetector(
-                        onTap: onBackPressed ?? () => Navigator.of(context).pop(),
-                        child: const Icon(
-                          Icons.arrow_back,
-                          color: AppColors.white,
-                          size: 24,
-                        ),
-                      ),
-                    if (showBackButton && title != null && title!.isNotEmpty)
-                      const SizedBox(width: 10),
-                    if (title != null && title!.isNotEmpty)
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: onBackPressed ?? () => Navigator.of(context).pop(),
-                          child: Text(
-                            title!,
-                            style: const TextStyle(
+                    Row(
+                      children: [
+                        if (showBackButton)
+                          GestureDetector(
+                            onTap: onBackPressed ?? () => Navigator.of(context).pop(),
+                            child: const Icon(
+                              Icons.arrow_back,
                               color: AppColors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                              size: 24,
                             ),
                           ),
-                        ),
-                      ),
+                        if (showBackButton && title != null && title!.isNotEmpty)
+                          const SizedBox(width: 10),
+                        if (title != null && title!.isNotEmpty)
+                          GestureDetector(
+                            onTap: onBackPressed ?? () => Navigator.of(context).pop(),
+                            child: Text(
+                              title!,
+                              style: const TextStyle(
+                                color: AppColors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    if (trailingAction != null) trailingAction!,
                   ],
                 ),
 
