@@ -51,7 +51,7 @@ class _InventoryHistoryScreenState extends State<InventoryHistoryScreen> {
     return ClipPath(
       clipper: _HeaderClipper(),
       child: Container(
-        height: 300,
+        height: 180,
         width: double.infinity,
         decoration: const BoxDecoration(color: Color(0xFF2563EB)),
         child: Padding(
@@ -97,11 +97,15 @@ class _InventoryHistoryScreenState extends State<InventoryHistoryScreen> {
     return ChangeNotifierProvider.value(
       value: _viewModel,
       child: Scaffold(
-        body: Column(
+        body: Stack(
           children: [
+            // Fundo azul curvado
             _buildCustomHeader(),
-            Expanded(
-              child: Consumer<InventoryHistoryViewModel>(
+            // Conteúdo sobreposto ao fundo azul (como nas outras telas)
+            Padding(
+              padding: const EdgeInsets.only(top: 140.0),
+              child: SizedBox.expand(
+                child: Consumer<InventoryHistoryViewModel>(
                 builder: (context, viewModel, child) {
                   if (viewModel.isLoading) {
                     return const Center(
@@ -162,6 +166,7 @@ class _InventoryHistoryScreenState extends State<InventoryHistoryScreen> {
                     ],
                   );
                 },
+                ),
               ),
             ),
           ],
