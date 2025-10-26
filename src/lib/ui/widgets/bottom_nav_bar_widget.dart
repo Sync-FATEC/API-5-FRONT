@@ -22,11 +22,11 @@ class BottomNavBarWidget extends StatelessWidget {
                 '/home',
                 '/orders',
                 '/alerts',
-                '/management',
+                '/dashboard',
                 '/users',
                 '/profile',
               ]
-            : ['/home', '/orders', '/alerts', '/management', '/profile'];
+            : ['/home', '/orders', '/alerts', '/dashboard', '/profile'];
 
         // Ajustar currentIndex se o usuário não tem permissão para "users"
         int adjustedIndex = currentIndex;
