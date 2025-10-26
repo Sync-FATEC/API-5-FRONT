@@ -1,6 +1,7 @@
 import '../../data/models/merchandise_model.dart' hide MerchandiseTypeModel;
 import '../../data/models/merchandise_type_model.dart';
 import '../../data/models/merchandise_entry_model.dart';
+import '../../data/models/merchandise_detail_response_model.dart';
 import 'http_client.dart';
 
 class MerchandiseService {
@@ -160,6 +161,36 @@ class MerchandiseService {
     } catch (e) {
       print('MerchandiseService: Erro na chamada: $e');
       throw Exception('Erro ao criar entrada de mercadoria: $e');
+    }
+  }
+
+  // Buscar detalhes de mercadoria com entradas
+  Future<MerchandiseDetailResponseModel> fetchMerchandiseTypeDetails(String id) async {
+    print('📡 [MERCHANDISE_SERVICE] Buscando detalhes da mercadoria: $id');
+    
+    final response = await HttpClient.get('/merchandise-types/$id/merchandises');
+    
+    print('📡 [MERCHANDISE_SERVICE] Resposta recebida:');
+    print('   - Success: ${response.success}');
+    print('   - Message: ${response.message}');
+    print('   - Data: ${response.data}');
+    
+    if (response.success && response.data != null) {
+      final data = response.data!['data'];
+      
+      print('📦 [MERCHANDISE_SERVICE] Dados extraídos da resposta:');
+      print('   - Tipo dos dados: ${data.runtimeType}');
+      
+      final merchandiseDetails = MerchandiseDetailResponseModel.fromJson(data);
+      
+      print('✅ [MERCHANDISE_SERVICE] Detalhes convertidos:');
+      print('   - Mercadoria: ${merchandiseDetails.merchandiseType.name}');
+      print('   - Entradas: ${merchandiseDetails.merchandises.length}');
+      
+      return merchandiseDetails;
+    } else {
+      print('❌ [MERCHANDISE_SERVICE] Erro na resposta: ${response.message}');
+      throw Exception(response.message);
     }
   }
 }
