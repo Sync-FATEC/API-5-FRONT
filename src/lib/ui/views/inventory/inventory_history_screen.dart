@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../widgets/background_header.dart';
 import '../../viewmodels/inventory_history_viewmodel.dart';
 import '../../../core/providers/order_provider.dart';
 import '../../../core/services/merchandise_service.dart';
@@ -48,6 +47,51 @@ class _InventoryHistoryScreenState extends State<InventoryHistoryScreen> {
     );
   }
 
+  Widget _buildCustomHeader() {
+    return ClipPath(
+      clipper: _HeaderClipper(),
+      child: Container(
+        height: 300,
+        width: double.infinity,
+        decoration: const BoxDecoration(color: Color(0xFF2563EB)),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 60.0, left: 20.0, right: 20.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Text(
+                    widget.productName != null 
+                        ? 'Histórico - ${widget.productName}'
+                        : 'Histórico de Inventário',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
@@ -55,13 +99,7 @@ class _InventoryHistoryScreenState extends State<InventoryHistoryScreen> {
       child: Scaffold(
         body: Column(
           children: [
-            Header(
-              title: widget.productName != null 
-                ? 'Histórico - ${widget.productName}'
-                : 'Histórico de Inventário',
-              showBackButton: true,
-              onBackPressed: () => Navigator.of(context).pop(),
-            ),
+            _buildCustomHeader(),
             Expanded(
               child: Consumer<InventoryHistoryViewModel>(
                 builder: (context, viewModel, child) {
@@ -562,5 +600,28 @@ class _InventoryHistoryScreenState extends State<InventoryHistoryScreen> {
       default:
         return status.toUpperCase();
     }
+  }
+}
+
+// Classe para criar a forma curvada do cabeçalho
+class _HeaderClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.lineTo(0, size.height * 0.75);
+    path.quadraticBezierTo(
+      size.width / 2,
+      size.height + 30,
+      size.width,
+      size.height * 0.75,
+    );
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
+    return false;
   }
 }
