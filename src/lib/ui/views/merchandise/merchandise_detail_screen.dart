@@ -15,6 +15,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:api2025/ui/views/merchandise/merchandise_history_screen.dart';
 import 'package:api2025/ui/views/merchandise/widgets/edit_merchandise_type_modal.dart';
+import '../inventory/inventory_history_screen.dart';
 
 class MerchandiseDetailScreen extends StatefulWidget {
   final MerchandiseTypeModel merchandise;
@@ -473,13 +474,24 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
                                   icon: Icons.inventory,
                                   title: 'Histórico de inventário',
                                   onTap: () {
-                                    // TODO: Implementar histórico de inventário
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Funcionalidade em desenvolvimento'),
-                                        backgroundColor: Colors.orange,
-                                      ),
-                                    );
+                                    if (widget.merchandise.id != null) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => InventoryHistoryScreen(
+                                            productId: widget.merchandise.id!,
+                                            productName: widget.merchandise.name,
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('ID do produto não encontrado'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   },
                                 ),
                                 const SizedBox(height: 12),
