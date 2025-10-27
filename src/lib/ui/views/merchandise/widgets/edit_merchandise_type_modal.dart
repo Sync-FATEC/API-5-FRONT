@@ -237,6 +237,7 @@ class _EditMerchandiseTypeFormState extends State<_EditMerchandiseTypeForm> {
                         child: DropdownButton<MerchandiseGroup?>(
                           value: _selectedGroup,
                           isExpanded: true,
+                          menuMaxHeight: 300,
                           items: [
                             const DropdownMenuItem<MerchandiseGroup?>(
                               value: null,
