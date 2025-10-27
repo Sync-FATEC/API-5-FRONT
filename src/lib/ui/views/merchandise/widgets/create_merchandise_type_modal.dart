@@ -203,6 +203,7 @@ class _CreateMerchandiseTypeFormState extends State<_CreateMerchandiseTypeForm> 
                     value: _selectedGroup,
                     hint: const Text('Selecione um grupo'),
                     isExpanded: true,
+                    menuMaxHeight: 300,
                     items: [
                       const DropdownMenuItem<MerchandiseGroup?>(
                         value: null,

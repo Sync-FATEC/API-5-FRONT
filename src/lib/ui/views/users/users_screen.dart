@@ -68,6 +68,7 @@ class UsersScreen extends StatelessWidget {
                 border: OutlineInputBorder(),
               ),
               value: null,
+              menuMaxHeight: 300,
               items: _roles.map((role) {
                 return DropdownMenuItem<String>(
                   value: role['value'],
