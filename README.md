@@ -6,6 +6,7 @@
 
   ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
   ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+  ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
   ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
   ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 </div>
@@ -21,6 +22,7 @@ O frontend é responsável por:
 ## 🚀 Tecnologias
 - **React**
 - **TypeScript**
+- **Flutter**
 - **HTML5**
 - **CSS3**
 
@@ -33,82 +35,55 @@ O frontend é responsável por:
 
 # 🚦 Como Executar
 
-### Pré-requisitos
-- Node.js (v18 ou superior)
-- npm ou yarn
+## 📋 Pré-requisitos
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (3.x)  
+- [Node.js](https://nodejs.org/) (necessário apenas para versão web)  
+- [Android Studio](https://developer.android.com/studio) ou [VSCode](https://code.visualstudio.com/) configurado  
 
-### Instalação
-
-1. Clone o repositório
+## 📥 Instalação
+Clone o repositório e instale as dependências:  
 ```bash
 git clone https://github.com/Sync-FATEC/API-5-FRONT/
+cd API-5-FRONT/src
+flutter pub get
 ```
 
-2. Instale as dependências
+## ⚙️ Configuração
+Antes de rodar o projeto, é necessário configurar alguns arquivos **não incluídos no repositório** por conterem informações sensíveis:  
+
+- Coloque o arquivo `firebase.json` dentro da pasta:  
+  ```
+  src/lib/core/client/
+  ```
+
+- Crie ou adicione o arquivo `.env` na **raiz do projeto**:  
+  ```
+  API-5-FRONT/.env
+  ```
+
+> ⚠️ Esses arquivos não estão disponíveis neste repositório. Solicite ao responsável pelo projeto ou configure-os conforme a documentação oficial (Firebase e variáveis de ambiente necessárias).  
+
+## ▶️ Execução
+Rodar aplicação em dispositivo ou emulador:  
 ```bash
-npm install
+flutter run
 ```
 
-3. Inicie o servidor
+## 🌐 Build para Web
+Gerar build para versão web:  
 ```bash
-npm run dev
+flutter build web
 ```
 
 ## 📁 Estrutura de Diretórios
 ```
-src/
-├── app/                   # Configuração principal da aplicação
-│   ├── Layout/            # Componente de layout principal
-│   ├── App.tsx            # Componente raiz e configuração de rotas
-│   ├── main.tsx           # Ponto de entrada da aplicação
-│   ├── store.ts           # Configuração do Redux store
-│   ├── hooks.ts           # Hooks do Redux (useAppDispatch, useAppSelector)
-│   └── index.css          # Estilos globais (Tailwind)
-│
-├── components/            # Componentes reutilizáveis
-│   ├── ConfirmDialog/     # Modal de confirmação
-│   ├── LayoutFooter/      # Rodapé do layout
-│   ├── LayoutHeader/      # Cabeçalho do layout
-│   ├── Pagination/        # Componente de paginação
-│   ├── Sidebar/           # Menu lateral
-│   ├── StockChangeModal/  # Modal de alteração de estoque
-│   ├── SupplierEditModal/ # Modal de edição de fornecedor
-│   ├── SupplierForm/      # Formulário de fornecedor
-│   ├── UserExcelImport/   # Importação de usuários via Excel
-│   ├── UserForm/          # Formulário de usuário
-│   ├── ProtectedRoute.tsx # HOC para proteção de rotas
-│   └── index.ts           # Barrel export dos componentes
-│
-├── pages/                 # Páginas da aplicação
-│   ├── Home/              # Página inicial
-│   ├── Invoices/          # Página de pedidos
-│   ├── Login/             # Página de login
-│   ├── NoMatch/           # Página 404
-│   ├── StockDetails/      # Detalhes do estoque
-│   ├── Stocks/            # Listagem de estoques
-│   ├── Supplier/          # Página de fornecedores
-│   ├── Users/             # Página de usuários
-│   └── index.ts           # Barrel export das páginas
-│
-├── services/              # Serviços de integração com APIs
-│   ├── authService.ts     # Serviço de autenticação
-│   ├── reportsService.ts  # Serviço de relatórios/dashboard
-│   ├── stockServices.ts   # Serviço de estoques
-│   └── supplierService.ts # Serviço de fornecedores
-│
-├── contexts/              # Contextos React
-│   ├── AuthContext.tsx    # Contexto de autenticação
-│   └── useAuth.ts         # Hook customizado para autenticação
-│
-├── hooks/                 # Hooks customizados
-│
-├── config/                # Configurações da aplicação
-│   └── firebase.ts        # Configuração do Firebase
-│
-├── shared/                # Recursos compartilhados
-│   └── api.ts             # Instância configurada do Axios
-│
-└── types/                 # Definições de tipos TypeScript  
+lib/
+├── api/          
+├── components/    
+├── pages/         
+├── hooks/         
+├── contexts/      
+└── utils/         
 ```
 
 ## 👥 Time
