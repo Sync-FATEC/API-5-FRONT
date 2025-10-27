@@ -10,10 +10,10 @@ class FileService {
   }) async {
     try {
       Directory? directory;
-      
+
       if (Platform.isAndroid) {
         // Tentar múltiplas localizações em ordem de preferência
-        
+
         // 1ª tentativa: Pasta Downloads pública
         try {
           directory = Directory('/storage/emulated/0/Download');
@@ -26,7 +26,7 @@ class FileService {
           print('FileService: Erro ao acessar Downloads: $e');
           directory = null;
         }
-        
+
         // 2ª tentativa: Pasta Documents pública
         if (directory == null) {
           try {
@@ -43,12 +43,14 @@ class FileService {
             directory = null;
           }
         }
-        
+
         // 3ª tentativa: Diretório da aplicação (fallback)
         if (directory == null) {
           try {
             directory = await getApplicationDocumentsDirectory();
-            print('FileService: Usando diretório da aplicação (fallback): ${directory.path}');
+            print(
+              'FileService: Usando diretório da aplicação (fallback): ${directory.path}',
+            );
           } catch (e) {
             print('FileService: Erro ao acessar diretório da aplicação: $e');
             directory = await getExternalStorageDirectory();
@@ -59,7 +61,9 @@ class FileService {
         directory = await getApplicationDocumentsDirectory();
       } else {
         // Para outras plataformas, usar Downloads se disponível
-        directory = await getDownloadsDirectory() ?? await getApplicationDocumentsDirectory();
+        directory =
+            await getDownloadsDirectory() ??
+            await getApplicationDocumentsDirectory();
       }
 
       if (directory == null) {
@@ -74,7 +78,8 @@ class FileService {
       int counter = 1;
       while (await File(finalPath).exists()) {
         final nameWithoutExt = fileName;
-        finalPath = '${directory.path}/${nameWithoutExt}_$counter.$fileExtension';
+        finalPath =
+            '${directory.path}/${nameWithoutExt}_$counter.$fileExtension';
         counter++;
       }
 
@@ -99,7 +104,7 @@ class FileService {
         if (permission.isGranted) {
           return true;
         }
-        
+
         // Se não tiver permissão, ainda podemos usar o diretório da app
         final appDir = await getApplicationDocumentsDirectory();
         return appDir.existsSync();
@@ -113,7 +118,8 @@ class FileService {
 
   static String getFileNameWithTimestamp(String baseName) {
     final now = DateTime.now();
-    final timestamp = '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}';
+    final timestamp =
+        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}';
     return '${baseName}_$timestamp';
   }
 }

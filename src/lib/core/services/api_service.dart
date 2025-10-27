@@ -442,20 +442,20 @@ class ApiService {
 
       if (response.success && response.data != null) {
         print('ApiService: Dashboard recebido com sucesso');
-        
+
         // A resposta já vem como Map<String, dynamic> do HttpClient
         // Vamos usar diretamente os dados recebidos
         final responseData = response.data!;
-        
+
         print('ApiService: Chaves disponíveis: ${responseData.keys.toList()}');
-        
+
         // Criar uma resposta estruturada para o DashboardApiResponse
         final dashboardResponse = {
           'success': true,
           'message': 'Dashboard carregado com sucesso',
           'data': responseData, // Os dados já estão no formato correto
         };
-        
+
         return DashboardApiResponse.fromJson(dashboardResponse);
       } else {
         print('ApiService: Erro na resposta - ${response.message}');
@@ -501,15 +501,24 @@ class ApiService {
       }
 
       final queryString = queryParams.entries
-          .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+          .map(
+            (e) =>
+                '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+          )
           .join('&');
 
-      print('ApiService: Baixando PDF para: /reports/dashboard/complete/report?$queryString');
+      print(
+        'ApiService: Baixando PDF para: /reports/dashboard/complete/report?$queryString',
+      );
 
-      final response = await HttpClient.getBytes('/reports/dashboard/complete/report?$queryString');
+      final response = await HttpClient.getBytes(
+        '/reports/dashboard/complete/report?$queryString',
+      );
 
       if (response.success && response.data != null) {
-        print('ApiService: PDF baixado com sucesso - ${response.data!.length} bytes');
+        print(
+          'ApiService: PDF baixado com sucesso - ${response.data!.length} bytes',
+        );
         return response.data;
       } else {
         print('ApiService: Erro ao baixar PDF - ${response.message}');
@@ -557,15 +566,24 @@ class ApiService {
       }
 
       final queryString = queryParams.entries
-          .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+          .map(
+            (e) =>
+                '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+          )
           .join('&');
 
-      print('ApiService: Baixando Excel para: /reports/dashboard/complete/report?$queryString');
+      print(
+        'ApiService: Baixando Excel para: /reports/dashboard/complete/report?$queryString',
+      );
 
-      final response = await HttpClient.getBytes('/reports/dashboard/complete/report?$queryString');
+      final response = await HttpClient.getBytes(
+        '/reports/dashboard/complete/report?$queryString',
+      );
 
       if (response.success && response.data != null) {
-        print('ApiService: Excel baixado com sucesso - ${response.data!.length} bytes');
+        print(
+          'ApiService: Excel baixado com sucesso - ${response.data!.length} bytes',
+        );
         return response.data;
       } else {
         print('ApiService: Erro ao baixar Excel - ${response.message}');

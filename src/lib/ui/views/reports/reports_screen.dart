@@ -104,7 +104,7 @@ class _ReportsScreenScreenState extends State<ReportsScreen> {
 
     try {
       print('Baixando relatório PDF...');
-      
+
       // Mostrar indicador de carregamento
       showDialog(
         context: context,
@@ -134,7 +134,9 @@ class _ReportsScreenScreenState extends State<ReportsScreen> {
       Navigator.of(context).pop();
 
       if (bytes != null) {
-        final fileName = FileService.getFileNameWithTimestamp('relatorio_dashboard');
+        final fileName = FileService.getFileNameWithTimestamp(
+          'relatorio_dashboard',
+        );
         final savedPath = await FileService.saveFile(
           bytes: bytes,
           fileName: fileName,
@@ -151,7 +153,9 @@ class _ReportsScreenScreenState extends State<ReportsScreen> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Erro: Não foi possível salvar o PDF')),
+            const SnackBar(
+              content: Text('Erro: Não foi possível salvar o PDF'),
+            ),
           );
         }
       }
@@ -160,11 +164,11 @@ class _ReportsScreenScreenState extends State<ReportsScreen> {
       if (Navigator.canPop(context)) {
         Navigator.of(context).pop();
       }
-      
+
       print('Erro ao baixar PDF: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao baixar PDF: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao baixar PDF: $e')));
     }
   }
 
@@ -181,7 +185,7 @@ class _ReportsScreenScreenState extends State<ReportsScreen> {
 
     try {
       print('Baixando relatório Excel...');
-      
+
       // Mostrar indicador de carregamento
       showDialog(
         context: context,
@@ -211,7 +215,9 @@ class _ReportsScreenScreenState extends State<ReportsScreen> {
       Navigator.of(context).pop();
 
       if (bytes != null) {
-        final fileName = FileService.getFileNameWithTimestamp('relatorio_dashboard');
+        final fileName = FileService.getFileNameWithTimestamp(
+          'relatorio_dashboard',
+        );
         final savedPath = await FileService.saveFile(
           bytes: bytes,
           fileName: fileName,
@@ -228,7 +234,9 @@ class _ReportsScreenScreenState extends State<ReportsScreen> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Erro: Não foi possível salvar o Excel')),
+            const SnackBar(
+              content: Text('Erro: Não foi possível salvar o Excel'),
+            ),
           );
         }
       }
@@ -237,11 +245,11 @@ class _ReportsScreenScreenState extends State<ReportsScreen> {
       if (Navigator.canPop(context)) {
         Navigator.of(context).pop();
       }
-      
+
       print('Erro ao baixar Excel: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao baixar Excel: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao baixar Excel: $e')));
     }
   }
 

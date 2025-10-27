@@ -36,10 +36,7 @@ class HttpClient {
       final uri = _buildUri(endpoint, queryParams);
       final defaultHeaders = await _defaultHeaders;
       final response = await http
-          .get(
-            uri,
-            headers: {...defaultHeaders, ...?headers},
-          )
+          .get(uri, headers: {...defaultHeaders, ...?headers})
           .timeout(timeoutDuration);
 
       return _handleResponse(response);
@@ -103,10 +100,7 @@ class HttpClient {
       final uri = _buildUri(endpoint);
       final defaultHeaders = await _defaultHeaders;
       final response = await http
-          .delete(
-            uri,
-            headers: {...defaultHeaders, ...?headers},
-          )
+          .delete(uri, headers: {...defaultHeaders, ...?headers})
           .timeout(timeoutDuration);
 
       return _handleResponse(response);
@@ -142,9 +136,11 @@ class HttpClient {
   static Uri _buildUri(String endpoint, [Map<String, dynamic>? queryParams]) {
     final uri = Uri.parse('$baseUrl$endpoint');
     if (queryParams != null && queryParams.isNotEmpty) {
-      return uri.replace(queryParameters: queryParams.map(
-        (key, value) => MapEntry(key, value.toString()),
-      ));
+      return uri.replace(
+        queryParameters: queryParams.map(
+          (key, value) => MapEntry(key, value.toString()),
+        ),
+      );
     }
     return uri;
   }
@@ -172,7 +168,7 @@ class HttpClient {
   // Tratar erros
   static HttpResponse _handleError(dynamic error) {
     String message = 'Erro de conexão';
-    
+
     if (error is SocketException) {
       message = 'Sem conexão com a internet';
     } else if (error is HttpException) {
@@ -227,10 +223,7 @@ class HttpClient {
       final uri = _buildUri(endpoint, queryParams);
       final defaultHeaders = await _defaultHeaders;
       final response = await http
-          .get(
-            uri,
-            headers: {...defaultHeaders, ...?headers},
-          )
+          .get(uri, headers: {...defaultHeaders, ...?headers})
           .timeout(timeoutDuration);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
