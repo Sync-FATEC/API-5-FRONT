@@ -122,11 +122,20 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 8.0,
+      ),
       child: TextField(
         controller: _searchController,
+        onChanged: (value) {
+          Provider.of<UserProvider>(
+            context,
+            listen: false,
+          ).updateSearchQuery(value);
+        },
         decoration: InputDecoration(
-          hintText: 'Pesquisar usuários...',
+          hintText: 'Pesquisar',
           prefixIcon: const Icon(Icons.search),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
@@ -140,16 +149,17 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                   },
                 )
               : null,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 0,
+            horizontal: 16,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide.none,
+          ),
           filled: true,
-          fillColor: Colors.grey.shade50,
+          fillColor: Colors.white,
         ),
-        onChanged: (value) {
-          Provider.of<UserProvider>(
-            context,
-            listen: false,
-          ).updateSearchQuery(value);
-        },
       ),
     );
   }
