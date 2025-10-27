@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:api2025/ui/widgets/background_header.dart';
 import 'package:api2025/ui/widgets/bottom_nav_bar_widget.dart';
 import 'package:provider/provider.dart';
+import '../../../core/services/api_service.dart';
+import '../../../core/services/file_service.dart';
 import '../../../core/providers/dashboard_provider.dart';
 import '../../../core/providers/stock_provider.dart';
 import 'widgets/filters_section.dart';
@@ -89,14 +91,158 @@ class _ReportsScreenScreenState extends State<ReportsScreen> {
     print('==============================');
   }
 
-  void _downloadPDF() {
-    // Implementar lógica para download de PDF
-    print('Baixando PDF...');
+  Future<void> _downloadPDF() async {
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
+    final currentStockId = stockId ?? stockProvider.selectedStock?.id;
+
+    if (currentStockId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nenhum estoque selecionado')),
+      );
+      return;
+    }
+
+    try {
+      print('Baixando relatório PDF...');
+      
+      // Mostrar indicador de carregamento
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Baixando relatório PDF...'),
+            ],
+          ),
+        ),
+      );
+
+      final apiService = ApiService();
+      final bytes = await apiService.downloadCompleteReportPDF(
+        stockId: currentStockId,
+        startDate: startDate,
+        endDate: endDate,
+        includeOrders: true,
+        includeMerchandise: true,
+        includeStock: true,
+      );
+
+      // Fechar dialog de carregamento
+      Navigator.of(context).pop();
+
+      if (bytes != null) {
+        final fileName = FileService.getFileNameWithTimestamp('relatorio_dashboard');
+        final savedPath = await FileService.saveFile(
+          bytes: bytes,
+          fileName: fileName,
+          fileExtension: 'pdf',
+        );
+
+        if (savedPath != null) {
+          final fileName = savedPath.split('/').last;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('PDF salvo: $fileName'),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Erro: Não foi possível salvar o PDF')),
+          );
+        }
+      }
+    } catch (e) {
+      // Fechar dialog se ainda estiver aberto
+      if (Navigator.canPop(context)) {
+        Navigator.of(context).pop();
+      }
+      
+      print('Erro ao baixar PDF: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao baixar PDF: $e')),
+      );
+    }
   }
 
-  void _downloadExcel() {
-    // Implementar lógica para download de Excel
-    print('Baixando Excel...');
+  Future<void> _downloadExcel() async {
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
+    final currentStockId = stockId ?? stockProvider.selectedStock?.id;
+
+    if (currentStockId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nenhum estoque selecionado')),
+      );
+      return;
+    }
+
+    try {
+      print('Baixando relatório Excel...');
+      
+      // Mostrar indicador de carregamento
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Baixando relatório Excel...'),
+            ],
+          ),
+        ),
+      );
+
+      final apiService = ApiService();
+      final bytes = await apiService.downloadCompleteReportExcel(
+        stockId: currentStockId,
+        startDate: startDate,
+        endDate: endDate,
+        includeOrders: true,
+        includeMerchandise: true,
+        includeStock: true,
+      );
+
+      // Fechar dialog de carregamento
+      Navigator.of(context).pop();
+
+      if (bytes != null) {
+        final fileName = FileService.getFileNameWithTimestamp('relatorio_dashboard');
+        final savedPath = await FileService.saveFile(
+          bytes: bytes,
+          fileName: fileName,
+          fileExtension: 'xlsx',
+        );
+
+        if (savedPath != null) {
+          final fileName = savedPath.split('/').last;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Excel salvo: $fileName'),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Erro: Não foi possível salvar o Excel')),
+          );
+        }
+      }
+    } catch (e) {
+      // Fechar dialog se ainda estiver aberto
+      if (Navigator.canPop(context)) {
+        Navigator.of(context).pop();
+      }
+      
+      print('Erro ao baixar Excel: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao baixar Excel: $e')),
+      );
+    }
   }
 
   Future<void> _selectDate(bool isStartDate) async {

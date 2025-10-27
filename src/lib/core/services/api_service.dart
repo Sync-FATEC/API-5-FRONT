@@ -467,4 +467,113 @@ class ApiService {
       throw Exception('Erro ao buscar dashboard completo: $e');
     }
   }
+
+  // Download relatório completo em PDF
+  Future<List<int>?> downloadCompleteReportPDF({
+    required String stockId,
+    String? period,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool includeOrders = true,
+    bool includeMerchandise = true,
+    bool includeStock = true,
+  }) async {
+    try {
+      // Construir query parameters
+      final Map<String, String> queryParams = {
+        'format': 'pdf',
+        'stockId': stockId,
+        'includeOrders': includeOrders.toString(),
+        'includeMerchandise': includeMerchandise.toString(),
+        'includeStock': includeStock.toString(),
+      };
+
+      if (period != null) {
+        queryParams['period'] = period;
+      }
+
+      if (startDate != null) {
+        queryParams['startDate'] = startDate.toIso8601String();
+      }
+
+      if (endDate != null) {
+        queryParams['endDate'] = endDate.toIso8601String();
+      }
+
+      final queryString = queryParams.entries
+          .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+          .join('&');
+
+      print('ApiService: Baixando PDF para: /reports/dashboard/complete/report?$queryString');
+
+      final response = await HttpClient.getBytes('/reports/dashboard/complete/report?$queryString');
+
+      if (response.success && response.data != null) {
+        print('ApiService: PDF baixado com sucesso - ${response.data!.length} bytes');
+        return response.data;
+      } else {
+        print('ApiService: Erro ao baixar PDF - ${response.message}');
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('ApiService: Erro ao baixar PDF: $e');
+      throw Exception('Erro ao baixar relatório PDF: $e');
+    }
+  }
+
+  // Download relatório completo em Excel
+  Future<List<int>?> downloadCompleteReportExcel({
+    required String stockId,
+    String? period,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool includeOrders = true,
+    bool includeMerchandise = true,
+    bool includeStock = true,
+  }) async {
+    try {
+      // Construir query parameters
+      final Map<String, String> queryParams = {
+        'format': 'excel',
+        'stockId': stockId,
+        'includeOrders': includeOrders.toString(),
+        'includeMerchandise': includeMerchandise.toString(),
+        'includeStock': includeStock.toString(),
+        // Parâmetros de layout para Excel organizado
+        'layout': 'compact',
+        'groupSections': 'true',
+      };
+
+      if (period != null) {
+        queryParams['period'] = period;
+      }
+
+      if (startDate != null) {
+        queryParams['startDate'] = startDate.toIso8601String();
+      }
+
+      if (endDate != null) {
+        queryParams['endDate'] = endDate.toIso8601String();
+      }
+
+      final queryString = queryParams.entries
+          .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+          .join('&');
+
+      print('ApiService: Baixando Excel para: /reports/dashboard/complete/report?$queryString');
+
+      final response = await HttpClient.getBytes('/reports/dashboard/complete/report?$queryString');
+
+      if (response.success && response.data != null) {
+        print('ApiService: Excel baixado com sucesso - ${response.data!.length} bytes');
+        return response.data;
+      } else {
+        print('ApiService: Erro ao baixar Excel - ${response.message}');
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('ApiService: Erro ao baixar Excel: $e');
+      throw Exception('Erro ao baixar relatório Excel: $e');
+    }
+  }
 }
