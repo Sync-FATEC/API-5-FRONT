@@ -3,6 +3,7 @@
 import 'package:flutter/foundation.dart';
 import '../services/merchandise_service.dart';
 import '../../data/models/merchandise_type_model.dart';
+import '../../data/models/merchandise_entries_response_model.dart';
 
 class MerchandiseTypeProvider extends ChangeNotifier {
   final MerchandiseService _merchandiseService = MerchandiseService();
@@ -180,6 +181,28 @@ class MerchandiseTypeProvider extends ChangeNotifier {
   void clearSelectedMerchandiseType() {
     _selectedMerchandiseType = null;
     notifyListeners();
+  }
+
+  // Buscar entradas e lotes de um tipo de mercadoria
+  Future<MerchandiseEntriesResponseModel?> fetchMerchandiseEntries(String merchandiseTypeId) async {
+    print('MerchandiseTypeProvider: Buscando entradas para merchandiseTypeId: $merchandiseTypeId');
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      final entriesResponse = await _merchandiseService.fetchMerchandiseEntries(merchandiseTypeId);
+      
+      print('MerchandiseTypeProvider: Entradas encontradas:');
+      print('   - Quantidade de entradas: ${entriesResponse.data.merchandises.length}');
+      
+      return entriesResponse;
+    } catch (e) {
+      print('MerchandiseTypeProvider: Erro ao buscar entradas: $e');
+      _setError('Erro ao buscar entradas do produto: $e');
+      return null;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   // Limpar dados

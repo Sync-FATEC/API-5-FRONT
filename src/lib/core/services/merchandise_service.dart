@@ -1,6 +1,7 @@
 import '../../data/models/merchandise_model.dart' hide MerchandiseTypeModel;
 import '../../data/models/merchandise_type_model.dart';
 import '../../data/models/merchandise_entry_model.dart';
+import '../../data/models/merchandise_entries_response_model.dart';
 import 'http_client.dart';
 
 class MerchandiseService {
@@ -205,6 +206,39 @@ class MerchandiseService {
     } catch (e) {
       print('MerchandiseService: Erro ao buscar histórico de entradas: $e');
       throw Exception('Erro ao buscar histórico de entradas: $e');
+    }
+  }
+
+  // Método para buscar todas as entradas e lotes de um tipo de mercadoria
+  Future<MerchandiseEntriesResponseModel> fetchMerchandiseEntries(String merchandiseTypeId) async {
+    print('MerchandiseService: Buscando entradas e lotes para merchandiseTypeId: $merchandiseTypeId');
+    
+    try {
+      final response = await HttpClient.get('/merchandise-types/$merchandiseTypeId/merchandises');
+      
+      print('MerchandiseService: Resposta das entradas e lotes:');
+      print('   - Success: ${response.success}');
+      print('   - Message: ${response.message}');
+      print('   - Data: ${response.data}');
+      
+      if (response.success && response.data != null) {
+        final entriesResponse = MerchandiseEntriesResponseModel.fromJson(response.data!);
+        
+        print('MerchandiseService: Entradas e lotes encontrados:');
+        print('   - Quantidade de entradas: ${entriesResponse.data.merchandises.length}');
+        
+        if (entriesResponse.data.merchandises.isNotEmpty) {
+          print('   - Primeira entrada: ${entriesResponse.data.merchandises.first.toJson()}');
+        }
+        
+        return entriesResponse;
+      } else {
+        print('MerchandiseService: Erro na resposta das entradas: ${response.message}');
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('MerchandiseService: Erro ao buscar entradas e lotes: $e');
+      throw Exception('Erro ao buscar entradas e lotes: $e');
     }
   }
 }
