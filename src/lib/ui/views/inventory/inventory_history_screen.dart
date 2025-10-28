@@ -74,7 +74,9 @@ class _InventoryHistoryScreenState extends State<InventoryHistoryScreen> {
                   child: Text(
                     widget.productName != null 
                         ? 'Histórico - ${widget.productName}'
-                        : 'Histórico de Inventário',
+                        : _viewModel.selectedProductName != null
+                            ? 'Histórico - ${_viewModel.selectedProductName}'
+                            : 'Histórico de Inventário',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
