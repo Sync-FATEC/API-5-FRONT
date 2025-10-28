@@ -1,9 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:api2025/ui/widgets/background_header.dart';
 import 'package:api2025/core/constants/app_colors.dart';
 import 'package:api2025/data/models/merchandise_type_model.dart';
-import 'package:api2025/data/models/merchandise_detail_response_model.dart';
-import 'package:api2025/data/models/merchandise_entry_detail_model.dart';
 import 'package:api2025/data/enums/merchandise_enums.dart';
 import 'package:provider/provider.dart';
 import 'package:api2025/core/providers/merchandise_type_provider.dart';
@@ -14,7 +14,9 @@ import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:api2025/ui/views/merchandise/merchandise_history_screen.dart';
+import 'package:api2025/ui/views/merchandise/merchandise_entries_screen.dart';
 import 'package:api2025/ui/views/merchandise/widgets/edit_merchandise_type_modal.dart';
+import '../inventory/inventory_history_screen.dart';
 
 class MerchandiseDetailScreen extends StatefulWidget {
   final MerchandiseTypeModel merchandise;
@@ -29,207 +31,349 @@ class MerchandiseDetailScreen extends StatefulWidget {
 }
 
 class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadMerchandiseDetails();
-    });
-  }
+  final ScreenshotController _qrScreenshotController = ScreenshotController();
 
-  Future<void> _loadMerchandiseDetails() async {
-    if (widget.merchandise.id != null) {
-      await context.read<MerchandiseTypeProvider>().loadMerchandiseDetails(widget.merchandise.id!);
-    }
-  }
-
-  String _getGroupDisplayName(String? group) {
+  String _getGroupDisplayName(MerchandiseGroup? group) {
     if (group == null) return 'Sem Grupo';
-    final merchandiseGroup = merchandiseGroupFromString(group);
-    return merchandiseGroupDisplayName(merchandiseGroup);
+    return merchandiseGroupDisplayName(group);
   }
 
-  Widget _buildInfoItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMerchandiseHeader(MerchandiseTypeDetailModel merchandiseType) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  merchandiseType.name,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.bluePrimary,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.bluePrimary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  _getGroupDisplayName(merchandiseType.group),
-                  style: const TextStyle(
-                    color: AppColors.bluePrimary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: _buildInfoItem('Registro', merchandiseType.recordNumber)),
-              Expanded(child: _buildInfoItem('Unidade', merchandiseType.unitOfMeasure)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(child: _buildInfoItem('Estoque Total', '${merchandiseType.quantityTotal}')),
-              Expanded(child: _buildInfoItem('Estoque Mínimo', '${merchandiseType.minimumStock}')),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(child: _buildInfoItem('Almoxarifado', merchandiseType.stock.name)),
-              Expanded(child: _buildInfoItem('Controlado', merchandiseType.controlled ? 'Sim' : 'Não')),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMerchandiseEntry(MerchandiseEntryDetailModel entry) {
-    final expirationDate = DateFormat('dd/MM/yyyy').format(entry.batch.expirationDate);
-    final isExpired = entry.batch.expirationDate.isBefore(DateTime.now());
-    final isNearExpiration = entry.batch.expirationDate.isBefore(DateTime.now().add(const Duration(days: 30)));
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isExpired
-              ? Colors.red.withOpacity(0.3)
-              : isNearExpiration
-                  ? Colors.orange.withOpacity(0.3)
-                  : Colors.grey.withOpacity(0.2),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 🔹 Cabeçalho simplificado (sem ID e sem status)
-          const Text(
-            'Entrada de Mercadoria',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoItem('Quantidade', '${entry.quantity}'),
-              ),
-              Expanded(
-                child: _buildInfoItem('Validade', expirationDate),
-              ),
-            ],
-          ),
-          if (isExpired || isNearExpiration) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: (isExpired ? Colors.red : Colors.orange).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
+  Future<void> _showQrCodeDialog() async {
+    final recordNumber = widget.merchandise.recordNumber;
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('QR Code do Produto'),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 340),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    isExpired ? Icons.error : Icons.warning,
-                    color: isExpired ? Colors.red : Colors.orange,
-                    size: 16,
+                  Text(
+                    'Ficha: $recordNumber',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      isExpired ? 'Produto vencido' : 'Produto próximo ao vencimento',
-                      style: TextStyle(
-                        color: isExpired ? Colors.red : Colors.orange,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
+                  const SizedBox(height: 16),
+                  Screenshot(
+                    controller: _qrScreenshotController,
+                    child: Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.all(12),
+                      child: SizedBox(
+                        width: 220,
+                        height: 220,
+                        child: Center(
+                          child: QrImageView(
+                            data: recordNumber,
+                            version: QrVersions.auto,
+                            size: 200,
+                            backgroundColor: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  SelectableText(
+                    recordNumber,
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
             ),
+          ),
+          actions: [
+            TextButton.icon(
+              onPressed: () => _saveQrToGallery(recordNumber),
+              icon: const Icon(Icons.save_alt),
+              label: const Text('Salvar na galeria'),
+            ),
+            TextButton.icon(
+              onPressed: () => _printQr(recordNumber),
+              icon: const Icon(Icons.print),
+              label: const Text('Imprimir'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Fechar'),
+            ),
           ],
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  Future<void> _saveQrToGallery(String recordNumber) async {
+    try {
+      final Uint8List? bytes = await _qrScreenshotController.capture();
+      if (bytes == null) {
+        throw Exception('Não foi possível capturar o QR Code');
+      }
+
+      final result = await ImageGallerySaverPlus.saveImage(
+        bytes,
+        name: 'qr_${recordNumber.replaceAll(RegExp(r"[^0-9A-Za-z]"), '_')}',
+        quality: 100,
+      );
+
+      if (!mounted) return;
+
+      bool success = false;
+      if (result is Map) {
+        success = result['isSuccess'] == true || result['success'] == true;
+      } else if (result is bool) {
+        success = result;
+      }
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('QR Code salvo na galeria com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        throw Exception('Falha ao salvar imagem na galeria.');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao salvar QR Code: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _printQr(String recordNumber) async {
+    try {
+      final Uint8List? bytes = await _qrScreenshotController.capture();
+      if (bytes == null) {
+        throw Exception('Não foi possível capturar o QR Code');
+      }
+
+      final pdf = pw.Document();
+      final image = pw.MemoryImage(bytes);
+
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Column(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                pw.Text('Ficha: $recordNumber', style: pw.TextStyle(fontSize: 18)),
+                pw.SizedBox(height: 20),
+                pw.Image(image, width: 200, height: 200),
+              ],
+            );
+          },
+        ),
+      );
+
+      await Printing.layoutPdf(onLayout: (format) => pdf.save());
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao imprimir QR Code: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _editMerchandise() async {
+    final result = await EditMerchandiseTypeModal.show(context, widget.merchandise);
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Produto atualizado com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      // Volta para a tela anterior (listagem)
+      Navigator.of(context).pop(true);
+    }
+  }
+
+  Future<void> _deleteMerchandise() async {
+    // Mostrar diálogo de confirmação
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Excluir Produto'),
+          content: Text('Tem certeza que deseja excluir "${widget.merchandise.name}"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Excluir'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        final merchandiseProvider = Provider.of<MerchandiseTypeProvider>(context, listen: false);
+        
+        if (widget.merchandise.id != null) {
+          final success = await merchandiseProvider.deleteMerchandiseType(widget.merchandise.id!);
+          
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Produto excluído com sucesso!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            // Volta para a tela anterior (listagem)
+            Navigator.of(context).pop(true);
+          } else {
+            // Verificar se é erro específico de produto em uso
+            String errorMessage = merchandiseProvider.errorMessage ?? 'Erro ao excluir produto';
+            Color backgroundColor = Colors.red;
+            
+            if (errorMessage.toLowerCase().contains('pedido')) {
+              backgroundColor = Colors.orange;
+            }
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(errorMessage),
+                backgroundColor: backgroundColor,
+                duration: const Duration(seconds: 4), // Mais tempo para ler a mensagem
+              ),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('ID do produto não encontrado'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao excluir produto: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _editQuantityTotal() async {
+    final TextEditingController quantityController = TextEditingController(
+      text: widget.merchandise.quantityTotal.toString(),
+    );
+
+    final result = await showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Editar Quantidade Total'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Digite a nova quantidade total:'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: quantityController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Quantidade Total',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                final quantity = int.tryParse(quantityController.text);
+                if (quantity != null && quantity >= 0) {
+                  Navigator.of(context).pop(quantity);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Digite uma quantidade válida (número positivo)'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Salvar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != null && mounted) {
+      try {
+        final merchandiseProvider = Provider.of<MerchandiseTypeProvider>(context, listen: false);
+        
+        if (widget.merchandise.id != null) {
+          final success = await merchandiseProvider.updateQuantityTotal(widget.merchandise.id!, result);
+          
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Quantidade total atualizada com sucesso!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            // Volta para a tela anterior (listagem) para atualizar a lista
+            Navigator.of(context).pop(true);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(merchandiseProvider.errorMessage ?? 'Erro ao atualizar quantidade total'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('ID do produto não encontrado'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao atualizar quantidade total: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -238,7 +382,7 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
       body: Stack(
         children: [
           Header(
-            title: 'DETALHES DA MERCADORIA',
+            title: 'VOLTAR',
             showBackButton: true,
             onBackPressed: () => Navigator.of(context).pop(),
             sizeHeader: 450,
@@ -331,13 +475,49 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
                                   icon: Icons.inventory,
                                   title: 'Histórico de inventário',
                                   onTap: () {
-                                    // TODO: Implementar histórico de inventário
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Funcionalidade em desenvolvimento'),
-                                        backgroundColor: Colors.orange,
-                                      ),
-                                    );
+                                    if (widget.merchandise.id != null) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => InventoryHistoryScreen(
+                                            productId: widget.merchandise.id!,
+                                            productName: widget.merchandise.name,
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('ID do produto não encontrado'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                
+                                _buildSectionItem(
+                                  icon: Icons.inventory_2,
+                                  title: 'Entradas do produto',
+                                  onTap: () {
+                                    if (widget.merchandise.id != null) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MerchandiseEntriesScreen(
+                                            merchandiseType: widget.merchandise,
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('ID do produto não encontrado'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   },
                                 ),
                                 const SizedBox(height: 12),
@@ -358,125 +538,197 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
                     // Botões de ação
                     Row(
                       children: [
-                        Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Erro ao carregar detalhes',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red.shade700,
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _editMerchandise,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.edit, size: 20),
+                                SizedBox(width: 8),
+                                Text(
+                                  'EDITAR',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          provider.errorMessage!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed: _loadMerchandiseDetails,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Tentar Novamente'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.bluePrimary,
-                            foregroundColor: Colors.white,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _deleteMerchandise,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.delete, size: 20),
+                                SizedBox(width: 8),
+                                Text(
+                                  'EXCLUIR',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  );
-                }
-
-                if (provider.merchandiseDetails == null) {
-                  return const Center(
-                    child: Text(
-                      'Nenhum detalhe encontrado',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  );
-                }
-
-                final details = provider.merchandiseDetails!;
-                return RefreshIndicator(
-                  onRefresh: _loadMerchandiseDetails,
-                  color: AppColors.bluePrimary,
-                  child: ListView(
-                    children: [
-                      _buildMerchandiseHeader(details.merchandiseType),
-                     Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.inventory_2, color: AppColors.bluePrimary, size: 20),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Entradas de Mercadoria (${details.merchandises.length})',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.bluePrimary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (details.merchandises.isEmpty)
-                        Container(
-                          margin: const EdgeInsets.all(16),
-                          padding: const EdgeInsets.all(32),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade200),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(Icons.inventory_2_outlined, size: 48, color: Colors.grey.shade400),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Nenhuma entrada encontrada',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Esta mercadoria ainda não possui entradas registradas.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-                              ),
-                            ],
-                          ),
-                        )
-                      else
-                        ...details.merchandises.map(_buildMerchandiseEntry),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                );
-              },
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDetailField(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.blue[50],
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.blue[200]!),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: AppColors.bluePrimary,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppColors.bluePrimary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: AppColors.bluePrimary,
+              size: 16,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuantityField(bool isAdmin) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Quantidade:',
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  widget.merchandise.quantityTotal.toString(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              if (isAdmin)
+                IconButton(
+                  onPressed: _editQuantityTotal,
+                  icon: const Icon(
+                    Icons.edit,
+                    color: Colors.blue,
+                    size: 20,
+                  ),
+                  tooltip: 'Editar quantidade total',
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

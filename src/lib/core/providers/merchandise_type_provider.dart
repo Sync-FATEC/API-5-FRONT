@@ -19,10 +19,6 @@ class MerchandiseTypeProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   MerchandiseTypeModel? get selectedMerchandiseType => _selectedMerchandiseType;
-  
-  // Getters para detalhes de mercadoria
-  MerchandiseDetailResponseModel? get merchandiseDetails => _merchandiseDetails;
-  bool get isLoadingDetails => _isLoadingDetails;
 
   // Carregar tipos de mercadoria
   Future<void> loadMerchandiseTypes({String? stockId}) async {
@@ -217,21 +213,9 @@ class MerchandiseTypeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Limpar detalhes de mercadoria
-  void clearMerchandiseDetails() {
-    _merchandiseDetails = null;
-    _isLoadingDetails = false;
-    notifyListeners();
-  }
-
   // Métodos privados para gerenciar estado
   void _setLoading(bool loading) {
     _isLoading = loading;
-    notifyListeners();
-  }
-
-  void _setLoadingDetails(bool loading) {
-    _isLoadingDetails = loading;
     notifyListeners();
   }
 
