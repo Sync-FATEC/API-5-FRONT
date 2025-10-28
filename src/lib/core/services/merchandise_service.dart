@@ -1,7 +1,7 @@
 import '../../data/models/merchandise_model.dart' hide MerchandiseTypeModel;
 import '../../data/models/merchandise_type_model.dart';
 import '../../data/models/merchandise_entry_model.dart';
-import '../../data/models/merchandise_detail_response_model.dart';
+import '../../data/models/merchandise_entries_response_model.dart';
 import 'http_client.dart';
 
 class MerchandiseService {
@@ -83,10 +83,22 @@ class MerchandiseService {
   }
 
   Future<MerchandiseTypeModel> fetchMerchandiseTypeById(String id) async {
-    final response = await HttpClient.get('/merchandise-types/$id');
+    print('MerchandiseService: Buscando tipo de mercadoria por ID: $id');
+    final response = await HttpClient.get('/merchandise-types/details/$id');
+    
+    print('MerchandiseService: Resposta do fetchMerchandiseTypeById:');
+    print('   - Success: ${response.success}');
+    print('   - Message: ${response.message}');
+    print('   - Data: ${response.data}');
+    
     if (response.success && response.data != null) {
-      return MerchandiseTypeModel.fromJson(response.data!);
+      print('MerchandiseService: Dados brutos da API: ${response.data}');
+      final product = MerchandiseTypeModel.fromJson(response.data!);
+      print('MerchandiseService: Produto parseado - Nome: "${product.name}"');
+      print('MerchandiseService: Produto parseado - ID: "${product.id}"');
+      return product;
     } else {
+      print('MerchandiseService: Erro ao buscar produto: ${response.message}');
       throw Exception(response.message);
     }
   }
@@ -164,33 +176,69 @@ class MerchandiseService {
     }
   }
 
-  // Buscar detalhes de mercadoria com entradas
-  Future<MerchandiseDetailResponseModel> fetchMerchandiseTypeDetails(String id) async {
-    print('📡 [MERCHANDISE_SERVICE] Buscando detalhes da mercadoria: $id');
+  // Método para buscar histórico de entradas de um tipo de mercadoria
+  Future<List<Map<String, dynamic>>> fetchEntryHistory(String merchandiseTypeId) async {
+    print('MerchandiseService: Buscando histórico de entradas para merchandiseTypeId: $merchandiseTypeId');
     
-    final response = await HttpClient.get('/merchandise-types/$id/merchandises');
+    try {
+      final response = await HttpClient.get('/merchandise-types/$merchandiseTypeId/entry-history');
+      
+      print('MerchandiseService: Resposta do histórico de entradas:');
+      print('   - Success: ${response.success}');
+      print('   - Message: ${response.message}');
+      print('   - Data: ${response.data}');
+      
+      if (response.success && response.data != null) {
+        final List data = response.data!['data'] ?? response.data ?? [];
+        
+        print('MerchandiseService: Histórico de entradas encontrado:');
+        print('   - Quantidade de entradas: ${data.length}');
+        
+        if (data.isNotEmpty) {
+          print('   - Primeira entrada: ${data.first}');
+        }
+        
+        return List<Map<String, dynamic>>.from(data);
+      } else {
+        print('MerchandiseService: Erro na resposta do histórico: ${response.message}');
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('MerchandiseService: Erro ao buscar histórico de entradas: $e');
+      throw Exception('Erro ao buscar histórico de entradas: $e');
+    }
+  }
+
+  // Método para buscar todas as entradas e lotes de um tipo de mercadoria
+  Future<MerchandiseEntriesResponseModel> fetchMerchandiseEntries(String merchandiseTypeId) async {
+    print('MerchandiseService: Buscando entradas e lotes para merchandiseTypeId: $merchandiseTypeId');
     
-    print('📡 [MERCHANDISE_SERVICE] Resposta recebida:');
-    print('   - Success: ${response.success}');
-    print('   - Message: ${response.message}');
-    print('   - Data: ${response.data}');
-    
-    if (response.success && response.data != null) {
-      final data = response.data!['data'];
+    try {
+      final response = await HttpClient.get('/merchandise-types/$merchandiseTypeId/merchandises');
       
-      print('📦 [MERCHANDISE_SERVICE] Dados extraídos da resposta:');
-      print('   - Tipo dos dados: ${data.runtimeType}');
+      print('MerchandiseService: Resposta das entradas e lotes:');
+      print('   - Success: ${response.success}');
+      print('   - Message: ${response.message}');
+      print('   - Data: ${response.data}');
       
-      final merchandiseDetails = MerchandiseDetailResponseModel.fromJson(data);
-      
-      print('✅ [MERCHANDISE_SERVICE] Detalhes convertidos:');
-      print('   - Mercadoria: ${merchandiseDetails.merchandiseType.name}');
-      print('   - Entradas: ${merchandiseDetails.merchandises.length}');
-      
-      return merchandiseDetails;
-    } else {
-      print('❌ [MERCHANDISE_SERVICE] Erro na resposta: ${response.message}');
-      throw Exception(response.message);
+      if (response.success && response.data != null) {
+        final entriesResponse = MerchandiseEntriesResponseModel.fromJson(response.data!);
+        
+        print('MerchandiseService: Entradas e lotes encontrados:');
+        print('   - Quantidade de entradas: ${entriesResponse.data.merchandises.length}');
+        
+        if (entriesResponse.data.merchandises.isNotEmpty) {
+          print('   - Primeira entrada: ${entriesResponse.data.merchandises.first.toJson()}');
+        }
+        
+        return entriesResponse;
+      } else {
+        print('MerchandiseService: Erro na resposta das entradas: ${response.message}');
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('MerchandiseService: Erro ao buscar entradas e lotes: $e');
+      throw Exception('Erro ao buscar entradas e lotes: $e');
     }
   }
 }

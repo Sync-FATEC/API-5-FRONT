@@ -3,7 +3,7 @@
 import 'package:flutter/foundation.dart';
 import '../services/merchandise_service.dart';
 import '../../data/models/merchandise_type_model.dart';
-import '../../data/models/merchandise_detail_response_model.dart';
+import '../../data/models/merchandise_entries_response_model.dart';
 
 class MerchandiseTypeProvider extends ChangeNotifier {
   final MerchandiseService _merchandiseService = MerchandiseService();
@@ -13,20 +13,12 @@ class MerchandiseTypeProvider extends ChangeNotifier {
   String? _errorMessage;
   MerchandiseTypeModel? _selectedMerchandiseType;
   String? _currentStockId;
-  
-  // Propriedades para detalhes de mercadoria
-  MerchandiseDetailResponseModel? _merchandiseDetails;
-  bool _isLoadingDetails = false;
 
   // Getters
   List<MerchandiseTypeModel> get merchandiseTypes => _merchandiseTypes;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   MerchandiseTypeModel? get selectedMerchandiseType => _selectedMerchandiseType;
-  
-  // Getters para detalhes de mercadoria
-  MerchandiseDetailResponseModel? get merchandiseDetails => _merchandiseDetails;
-  bool get isLoadingDetails => _isLoadingDetails;
 
   // Carregar tipos de mercadoria
   Future<void> loadMerchandiseTypes({String? stockId}) async {
@@ -191,28 +183,25 @@ class MerchandiseTypeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Carregar detalhes de mercadoria com entradas
-  Future<void> loadMerchandiseDetails(String merchandiseTypeId) async {
-    print('🔄 [MERCHANDISE_TYPE_PROVIDER] Carregando detalhes da mercadoria: $merchandiseTypeId');
-    
-    _setLoadingDetails(true);
+  // Buscar entradas e lotes de um tipo de mercadoria
+  Future<MerchandiseEntriesResponseModel?> fetchMerchandiseEntries(String merchandiseTypeId) async {
+    print('MerchandiseTypeProvider: Buscando entradas para merchandiseTypeId: $merchandiseTypeId');
+    _setLoading(true);
     _setError(null);
 
     try {
-      print('🌐 [MERCHANDISE_TYPE_PROVIDER] Chamando MerchandiseService para detalhes...');
-      _merchandiseDetails = await _merchandiseService.fetchMerchandiseTypeDetails(merchandiseTypeId);
+      final entriesResponse = await _merchandiseService.fetchMerchandiseEntries(merchandiseTypeId);
       
-      print('✅ [MERCHANDISE_TYPE_PROVIDER] Detalhes carregados com sucesso!');
-      print('📦 [MERCHANDISE_TYPE_PROVIDER] Mercadoria: ${_merchandiseDetails?.merchandiseType.name}');
-      print('📦 [MERCHANDISE_TYPE_PROVIDER] Entradas: ${_merchandiseDetails?.merchandises.length}');
+      print('MerchandiseTypeProvider: Entradas encontradas:');
+      print('   - Quantidade de entradas: ${entriesResponse.data.merchandises.length}');
       
+      return entriesResponse;
     } catch (e) {
-      print('❌ [MERCHANDISE_TYPE_PROVIDER] Erro ao carregar detalhes: $e');
-      _setError('Erro ao carregar detalhes da mercadoria: $e');
-      _merchandiseDetails = null;
+      print('MerchandiseTypeProvider: Erro ao buscar entradas: $e');
+      _setError('Erro ao buscar entradas do produto: $e');
+      return null;
     } finally {
-      print('🏁 [MERCHANDISE_TYPE_PROVIDER] Finalizando carregamento de detalhes');
-      _setLoadingDetails(false);
+      _setLoading(false);
     }
   }
 
@@ -224,21 +213,9 @@ class MerchandiseTypeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Limpar detalhes de mercadoria
-  void clearMerchandiseDetails() {
-    _merchandiseDetails = null;
-    _isLoadingDetails = false;
-    notifyListeners();
-  }
-
   // Métodos privados para gerenciar estado
   void _setLoading(bool loading) {
     _isLoading = loading;
-    notifyListeners();
-  }
-
-  void _setLoadingDetails(bool loading) {
-    _isLoadingDetails = loading;
     notifyListeners();
   }
 
