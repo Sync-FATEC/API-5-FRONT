@@ -342,22 +342,21 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Dropdown de Seção
-            Consumer<SectionProvider>(
-              builder: (context, sectionProvider, child) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Seção:',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Dropdown de Seção
+          Consumer<SectionProvider>(
+            builder: (context, sectionProvider, child) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Seção:',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                         color: Colors.black87,
                       ),
                     ),
@@ -375,6 +374,7 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
                           value: _selectedSection,
                           isExpanded: true,
                           hint: const Text('Selecione uma seção'),
+                          menuMaxHeight: 300,
                           items: sectionProvider.sections.map((section) {
                             return DropdownMenuItem<SectionModel>(
                               value: section,
@@ -479,52 +479,61 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
                       value: _selectedMerchandise,
                       isExpanded: true,
                       hint: const Text('Selecione um produto'),
+                      menuMaxHeight: 300,
                       items: filteredProducts.map((merchandise) {
                         return DropdownMenuItem<MerchandiseTypeModel>(
                           value: merchandise,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      merchandise.name,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w500,
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        merchandise.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
                                       ),
                                     ),
-                                  ),
-                                  if (merchandise.controlled)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.orange.shade100,
-                                        borderRadius: BorderRadius.circular(4),
-                                        border: Border.all(color: Colors.orange.shade300),
-                                      ),
-                                      child: Text(
-                                        'CONTROLADO',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.orange.shade700,
+                                    if (merchandise.controlled)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.orange.shade100,
+                                          borderRadius: BorderRadius.circular(4),
+                                          border: Border.all(color: Colors.orange.shade300),
+                                        ),
+                                        child: Text(
+                                          'CONTROLADO',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.orange.shade700,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                ],
-                              ),
-                              Text(
-                                'Disponível: ${merchandise.quantityTotal} ${merchandise.unitOfMeasure}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: merchandise.quantityTotal <= merchandise.minimumStock 
-                                    ? Colors.orange 
-                                    : Colors.grey.shade600,
+                                  ],
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Disponível: ${merchandise.quantityTotal} ${merchandise.unitOfMeasure}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: merchandise.quantityTotal <= merchandise.minimumStock 
+                                      ? Colors.orange 
+                                      : Colors.grey.shade600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       }).toList(),
@@ -607,6 +616,7 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
             
             // Campo de quantidade e botão adicionar
             Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
                   child: Column(
@@ -651,16 +661,23 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: _selectedMerchandise != null && _selectedMerchandise!.quantityTotal > 0 
-                    ? _addOrderItem 
-                    : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.bluePrimary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                SizedBox(
+                  height: 48,
+                  width: 56,
+                  child: ElevatedButton(
+                    onPressed: _selectedMerchandise != null && _selectedMerchandise!.quantityTotal > 0 
+                      ? _addOrderItem 
+                      : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.bluePrimary,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Icon(Icons.add, size: 24),
                   ),
-                  child: const Icon(Icons.add),
                 ),
               ],
             ),
@@ -674,7 +691,6 @@ class _CreateOrderFormState extends State<_CreateOrderForm> {
             ),
           ],
         ),
-      ),
     );
   }
 }

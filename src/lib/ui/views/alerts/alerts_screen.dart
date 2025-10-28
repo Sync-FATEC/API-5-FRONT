@@ -197,6 +197,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                             padding: const EdgeInsets.only(bottom: 12.0),
                             child: AlertCard(
                               alert: alert,
+                              showArrow: false,
                               onTap: () {
                                 // TODO: Implementar navegação para detalhes do alerta
                                 print(

@@ -36,10 +36,7 @@ class HttpClient {
       final uri = _buildUri(endpoint, queryParams);
       final defaultHeaders = await _defaultHeaders;
       final response = await http
-          .get(
-            uri,
-            headers: {...defaultHeaders, ...?headers},
-          )
+          .get(uri, headers: {...defaultHeaders, ...?headers})
           .timeout(timeoutDuration);
 
       return _handleResponse(response);
@@ -103,10 +100,7 @@ class HttpClient {
       final uri = _buildUri(endpoint);
       final defaultHeaders = await _defaultHeaders;
       final response = await http
-          .delete(
-            uri,
-            headers: {...defaultHeaders, ...?headers},
-          )
+          .delete(uri, headers: {...defaultHeaders, ...?headers})
           .timeout(timeoutDuration);
 
       return _handleResponse(response);
@@ -142,9 +136,11 @@ class HttpClient {
   static Uri _buildUri(String endpoint, [Map<String, dynamic>? queryParams]) {
     final uri = Uri.parse('$baseUrl$endpoint');
     if (queryParams != null && queryParams.isNotEmpty) {
-      return uri.replace(queryParameters: queryParams.map(
-        (key, value) => MapEntry(key, value.toString()),
-      ));
+      return uri.replace(
+        queryParameters: queryParams.map(
+          (key, value) => MapEntry(key, value.toString()),
+        ),
+      );
     }
     return uri;
   }
@@ -172,7 +168,7 @@ class HttpClient {
   // Tratar erros
   static HttpResponse _handleError(dynamic error) {
     String message = 'Erro de conexão';
-    
+
     if (error is SocketException) {
       message = 'Sem conexão com a internet';
     } else if (error is HttpException) {
@@ -215,6 +211,64 @@ class HttpClient {
       default:
         return 'Erro desconhecido';
     }
+  }
+
+  // GET Request para baixar bytes (arquivos)
+  static Future<HttpBytesResponse> getBytes(
+    String endpoint, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParams,
+  }) async {
+    try {
+      final uri = _buildUri(endpoint, queryParams);
+      final defaultHeaders = await _defaultHeaders;
+      final response = await http
+          .get(uri, headers: {...defaultHeaders, ...?headers})
+          .timeout(timeoutDuration);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return HttpBytesResponse(
+          statusCode: response.statusCode,
+          data: response.bodyBytes,
+          success: true,
+          message: 'Arquivo baixado com sucesso',
+        );
+      } else {
+        return HttpBytesResponse(
+          statusCode: response.statusCode,
+          data: null,
+          success: false,
+          message: 'Erro ao baixar arquivo: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return HttpBytesResponse(
+        statusCode: 0,
+        data: null,
+        success: false,
+        message: 'Erro ao baixar arquivo: $e',
+      );
+    }
+  }
+}
+
+// Classe para resposta HTTP com bytes
+class HttpBytesResponse {
+  final int statusCode;
+  final List<int>? data;
+  final bool success;
+  final String message;
+
+  HttpBytesResponse({
+    required this.statusCode,
+    required this.data,
+    required this.success,
+    required this.message,
+  });
+
+  @override
+  String toString() {
+    return 'HttpBytesResponse(statusCode: $statusCode, success: $success, message: $message, dataLength: ${data?.length})';
   }
 }
 

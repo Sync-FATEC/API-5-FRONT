@@ -411,6 +411,7 @@ class _UserEditModalState extends State<UserEditModal> {
                   labelText: 'Função',
                   border: OutlineInputBorder(),
                 ),
+                menuMaxHeight: 300,
                 items: _roleOptions.map((role) {
                   return DropdownMenuItem(
                     value: role,

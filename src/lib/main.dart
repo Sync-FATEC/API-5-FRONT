@@ -1,11 +1,13 @@
 import 'package:api2025/ui/views/alerts/alerts_screen.dart';
 import 'package:api2025/ui/views/merchandise/merchandise_menu_screen.dart';
 import 'package:api2025/ui/views/orders/orders_screen.dart';
+import 'package:api2025/ui/views/reports/reports_screen.dart';
 import 'package:api2025/ui/views/stock/stock_screen.dart';
 import 'package:api2025/ui/views/users/users_screen.dart';
 import 'package:api2025/ui/widgets/scan_or_manual_dialog.dart';
 import 'package:api2025/ui/views/orders/widgets/orders_list_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -17,6 +19,7 @@ import 'package:api2025/ui/views/profile/profile_screen.dart';
 import 'package:api2025/core/providers/user_provider.dart';
 import 'package:api2025/core/providers/stock_provider.dart';
 import 'package:api2025/core/providers/section_provider.dart';
+import 'package:api2025/core/providers/dashboard_provider.dart';
 import 'package:api2025/core/providers/merchandise_type_provider.dart';
 import 'package:api2025/core/providers/order_provider.dart';
 import 'package:api2025/core/providers/alert_provider.dart';
@@ -49,10 +52,18 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => MerchandiseTypeProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
         ChangeNotifierProvider(create: (_) => AlertProvider()),
+        ChangeNotifierProvider(create: (_) => DashboardProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-  title: 'Controle de estoque',
+        title: 'Controle de estoque',
+        locale: const Locale('pt', 'BR'),
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('pt', 'BR')],
         theme: ThemeData(
           scaffoldBackgroundColor: const Color(0xFFF9F9F9),
           colorScheme: ColorScheme.fromSeed(seedColor: AppColors.bluePrimary),
@@ -69,6 +80,7 @@ class MyApp extends StatelessWidget {
           '/orders': (context) => const OrdersScreen(),
           '/orders-list': (context) => const OrdersListScreen(),
           '/alerts': (context) => const AlertsScreen(),
+          '/dashboard': (context) => const ReportsScreen(),
           '/merchandise-menu': (context) {
             Function(String)? updateScanResult;
 
