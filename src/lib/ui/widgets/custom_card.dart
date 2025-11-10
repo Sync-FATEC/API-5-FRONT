@@ -11,6 +11,7 @@ class CustomCard extends StatelessWidget {
   final bool showArrow;
   final Function? onDelete;
   final Function? onEdit;
+  final Widget? trailing;
 
   const CustomCard({
     super.key,
@@ -23,6 +24,7 @@ class CustomCard extends StatelessWidget {
     this.showArrow = true,
     this.onDelete,
     this.onEdit,
+    this.trailing,
   });
 
   void _showOptionsBottomSheet(BuildContext context) {
@@ -158,8 +160,10 @@ class CustomCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Ícone de seta (condicional)
-            if (showArrow)
+            // Ações customizadas ou seta padrão
+            if (trailing != null)
+              trailing!
+            else if (showArrow)
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(

@@ -14,6 +14,9 @@ import 'package:api2025/ui/views/home/home_screen.dart';
 import 'package:api2025/ui/views/forgot_password/forgot_password_screen.dart';
 import 'package:api2025/ui/views/section/section_screen.dart';
 import 'package:api2025/ui/views/profile/profile_screen.dart';
+import 'package:api2025/ui/views/exam_types/exam_types_screen.dart';
+import 'package:api2025/ui/views/appointments/appointments_screen.dart';
+import 'package:api2025/ui/widgets/role_gate.dart';
 import 'package:api2025/core/providers/user_provider.dart';
 import 'package:api2025/core/providers/stock_provider.dart';
 import 'package:api2025/core/providers/section_provider.dart';
@@ -67,6 +70,15 @@ class MyApp extends StatelessWidget {
           '/orders': (context) => const OrdersScreen(),
           '/orders-list': (context) => const OrdersListScreen(),
           '/alerts': (context) => const AlertsScreen(),
+          // Novas rotas (Agenda e Tipos de Exame) com RBAC
+          '/exam-types': (context) => const RoleGate(
+                allowedRoles: ['COORDENADOR_AGENDA'],
+                child: ExamTypesScreen(),
+              ),
+          '/appointments': (context) => const RoleGate(
+                allowedRoles: ['PACIENTE', 'COORDENADOR_AGENDA'],
+                child: AppointmentsScreen(),
+              ),
           '/merchandise-menu': (context) {
             Function(String)? updateScanResult;
 
