@@ -23,6 +23,7 @@ class AppointmentsViewModel extends ChangeNotifier {
   // Estado
   List<AppointmentModel> _items = [];
   List<ExamTypeModel> _examTypes = [];
+  List<Map<String, dynamic>> _patients = [];
   bool _isLoading = false;
   String? _error;
 
@@ -36,6 +37,7 @@ class AppointmentsViewModel extends ChangeNotifier {
   // Getters
   List<AppointmentModel> get items => _items;
   List<ExamTypeModel> get examTypes => _examTypes;
+  List<Map<String, dynamic>> get patients => _patients;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -45,15 +47,46 @@ class AppointmentsViewModel extends ChangeNotifier {
   String? get filterExamTypeId => _filterExamTypeId;
   AppointmentStatus? get filterStatus => _filterStatus;
 
+  // Helpers de exibição
+  String examTypeNameById(String id) {
+    final idx = _examTypes.indexWhere((e) => e.id == id);
+    return idx >= 0 ? _examTypes[idx].name : id;
+  }
+
+  String patientNameById(String id) {
+    final idx = _patients.indexWhere((p) => (p['id'] ?? '').toString() == id);
+    if (idx >= 0) {
+      final p = _patients[idx];
+      final name = (p['name'] ?? p['nome'])?.toString();
+      if (name != null && name.isNotEmpty) return name;
+    }
+    return id;
+  }
+
   Future<void> initialize() async {
     _setLoading(true);
     try {
       _examTypes = await _examService.fetchExamTypes(isActive: true);
+      // Ordena alfabeticamente por nome
+      _examTypes.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
       _error = null;
     } catch (e) {
       _error = e.toString();
     }
     _setLoading(false);
+  }
+
+  Future<void> loadPatients({String query = ''}) async {
+    try {
+      final list = await _service.searchPatients(query);
+      // Ordena alfabeticamente por nome completo
+      list.sort((a, b) => (a['name'] ?? '').toString().toLowerCase().compareTo((b['name'] ?? '').toString().toLowerCase()));
+      _patients = list;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
   }
 
   Future<void> load({

@@ -19,7 +19,7 @@ void main() {
   group('ExamTypesViewModel', () {
     test('valida entrada inválida no cadastro', () async {
       final vm = ExamTypesViewModel(service: _FakeExamService());
-      await vm.initialize();
+      await vm.load();
 
       final invalid = ExamTypeModel(name: '', estimatedDuration: 0, isActive: true);
       final ok = await vm.create(invalid);

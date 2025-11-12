@@ -26,6 +26,8 @@ class UsersScreen extends StatelessWidget {
       {'value': 'SOLDADO', 'label': 'Soldado'},
       {'value': 'SUPERVISOR', 'label': 'Supervisor'},
       {'value': 'ADMIN', 'label': 'Administrador'},
+      // {'value': "COORDENADOR_AGENDA", 'label': 'Coordenador de Agenda'},
+      // {'value': 'PACIENTE', 'label': 'Paciente'},
     ];
 
     CustomModal.show(

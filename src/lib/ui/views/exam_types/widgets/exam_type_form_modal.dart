@@ -124,6 +124,11 @@ class _ExamTypeFormModalState extends State<ExamTypeFormModal> {
                     }
                     if (ok) {
                       Navigator.of(context).pop(true);
+                    } else if (vm.error != null) {
+                      // ignore: use_build_context_synchronously
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(vm.error!)),
+                      );
                     }
                   },
                   child: const Text('Salvar'),
