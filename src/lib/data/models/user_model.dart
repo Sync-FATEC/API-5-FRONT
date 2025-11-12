@@ -65,6 +65,10 @@ extension UserDisplayExtension on UserModel {
         return AppColors.orange;
       case 'SOLDADO':
         return AppColors.bluePrimary;
+      case 'COORDENADOR_AGENDA':
+        return AppColors.greenPrimary;
+      case 'PACIENTE':
+        return AppColors.bluePrimary;
       default:
         return AppColors.gray;
     }
@@ -78,6 +82,10 @@ extension UserDisplayExtension on UserModel {
         return 'Supervisor';
       case 'SOLDADO':
         return 'Soldado';
+      case 'COORDENADOR_AGENDA':
+        return 'Coordenador de Agenda';
+      case 'PACIENTE':
+        return 'Paciente';
       default:
         return role;
     }

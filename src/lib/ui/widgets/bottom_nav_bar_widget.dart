@@ -12,11 +12,43 @@ class BottomNavBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
-        // Verificar se o usuário é admin ou supervisor
-        final userRole = userProvider.apiUserData?.role.toLowerCase() ?? '';
+        // Papel do usuário
+        final role = userProvider.apiUserData?.role.toUpperCase() ?? '';
+
+        // Configuração específica para COORDENADOR_AGENDA (Gerente de Agendamentos)
+        if (role == 'COORDENADOR_AGENDA') {
+          final routes = <String>[
+            '/appointments',
+            '/exam-types',
+            '/patients',
+            '/profile',
+          ];
+
+          final items = const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(icon: Icon(Icons.event), label: 'AGENDAMENTOS'),
+            BottomNavigationBarItem(icon: Icon(Icons.biotech), label: 'EXAMES'),
+            BottomNavigationBarItem(icon: Icon(Icons.groups), label: 'PACIENTES'),
+            BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'CONTA'),
+          ];
+
+          return BottomNavigationBar(
+            currentIndex: currentIndex.clamp(0, items.length - 1),
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: Colors.blue,
+            unselectedItemColor: Colors.grey,
+            onTap: (index) {
+              if (index != currentIndex) {
+                Navigator.pushReplacementNamed(context, routes[index]);
+              }
+            },
+            items: items,
+          );
+        }
+
+        // Comportamento padrão existente (HOME/PEDIDOS/ALERTAS/GESTÃO/[USUÁRIOS]/PERFIL)
+        final userRole = role.toLowerCase();
         final showUsersTab = userRole == 'admin' || userRole == 'supervisor';
 
-        // Lista de rotas baseada na permissão
         final routes = showUsersTab
             ? [
                 '/home',
@@ -28,13 +60,11 @@ class BottomNavBarWidget extends StatelessWidget {
               ]
             : ['/home', '/orders', '/alerts', '/dashboard', '/profile'];
 
-        // Ajustar currentIndex se o usuário não tem permissão para "users"
         int adjustedIndex = currentIndex;
         if (!showUsersTab && currentIndex >= 4) {
           adjustedIndex = currentIndex - 1;
         }
 
-        // Lista de itens da barra de navegação
         final items = <BottomNavigationBarItem>[
           const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'HOME'),
           const BottomNavigationBarItem(
@@ -49,7 +79,6 @@ class BottomNavBarWidget extends StatelessWidget {
             icon: Icon(Icons.bar_chart),
             label: 'GESTÃO',
           ),
-          // Só adiciona o item "USUÁRIOS" se for admin ou supervisor
           if (showUsersTab)
             const BottomNavigationBarItem(
               icon: Icon(Icons.person_add_alt_1),

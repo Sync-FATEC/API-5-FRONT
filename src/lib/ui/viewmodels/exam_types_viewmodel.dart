@@ -1,0 +1,105 @@
+// lib/ui/viewmodels/exam_types_viewmodel.dart
+
+import 'package:flutter/material.dart';
+import '../../core/services/exam_service.dart';
+import '../../data/models/exam_type_model.dart';
+
+/// ViewModel para gerenciamento de Tipos de Exame
+/// - Controla estados de carregamento e erro
+/// - Expõe ações CRUD
+class ExamTypesViewModel extends ChangeNotifier {
+  final ExamService _service;
+
+  ExamTypesViewModel({ExamService? service}) : _service = service ?? ExamService();
+
+  // Estado
+  List<ExamTypeModel> _items = [];
+  ExamTypeModel? _selected;
+  bool _isLoading = false;
+  String? _error;
+
+  // Getters
+  List<ExamTypeModel> get items => _items;
+  ExamTypeModel? get selected => _selected;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+
+  Future<void> load({String? query, bool? isActive}) async {
+    _setLoading(true);
+    try {
+      _items = await _service.fetchExamTypes(query: query, isActive: isActive);
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+    }
+    _setLoading(false);
+  }
+
+  Future<bool> create(ExamTypeModel model) async {
+    // Validações simples
+    if (!model.isValidName) {
+      _error = 'Nome do exame é obrigatório';
+      notifyListeners();
+      return false;
+    }
+    if (!model.isValidDuration) {
+      _error = 'Duração estimada deve ser maior que 0 e menor que 480 minutos';
+      notifyListeners();
+      return false;
+    }
+
+    _setLoading(true);
+    try {
+      final created = await _service.createExamType(model);
+      _items = [created, ..._items];
+      _error = null;
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  Future<bool> update(String id, Map<String, dynamic> fields) async {
+    _setLoading(true);
+    try {
+      final updated = await _service.updateExamType(id, fields);
+      _items = _items.map((e) => e.id == id ? updated : e).toList();
+      _selected = updated;
+      _error = null;
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  Future<bool> remove(String id) async {
+    _setLoading(true);
+    try {
+      await _service.deleteExamType(id);
+      _items = _items.where((e) => e.id != id).toList();
+      _error = null;
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  void select(ExamTypeModel? model) {
+    _selected = model;
+    notifyListeners();
+  }
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+}

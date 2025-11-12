@@ -11,6 +11,7 @@ class CustomCard extends StatelessWidget {
   final bool showArrow;
   final Function? onDelete;
   final Function? onEdit;
+  final Widget? trailing;
 
   const CustomCard({
     super.key,
@@ -23,6 +24,7 @@ class CustomCard extends StatelessWidget {
     this.showArrow = true,
     this.onDelete,
     this.onEdit,
+    this.trailing,
   });
 
   void _showOptionsBottomSheet(BuildContext context) {
@@ -149,17 +151,24 @@ class CustomCard extends StatelessWidget {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: TextStyle(fontSize: 14, color: AppColors.gray),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            // Ícone de seta (condicional)
-            if (showArrow)
+            // Ações customizadas ou seta padrão
+            if (trailing != null)
+              trailing!
+            else if (showArrow)
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(

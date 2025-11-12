@@ -3,6 +3,9 @@ import 'package:api2025/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../viewmodels/login_viewmodel.dart'; // Importe a ViewModel
+import '../../../../core/routing/role_router.dart';
+import '../../../../core/providers/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -129,8 +132,19 @@ class _LoginFormState extends State<LoginForm> {
                             final success = await viewModel.login(email, password);
                             
                             if (success && context.mounted) {
-                              // Navegar para a tela de seleção de estoque
-                              Navigator.of(context).pushReplacementNamed('/stock-selection');
+                              // Redireciona baseado no role do usuário
+                              final userProvider = Provider.of<UserProvider>(context, listen: false);
+                              final role = roleFromString(userProvider.apiUserData?.role);
+                              final route = resolveRedirectRoute(role);
+
+                              if (route != null) {
+                                Navigator.of(context).pushReplacementNamed(route);
+                              } else {
+                                // Role não reconhecido — tratamento de erro
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Role do usuário não reconhecido. Contate o administrador.')),
+                                );
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(
