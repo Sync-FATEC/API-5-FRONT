@@ -54,11 +54,11 @@ class BottomNavBarWidget extends StatelessWidget {
                 '/home',
                 '/orders',
                 '/alerts',
-                '/management',
+                '/dashboard',
                 '/users',
                 '/profile',
               ]
-            : ['/home', '/orders', '/alerts', '/management', '/profile'];
+            : ['/home', '/orders', '/alerts', '/dashboard', '/profile'];
 
         int adjustedIndex = currentIndex;
         if (!showUsersTab && currentIndex >= 4) {

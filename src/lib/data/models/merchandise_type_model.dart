@@ -24,6 +24,9 @@ class MerchandiseTypeModel {
     });
 
     factory MerchandiseTypeModel.fromJson(Map<String, dynamic> json) {
+        print('MerchandiseTypeModel.fromJson: Dados recebidos: $json');
+        print('MerchandiseTypeModel.fromJson: Campo name: "${json['name']}"');
+        
         return MerchandiseTypeModel(
             id: json['id'],
             name: json['name'],
