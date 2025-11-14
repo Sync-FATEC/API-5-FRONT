@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../../viewmodels/login_viewmodel.dart'; // Importe a ViewModel
 import '../../../../core/routing/role_router.dart';
 import '../../../../core/providers/user_provider.dart';
-import 'package:provider/provider.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -53,19 +52,22 @@ class _LoginFormState extends State<LoginForm> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                 Row(
-                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                   children: [
-                     Image.asset('assets/LOGO1.png', height: 60),
-                     const Text(
-                       "Bem-vindo ao App de\ncontrole de estoque!",
-                       textAlign: TextAlign.center,
-                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                     ),
-                     Image.asset('assets/LOGO2.png', height: 60),
-                   ],
-                 ),
-                 const SizedBox(height: 50),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Image.asset('assets/LOGO1.png', height: 60),
+                    const Text(
+                      "Bem-vindo ao App de\ncontrole de estoque!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Image.asset('assets/LOGO2.png', height: 60),
+                  ],
+                ),
+                const SizedBox(height: 50),
 
                 // Conecte o controlador ao TextField
                 TextField(
@@ -128,35 +130,64 @@ class _LoginFormState extends State<LoginForm> {
                             // Pega o texto dos controladores e chama a ViewModel
                             final email = _emailController.text;
                             final password = _passwordController.text;
-                            
-                            final success = await viewModel.login(email, password);
-                            
-                            if (success && context.mounted) {
-                              // Redireciona baseado no role do usuário
-                              final userProvider = Provider.of<UserProvider>(context, listen: false);
-                              final role = roleFromString(userProvider.apiUserData?.role);
-                              final route = resolveRedirectRoute(role);
 
-                              if (route != null) {
-                                Navigator.of(context).pushReplacementNamed(route);
-                              } else {
-                                // Role não reconhecido — tratamento de erro
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Role do usuário não reconhecido. Contate o administrador.')),
-                                );
+                            final success = await viewModel.login(
+                              email,
+                              password,
+                            );
+
+                            if (success && context.mounted) {
+                              // Lógica de redirecionamento personalizada baseada no role
+                              final userProvider = Provider.of<UserProvider>(
+                                context,
+                                listen: false,
+                              );
+                              final role = roleFromString(
+                                userProvider.apiUserData?.role,
+                              );
+
+                              String? targetRoute;
+
+                              switch (role) {
+                                case Role.COORDENADOR_AGENDA:
+                                  // Coordenador vai para a tela de agendamentos
+                                  targetRoute = '/appointments';
+                                  break;
+                                case Role.PACIENTE:
+                                  // Paciente vai para a tela de listagem de agendamentos do paciente
+                                  targetRoute =
+                                      '/appointments'; // ou '/patient-appointments' se for uma rota específica
+                                  break;
+                                case Role.SOLDADO:
+                                case Role.SUPERVISOR:
+                                case Role.ADMIN:
+                                default:
+                                  // Todos os outros roles vão para seleção de estoque
+                                  targetRoute = '/stock-selection';
+                                  break;
                               }
+
+                              Navigator.of(
+                                context,
+                              ).pushReplacementNamed(targetRoute);
                             }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.bluePrimary,
-                            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 5,
+                              horizontal: 20,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5),
                             ),
                           ),
                           child: const Text(
                             'Entrar',
-                            style: TextStyle(fontSize: 18, color: AppColors.white),
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: AppColors.white,
+                            ),
                           ),
                         ),
                 ),

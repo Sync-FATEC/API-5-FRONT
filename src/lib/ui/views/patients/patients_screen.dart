@@ -6,6 +6,7 @@ import '../../widgets/background_header.dart';
 import '../../widgets/custom_card.dart';
 import '../../widgets/bottom_nav_bar_widget.dart';
 import '../../viewmodels/patients_viewmodel.dart';
+import '../users/users_management_screen.dart';
 
 class PatientsScreen extends StatefulWidget {
   const PatientsScreen({super.key});
@@ -23,6 +24,24 @@ class _PatientsScreenState extends State<PatientsScreen> {
     super.dispose();
   }
 
+  void _showUserRegistrationModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Cadastro de Usuário'),
+          content: const Text('Implementar formulário de cadastro aqui'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Fechar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -31,84 +50,39 @@ class _PatientsScreenState extends State<PatientsScreen> {
         builder: (context, vm, _) => Scaffold(
           body: Stack(
             children: [
-              const Header(title: 'PACIENTES', subtitle: 'CLÍNICA'),
-              Padding(
-                padding: const EdgeInsets.only(top: 120.0),
+              Column(
+                children: [
+                  const Header(title: 'Gerenciar Pacientes'),
+                ],
+              ),
+              Positioned(
+                top: 160, // Ajuste este valor para posicionar sobre o header
+                left: 16,
+                right: 16,
                 child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _searchCtrl,
-                              decoration: const InputDecoration(
-                                hintText: 'Buscar por nome ou e-mail',
-                                prefixIcon: Icon(Icons.search),
-                              ),
-                              onSubmitted: (txt) => vm.load(query: txt.trim()),
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: 'Buscar',
-                            icon: const Icon(Icons.search),
-                            onPressed: () => vm.load(query: _searchCtrl.text.trim()),
-                          ),
-                          IconButton(
-                            tooltip: 'Atualizar',
-                            icon: const Icon(Icons.refresh),
-                            onPressed: () => vm.load(query: vm.query),
-                          ),
-                        ],
-                      ),
+                    // Cards de ação
+                    CustomCard(
+                      iconData: Icons.person_add_alt_1_outlined,
+                      title: 'Cadastro de pacientes',
+                      subtitle: 'Cadastre novos pacientes no sistema',
+                      onTap: () {
+                        _showUserRegistrationModal(context);
+                      },
                     ),
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: () => vm.load(query: vm.query),
-                        child: ListView(
-                          padding: const EdgeInsets.all(16),
-                          children: [
-                            if (vm.isLoading)
-                              const Center(child: CircularProgressIndicator()),
-                            if (vm.error != null)
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(vm.error!, style: const TextStyle(color: Colors.red)),
-                              ),
-                            ...vm.items.map((p) => CustomCard(
-                                  iconData: Icons.person,
-                                  title: (p['name'] ?? p['nome'] ?? 'Sem nome').toString(),
-                                  subtitle: (p['email'] ?? 'Sem e-mail').toString(),
-                                  onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (_) => AlertDialog(
-                                        title: const Text('Detalhes do Paciente'),
-                                        content: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text('ID: ${(p['id'] ?? '').toString()}'),
-                                            Text('Nome: ${(p['name'] ?? p['nome'] ?? '').toString()}'),
-                                            Text('E-mail: ${(p['email'] ?? '').toString()}'),
-                                            if ((p['phone'] ?? '').toString().isNotEmpty)
-                                              Text('Telefone: ${(p['phone'] ?? '').toString()}'),
-                                          ],
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context),
-                                            child: const Text('Fechar'),
-                                          )
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                )),
-                          ],
-                        ),
-                      ),
+                    const SizedBox(height: 16),
+                    CustomCard(
+                      iconData: Icons.person_sharp,
+                      title: 'Gerenciar pacientes',
+                      subtitle: 'Visualize e gerencie pacientes cadastrados',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const UsersManagementScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -121,4 +95,3 @@ class _PatientsScreenState extends State<PatientsScreen> {
     );
   }
 }
-
