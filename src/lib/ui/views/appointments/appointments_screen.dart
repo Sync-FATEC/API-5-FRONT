@@ -109,7 +109,14 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                   iconData: Icons.event,
                                   title: 'Paciente: ${vm.patientNameById(a.patientId)}',
                                   subtitle:
-                                      'Exame: ${vm.examTypeNameById(a.examTypeId)} • ${DateFormat('dd/MM/yyyy HH:mm').format(a.dateTime.toLocal())}',
+                                      () {
+                                        final base = 'Exame: ${vm.examTypeNameById(a.examTypeId)} • ${DateFormat('dd/MM/yyyy HH:mm').format(a.dateTime.toLocal())}';
+                                        if (a.withdrawalDate != null) {
+                                          final r = DateFormat('dd/MM/yyyy HH:mm').format(a.withdrawalDate!.toLocal());
+                                          return '$base • Retirada: $r';
+                                        }
+                                        return base;
+                                      }(),
                                   onTap: () {
                                     if (isCoordinator) {
                                       AppointmentFormModal.show(context, initial: a).then((edited) {

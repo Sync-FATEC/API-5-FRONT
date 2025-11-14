@@ -49,6 +49,9 @@ class _AppointmentFormModalState extends State<AppointmentFormModal> {
   final _dateCtrl = TextEditingController();
   final _timeCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
+  final _retiradaDateCtrl = TextEditingController();
+  final _retiradaTimeCtrl = TextEditingController();
+  bool _retiradaCleared = false;
   AppointmentStatus _status = AppointmentStatus.agendado;
 
 
@@ -64,6 +67,11 @@ class _AppointmentFormModalState extends State<AppointmentFormModal> {
       _timeCtrl.text = '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
       _notesCtrl.text = i.notes ?? '';
       _status = i.status;
+      if (i.withdrawalDate != null) {
+        final rd = i.withdrawalDate!.toLocal();
+        _retiradaDateCtrl.text = '${rd.year}-${rd.month.toString().padLeft(2, '0')}-${rd.day.toString().padLeft(2, '0')}';
+        _retiradaTimeCtrl.text = '${rd.hour.toString().padLeft(2, '0')}:${rd.minute.toString().padLeft(2, '0')}';
+      }
     }
     // Carrega pacientes para o dropdown
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -77,6 +85,8 @@ class _AppointmentFormModalState extends State<AppointmentFormModal> {
     _dateCtrl.dispose();
     _timeCtrl.dispose();
     _notesCtrl.dispose();
+    _retiradaDateCtrl.dispose();
+    _retiradaTimeCtrl.dispose();
     super.dispose();
   }
 
@@ -101,6 +111,34 @@ class _AppointmentFormModalState extends State<AppointmentFormModal> {
     );
     if (time != null) {
       _timeCtrl.text = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    }
+  }
+
+  Future<void> _pickRetiradaDate(BuildContext context) async {
+    final now = DateTime.now();
+    final initialDate = now.add(const Duration(days: 0));
+    final date = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: now.subtract(const Duration(days: 1)),
+      lastDate: now.add(const Duration(days: 365)),
+    );
+    if (date != null) {
+      _retiradaDateCtrl.text = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      _retiradaCleared = false;
+      setState(() {});
+    }
+  }
+
+  Future<void> _pickRetiradaTime(BuildContext context) async {
+    final time = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 9, minute: 0),
+    );
+    if (time != null) {
+      _retiradaTimeCtrl.text = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      _retiradaCleared = false;
+      setState(() {});
     }
   }
 
@@ -238,6 +276,49 @@ class _AppointmentFormModalState extends State<AppointmentFormModal> {
               ],
             ),
             const SizedBox(height: 12),
+            // Campo opcional de retirada de material
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _retiradaDateCtrl,
+                    decoration: InputDecoration(
+                      labelText: 'Data de Retirada (opcional)',
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.calendar_today),
+                        onPressed: () => _pickRetiradaDate(context),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _retiradaTimeCtrl,
+                    decoration: InputDecoration(
+                      labelText: 'Hora de Retirada (opcional)',
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.watch_later),
+                        onPressed: () => _pickRetiradaTime(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  _retiradaDateCtrl.clear();
+                  _retiradaTimeCtrl.clear();
+                  _retiradaCleared = true;
+                  setState(() {});
+                },
+                child: const Text('Remover retirada'),
+              ),
+            ),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _notesCtrl,
               decoration: const InputDecoration(labelText: 'Observações'),
@@ -287,6 +368,18 @@ class _AppointmentFormModalState extends State<AppointmentFormModal> {
                         int.parse(timeParts[0]),
                         int.parse(timeParts[1]),
                       );
+                      DateTime? retiradaLocal;
+                      if (_retiradaDateCtrl.text.trim().isNotEmpty && _retiradaTimeCtrl.text.trim().isNotEmpty) {
+                        final rDateParts = _retiradaDateCtrl.text.trim().split('-');
+                        final rTimeParts = _retiradaTimeCtrl.text.trim().split(':');
+                        retiradaLocal = DateTime(
+                          int.parse(rDateParts[0]),
+                          int.parse(rDateParts[1]),
+                          int.parse(rDateParts[2]),
+                          int.parse(rTimeParts[0]),
+                          int.parse(rTimeParts[1]),
+                        );
+                      }
                       final model = AppointmentModel(
                         id: widget.initial?.id,
                         patientId: _selectedPatientId!,
@@ -294,12 +387,17 @@ class _AppointmentFormModalState extends State<AppointmentFormModal> {
                         dateTime: localDate.toUtc(),
                         status: _status,
                         notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+                        withdrawalDate: retiradaLocal?.toUtc(),
                       );
                       bool ok;
                       if (widget.initial == null) {
                         ok = await vm.create(model);
                       } else {
-                        ok = await vm.update(widget.initial!.id!, model.toJson());
+                        final fields = model.toJson();
+                        if (_retiradaCleared) {
+                          fields['dataRetirada'] = null;
+                        }
+                        ok = await vm.update(widget.initial!.id!, fields);
                       }
                       if (ok) {
                         // ignore: use_build_context_synchronously
