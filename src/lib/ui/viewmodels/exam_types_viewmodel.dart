@@ -63,6 +63,11 @@ class ExamTypesViewModel extends ChangeNotifier {
   }
 
   Future<bool> update(String id, Map<String, dynamic> fields) async {
+    if (id.isEmpty) {
+      _error = 'ID do tipo de exame é obrigatório para atualização';
+      notifyListeners();
+      return false;
+    }
     _setLoading(true);
     try {
       final updated = await _service.updateExamType(id, fields);

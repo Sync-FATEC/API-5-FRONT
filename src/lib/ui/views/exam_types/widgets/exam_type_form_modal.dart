@@ -12,10 +12,15 @@ class ExamTypeFormModal extends StatefulWidget {
   const ExamTypeFormModal({super.key, this.initial});
 
   static Future<bool?> show(BuildContext context, {ExamTypeModel? initial}) {
+    // Garante acesso ao ExamTypesViewModel dentro do modal
+    final vm = Provider.of<ExamTypesViewModel>(context, listen: false);
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ExamTypeFormModal(initial: initial),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: vm,
+        child: ExamTypeFormModal(initial: initial),
+      ),
     );
   }
 
@@ -30,6 +35,7 @@ class _ExamTypeFormModalState extends State<ExamTypeFormModal> {
   final _durationCtrl = TextEditingController();
   final _prepCtrl = TextEditingController();
   bool _isActive = true;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -106,32 +112,64 @@ class _ExamTypeFormModalState extends State<ExamTypeFormModal> {
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: () async {
-                    if (!_formKey.currentState!.validate()) return;
-                    final model = ExamTypeModel(
-                      id: widget.initial?.id,
-                      name: _nameCtrl.text.trim(),
-                      description: _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
-                      estimatedDuration: int.tryParse(_durationCtrl.text.trim()) ?? 0,
-                      requiredPreparation: _prepCtrl.text.trim().isEmpty ? null : _prepCtrl.text.trim(),
-                      isActive: _isActive,
-                    );
-                    bool ok;
-                    if (widget.initial == null) {
-                      ok = await vm.create(model);
-                    } else {
-                      ok = await vm.update(widget.initial!.id!, model.toJson());
-                    }
-                    if (ok) {
-                      Navigator.of(context).pop(true);
-                    } else if (vm.error != null) {
-                      // ignore: use_build_context_synchronously
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(vm.error!)),
-                      );
-                    }
-                  },
-                  child: const Text('Salvar'),
+                  onPressed: _isSubmitting
+                      ? null
+                      : () async {
+                          if (!_formKey.currentState!.validate()) return;
+                          setState(() => _isSubmitting = true);
+                          try {
+                            final duration = int.tryParse(_durationCtrl.text.trim()) ?? 0;
+                            final model = ExamTypeModel(
+                              id: widget.initial?.id,
+                              name: _nameCtrl.text.trim(),
+                              description: _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
+                              estimatedDuration: duration,
+                              requiredPreparation: _prepCtrl.text.trim().isEmpty ? null : _prepCtrl.text.trim(),
+                              isActive: _isActive,
+                            );
+
+                            bool ok = false;
+                            if (widget.initial == null) {
+                              ok = await vm.create(model);
+                            } else {
+                              final id = widget.initial?.id;
+                              if (id == null || id.isEmpty) {
+                                vm.select(null);
+                                // ignore: use_build_context_synchronously
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('ID do tipo de exame inválido para edição')),
+                                );
+                              } else {
+                                // Enviar apenas campos atualizáveis (sem id/isActive)
+                                final fields = {
+                                  'nome': model.name,
+                                  'descricao': model.description,
+                                  'duracaoEstimada': model.estimatedDuration,
+                                  'preparoNecessario': model.requiredPreparation,
+                                };
+                                ok = await vm.update(id, fields);
+                              }
+                            }
+
+                            if (ok) {
+                              if (!mounted) return;
+                              Navigator.of(context).pop(true);
+                            } else if (vm.error != null) {
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(vm.error!)),
+                              );
+                            }
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Erro ao salvar: $e')),
+                            );
+                          } finally {
+                            if (mounted) setState(() => _isSubmitting = false);
+                          }
+                        },
+                  child: Text(_isSubmitting ? 'Salvando...' : 'Salvar'),
                 ),
               ],
             ),
