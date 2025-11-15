@@ -60,7 +60,6 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   // Inicializar usuário ao abrir o app
   Future<void> _initializeUser() async {
     _setLoading(true);
@@ -397,22 +396,22 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-    Future<void> fetchAllUsers() async {
-      _isLoading = true;
-      _errorMessage = null;
-      notifyListeners();
+  Future<void> fetchAllUsers() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
-      try {
-        // Supondo que o serviço retorne List<UserModel>
-        _allUsers = await _apiService.getAllUsers();
-      } catch (e) {
-        _errorMessage = 'Erro ao carregar usuários: ${e.toString()}';
-        _allUsers = [];
-      } finally {
-        _isLoading = false;
-        notifyListeners();
-      }
+    try {
+      // Supondo que o serviço retorne List<UserModel>
+      _allUsers = await _apiService.getAllUsers();
+    } catch (e) {
+      _errorMessage = 'Erro ao carregar usuários: ${e.toString()}';
+      _allUsers = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
+  }
 
   // Atualizar usuário
   Future<bool> updateUser(

@@ -213,14 +213,43 @@ class ApiService {
     print(
       'ApiService: Fazendo chamada para /auth/register - Nome: $name, Email: $email, Role: $role',
     );
+
+    // O backend espera um array de usuários dentro de uma chave "users"
+    final requestBody = <String, dynamic>{
+      'users': [
+        {
+          'name': name,
+          'email': email.toLowerCase(),
+          'role': role,
+        }
+      ],
+    };
+
+    print('ApiService: Corpo da requisição: $requestBody');
+
     try {
       final response = await HttpClient.post(
         '/auth/register',
-        body: {'name': name, 'email': email, 'role': role},
+        body: requestBody,
       );
 
+      print('ApiService: Status da resposta: ${response.statusCode}');
+      print('ApiService: Sucesso: ${response.success}');
+      print('ApiService: Dados da resposta: ${response.data}');
+      print('ApiService: Mensagem: ${response.message}');
+
       if (response.success && response.data != null) {
-        return UserApiResponse.fromJson(response.data!);
+        // A resposta pode vir com um array de usuários em data
+        final responseData = response.data!;
+        if (responseData['data'] is List && (responseData['data'] as List).isNotEmpty) {
+          // Pegar o primeiro usuário criado
+          final userData = (responseData['data'] as List)[0];
+          return UserApiResponse.fromJson({'data': userData});
+        } else if (responseData['data'] != null) {
+          return UserApiResponse.fromJson(responseData);
+        } else {
+          return UserApiResponse.fromJson(responseData);
+        }
       } else {
         throw Exception(response.message);
       }
