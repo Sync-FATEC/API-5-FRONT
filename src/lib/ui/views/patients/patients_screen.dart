@@ -8,7 +8,7 @@ import '../../widgets/custom_card.dart';
 import '../../widgets/custom_modal.dart';
 import '../../widgets/bottom_nav_bar_widget.dart';
 import '../../viewmodels/patients_viewmodel.dart';
-import '../users/users_management_screen.dart';
+import 'patients_management_screen.dart';
 
 class PatientsScreen extends StatefulWidget {
   const PatientsScreen({super.key});
@@ -165,7 +165,7 @@ class _PatientsScreenState extends State<PatientsScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const UsersManagementScreen(),
+                            builder: (context) => const PatientsManagementScreen(),
                           ),
                         );
                       },

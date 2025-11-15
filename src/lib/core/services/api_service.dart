@@ -404,20 +404,45 @@ class ApiService {
 
       print('ApiService: Response success: ${response.success}');
       print('ApiService: Response data: ${response.data}');
+      print('ApiService: Response data type: ${response.data.runtimeType}');
 
       if (response.success && response.data != null) {
-        // O backend retorna { data: { stocks: [...] } }
-        final Map<String, dynamic> responseData = response.data!['data'] ?? {};
-        final List<dynamic> stocks = responseData['stocks'] ?? [];
-        print('ApiService: Stocks encontrados: ${stocks.length}');
-        print('ApiService: Stocks data: $stocks');
-        return stocks;
+        // O backend retorna { success: true, data: [array], message: "..." }
+        if (response.data is Map) {
+          final Map<String, dynamic> responseData = response.data as Map<String, dynamic>;
+          // O campo 'data' contém o array de estoques
+          if (responseData.containsKey('data')) {
+            final data = responseData['data'];
+            if (data is List) {
+              final List<dynamic> stocks = data;
+              print('ApiService: Stocks encontrados: ${stocks.length}');
+              print('ApiService: Stocks data: $stocks');
+              return stocks;
+            } else {
+              print('ApiService: Campo data não é uma lista');
+              return [];
+            }
+          } else {
+            print('ApiService: Campo data não encontrado na resposta');
+            return [];
+          }
+        } else if (response.data is List) {
+          // Se a resposta já for uma lista diretamente (caso raro)
+          final List<dynamic> stocks = response.data as List<dynamic>;
+          print('ApiService: Stocks encontrados (lista direta): ${stocks.length}');
+          return stocks;
+        } else {
+          print('ApiService: Formato de resposta inesperado: ${response.data.runtimeType}');
+          return [];
+        }
       } else {
         throw Exception(response.message);
       }
     } catch (e) {
       print('ApiService: Erro na chamada: $e');
-      throw Exception('Erro ao buscar estoques do usuário: $e');
+      // Retornar lista vazia em caso de erro ao invés de lançar exceção
+      // Isso evita quebrar a UI para pacientes que não têm estoques
+      return [];
     }
   }
 

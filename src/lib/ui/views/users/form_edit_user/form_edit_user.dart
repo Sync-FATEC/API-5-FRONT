@@ -22,7 +22,10 @@ class UserEditHelper {
         availableStocks: availableStocks,
         onSuccess: onSuccess,
       ),
-    );
+    ).then((_) {
+      // Chamar onSuccess quando o modal for fechado por qualquer motivo
+      onSuccess();
+    });
   }
 }
 
@@ -52,7 +55,7 @@ class _UserEditModalState extends State<UserEditModal> {
   List<String> _userStockIds = [];
   List<StockModel> _userStocks = [];
 
-  final List<String> _roleOptions = ['ADMIN', 'SUPERVISOR', 'SOLDADO'];
+  final List<String> _roleOptions = ['ADMIN', 'SUPERVISOR', 'SOLDADO', 'PACIENTE'];
 
   @override
   void initState() {
@@ -84,7 +87,22 @@ class _UserEditModalState extends State<UserEditModal> {
       print('Estoques carregados: $stocks');
       
       setState(() {
-        _userStockIds = stocks.map((stock) => stock['stockId'] as String).toList();
+        // Verificar se stocks é uma lista de Maps ou uma lista simples
+        if (stocks.isNotEmpty && stocks[0] is Map) {
+          _userStockIds = stocks.map((stock) {
+            if (stock is Map) {
+              return stock['stockId'] as String? ?? stock['id'] as String? ?? '';
+            }
+            return '';
+          }).where((id) => id.isNotEmpty).toList();
+        } else {
+          // Se não for uma lista de Maps, tentar tratar como lista de strings (IDs)
+          _userStockIds = stocks
+              .where((stock) => stock is String)
+              .map((stock) => stock as String)
+              .toList();
+        }
+        
         _userStocks = widget.availableStocks
             .where((stock) => _userStockIds.contains(stock.id))
             .toList();
@@ -94,7 +112,14 @@ class _UserEditModalState extends State<UserEditModal> {
       });
     } catch (e) {
       print('Erro ao carregar estoques do usuário: $e');
-      _showSnackBar('Erro ao carregar estoques do usuário: $e');
+      // Não mostrar erro para pacientes, pois eles não têm estoques vinculados
+      if (widget.user.role.toUpperCase() != 'PACIENTE') {
+        _showSnackBar('Erro ao carregar estoques do usuário: $e');
+      }
+      setState(() {
+        _userStockIds = [];
+        _userStocks = [];
+      });
     } finally {
       setState(() => _isLoading = false);
     }
