@@ -20,6 +20,20 @@ class ExamTypesScreen extends StatefulWidget {
 }
 
 class _ExamTypesScreenState extends State<ExamTypesScreen> {
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -53,7 +67,7 @@ class _ExamTypesScreenState extends State<ExamTypesScreen> {
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(30),
                               border: Border.all(
                                 color: AppColors.bluePrimary.withOpacity(0.3),
                               ),
@@ -66,6 +80,7 @@ class _ExamTypesScreenState extends State<ExamTypesScreen> {
                               ],
                             ),
                             child: TextField(
+                              controller: _searchController,
                               decoration: const InputDecoration(
                                 hintText: 'Buscar por nome',
                                 prefixIcon: Icon(
@@ -78,9 +93,9 @@ class _ExamTypesScreenState extends State<ExamTypesScreen> {
                                   vertical: 12,
                                 ),
                               ),
-                              onSubmitted: (txt) => vm.load(
+                              onChanged: (txt) => vm.load(
                                 query: txt.trim(),
-                                isActive: vm.isLoading ? null : true,
+                                isActive: true,
                               ),
                             ),
                           ),

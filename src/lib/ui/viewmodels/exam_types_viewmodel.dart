@@ -13,13 +13,15 @@ class ExamTypesViewModel extends ChangeNotifier {
   ExamTypesViewModel({ExamService? service}) : _service = service ?? ExamService();
 
   // Estado
-  List<ExamTypeModel> _items = [];
+  List<ExamTypeModel> _allItems = [];
+  List<ExamTypeModel> _filteredItems = [];
   ExamTypeModel? _selected;
   bool _isLoading = false;
   String? _error;
+  String? _currentQuery;
 
   // Getters
-  List<ExamTypeModel> get items => _items;
+  List<ExamTypeModel> get items => _filteredItems;
   ExamTypeModel? get selected => _selected;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -27,12 +29,27 @@ class ExamTypesViewModel extends ChangeNotifier {
   Future<void> load({String? query, bool? isActive}) async {
     _setLoading(true);
     try {
-      _items = await _service.fetchExamTypes(query: query, isActive: isActive);
+      // Carrega sempre sem query para ter a lista completa
+      _allItems = await _service.fetchExamTypes(isActive: isActive);
+      _currentQuery = query;
+      _applyFilter();
       _error = null;
     } catch (e) {
       _error = e.toString();
     }
     _setLoading(false);
+  }
+
+  void _applyFilter() {
+    if (_currentQuery == null || _currentQuery!.isEmpty) {
+      _filteredItems = _allItems;
+    } else {
+      final queryLower = _currentQuery!.toLowerCase();
+      _filteredItems = _allItems
+          .where((item) => item.name.toLowerCase().contains(queryLower))
+          .toList();
+    }
+    notifyListeners();
   }
 
   Future<bool> create(ExamTypeModel model) async {
@@ -51,7 +68,8 @@ class ExamTypesViewModel extends ChangeNotifier {
     _setLoading(true);
     try {
       final created = await _service.createExamType(model);
-      _items = [created, ..._items];
+      _allItems = [created, ..._allItems];
+      _applyFilter();
       _error = null;
       _setLoading(false);
       return true;
@@ -71,7 +89,8 @@ class ExamTypesViewModel extends ChangeNotifier {
     _setLoading(true);
     try {
       final updated = await _service.updateExamType(id, fields);
-      _items = _items.map((e) => e.id == id ? updated : e).toList();
+      _allItems = _allItems.map((e) => e.id == id ? updated : e).toList();
+      _applyFilter();
       _selected = updated;
       _error = null;
       _setLoading(false);
@@ -87,7 +106,8 @@ class ExamTypesViewModel extends ChangeNotifier {
     _setLoading(true);
     try {
       await _service.deleteExamType(id);
-      _items = _items.where((e) => e.id != id).toList();
+      _allItems = _allItems.where((e) => e.id != id).toList();
+      _applyFilter();
       _error = null;
       _setLoading(false);
       return true;

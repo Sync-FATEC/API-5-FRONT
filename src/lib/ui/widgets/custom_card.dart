@@ -12,6 +12,8 @@ class CustomCard extends StatelessWidget {
   final Function? onDelete;
   final Function? onEdit;
   final Widget? trailing;
+  final String? additionalInfo;
+  final Widget? bottomWidget;
 
   const CustomCard({
     super.key,
@@ -25,6 +27,8 @@ class CustomCard extends StatelessWidget {
     this.onDelete,
     this.onEdit,
     this.trailing,
+    this.additionalInfo,
+    this.bottomWidget,
   });
 
   void _showOptionsBottomSheet(BuildContext context) {
@@ -109,7 +113,84 @@ class CustomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final mainContent = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Círculo do Ícone
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: iconBackgroundColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(iconData, size: 45, color: iconColor),
+        ),
+        const SizedBox(width: 16),
+        // Coluna com Título e Subtítulo
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: TextStyle(fontSize: 14, color: AppColors.gray),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (additionalInfo != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  additionalInfo!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.gray,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: null,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ],
+          ),
+        ),
+        // Ações customizadas ou seta padrão
+        if (trailing != null)
+          trailing!
+        else if (showArrow)
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: AppColors.black.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.arrow_forward_ios,
+              color: AppColors.black,
+              size: 12,
+            ),
+          ),
+      ],
+    );
+
+    final cardContent = bottomWidget != null
+        ? Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [mainContent, const SizedBox(height: 12), bottomWidget!],
+          )
+        : mainContent;
+
+    final mainCard = GestureDetector(
       onLongPress: (onDelete != null || onEdit != null)
           ? () {
               _showOptionsBottomSheet(context);
@@ -124,63 +205,10 @@ class CustomCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: AppColors.gray.withOpacity(0.3), width: 1),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Círculo do Ícone
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: iconBackgroundColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(iconData, size: 45, color: iconColor),
-            ),
-            const SizedBox(width: 16),
-            // Coluna com Título e Subtítulo
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(fontSize: 14, color: AppColors.gray),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            // Ações customizadas ou seta padrão
-            if (trailing != null)
-              trailing!
-            else if (showArrow)
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: AppColors.black.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppColors.black,
-                  size: 12,
-                ),
-              ),
-          ],
-        ),
+        child: cardContent,
       ),
     );
+
+    return mainCard;
   }
 }
