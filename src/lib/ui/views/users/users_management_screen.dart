@@ -18,11 +18,7 @@ class UsersManagementScreen extends StatefulWidget {
 class _UsersManagementScreenState extends State<UsersManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedFilter = 'TODOS';
-  final List<String> _filterOptions = [
-    'TODOS',
-    'SUPERVISOR',
-    'SOLDADO',
-  ];
+  final List<String> _filterOptions = ['TODOS', 'SUPERVISOR', 'SOLDADO'];
 
   @override
   void initState() {
@@ -90,8 +86,34 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                       );
 
                       if (filteredUsers.isEmpty) {
-                        return const Center(
-                          child: Text('Nenhum usuário encontrado.'),
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.person_off_outlined,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Nenhum usuário encontrado',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'com essa busca ou filtro',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
                         );
                       }
 
@@ -116,16 +138,13 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
             ),
           ),
         ],
-      )
+      ),
     );
   }
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8.0,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: TextField(
         controller: _searchController,
         onChanged: (value) {
@@ -169,7 +188,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
     final usersWithoutAdmins = users
         .where((user) => user.role.toUpperCase() != 'ADMIN')
         .toList();
-    
+
     if (_selectedFilter == 'TODOS') {
       return usersWithoutAdmins;
     }

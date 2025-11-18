@@ -2,13 +2,7 @@
 import 'package:flutter/foundation.dart';
 
 /// Enum de roles suportados pelo app
-enum Role {
-  SOLDADO,
-  SUPERVISOR,
-  ADMIN,
-  COORDENADOR_AGENDA,
-  PACIENTE,
-}
+enum Role { SOLDADO, SUPERVISOR, ADMIN, COORDENADOR_AGENDA, PACIENTE }
 
 /// Converte string (case-insensitive) para Role
 Role? roleFromString(String? value) {
@@ -50,4 +44,3 @@ String? resolveRedirectRoute(Role? role) {
       return '/stock-selection';
   }
 }
-

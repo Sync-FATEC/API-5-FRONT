@@ -12,7 +12,8 @@ class PatientsManagementScreen extends StatefulWidget {
   const PatientsManagementScreen({super.key});
 
   @override
-  State<PatientsManagementScreen> createState() => _PatientsManagementScreenState();
+  State<PatientsManagementScreen> createState() =>
+      _PatientsManagementScreenState();
 }
 
 class _PatientsManagementScreenState extends State<PatientsManagementScreen> {
@@ -87,8 +88,34 @@ class _PatientsManagementScreenState extends State<PatientsManagementScreen> {
                       final patients = _getPatients(provider.filteredUsers);
 
                       if (patients.isEmpty) {
-                        return const Center(
-                          child: Text('Nenhum paciente encontrado.'),
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.people_outline,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Nenhum paciente encontrado',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'com essa busca',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
                         );
                       }
 
@@ -101,7 +128,8 @@ class _PatientsManagementScreenState extends State<PatientsManagementScreen> {
                             final patient = patients[index];
                             return _PatientCard(
                               patient: patient,
-                              onTap: () => _showEditPatientModal(context, patient),
+                              onTap: () =>
+                                  _showEditPatientModal(context, patient),
                             );
                           },
                         ),
@@ -119,10 +147,7 @@ class _PatientsManagementScreenState extends State<PatientsManagementScreen> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8.0,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: TextField(
         controller: _searchController,
         onChanged: (value) {
@@ -188,7 +213,9 @@ class _PatientCard extends StatelessWidget {
                   CircleAvatar(
                     backgroundColor: patient.roleColor.withOpacity(0.1),
                     child: Text(
-                      patient.name.isNotEmpty ? patient.name[0].toUpperCase() : '?',
+                      patient.name.isNotEmpty
+                          ? patient.name[0].toUpperCase()
+                          : '?',
                       style: TextStyle(
                         color: patient.roleColor,
                         fontWeight: FontWeight.bold,
@@ -243,7 +270,9 @@ class _PatientCard extends StatelessWidget {
                       Row(
                         children: [
                           Icon(
-                            patient.isActive ? Icons.check_circle : Icons.cancel,
+                            patient.isActive
+                                ? Icons.check_circle
+                                : Icons.cancel,
                             color: patient.isActive ? Colors.green : Colors.red,
                             size: 16,
                           ),
@@ -252,7 +281,9 @@ class _PatientCard extends StatelessWidget {
                             patient.isActive ? 'Ativo' : 'Inativo',
                             style: TextStyle(
                               fontSize: 12,
-                              color: patient.isActive ? Colors.green : Colors.red,
+                              color: patient.isActive
+                                  ? Colors.green
+                                  : Colors.red,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -284,4 +315,3 @@ class _PatientCard extends StatelessWidget {
     );
   }
 }
-

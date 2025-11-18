@@ -65,7 +65,7 @@ class OrdersScreen extends StatelessWidget {
           ),
         ],
       ),
-      // Barra de navegação inferior removida
+      bottomNavigationBar: const BottomNavBarWidget(currentIndex: 1),
     );
   }
 

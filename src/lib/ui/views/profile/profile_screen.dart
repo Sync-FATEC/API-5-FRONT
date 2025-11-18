@@ -77,7 +77,7 @@ class ProfileScreen extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 20),
               child: Consumer<UserProvider>(
                 builder: (context, userProvider, child) {
-                  // Verificar se o usuário é admin ou supervisor
+                  // Verificar o papel do usuário
                   final userRole =
                       userProvider.apiUserData?.role.toLowerCase() ?? '';
                   final canChangeAccess =
@@ -97,13 +97,15 @@ class ProfileScreen extends StatelessWidget {
                           }
                         },
                       ),
-                      _buildMenuItem(
-                        icon: Icons.sync,
-                        title: 'Alterar acesso',
-                        onTap: () {
-                          _navigateToChangeStock(context);
-                        },
-                      ),
+                      // Mostrar "Alterar acesso" apenas para admin e supervisor
+                      if (canChangeAccess)
+                        _buildMenuItem(
+                          icon: Icons.sync,
+                          title: 'Alterar acesso',
+                          onTap: () {
+                            _navigateToChangeStock(context);
+                          },
+                        ),
                       _buildMenuItem(
                         icon: Icons.exit_to_app,
                         title: 'Sair',
@@ -119,7 +121,15 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: const BottomNavBarWidget(currentIndex: 5),
+      bottomNavigationBar: Consumer<UserProvider>(
+        builder: (context, userProvider, _) {
+          final userRole = userProvider.apiUserData?.role.toUpperCase() ?? '';
+          // Para PACIENTE, o índice é 1 (PERFIL é o segundo item)
+          // Para outros, o índice é 5
+          final navIndex = userRole == 'PACIENTE' ? 1 : 5;
+          return BottomNavBarWidget(currentIndex: navIndex);
+        },
+      ),
     );
   }
 
@@ -151,6 +161,8 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _navigateToChangeStock(BuildContext context) {
-    Navigator.of(context).pushNamedAndRemoveUntil('/stock-selection',(route) => false,);
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil('/stock-selection', (route) => false);
   }
 }
