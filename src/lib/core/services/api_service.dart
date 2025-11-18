@@ -210,8 +210,12 @@ class ApiService {
     String email,
     String role,
   ) async {
+    final normalizedRole = role.toUpperCase();
+    final isPatient = normalizedRole == 'PACIENTE';
+    final endpoint = isPatient ? '/auth/register' : '/auth/users';
+
     print(
-      'ApiService: Fazendo chamada para /auth/register - Nome: $name, Email: $email, Role: $role',
+      'ApiService: Fazendo chamada para $endpoint - Nome: $name, Email: $email, Role: $role',
     );
 
     // O backend espera um array de usuários dentro de uma chave "users"
@@ -229,7 +233,7 @@ class ApiService {
 
     try {
       final response = await HttpClient.post(
-        '/auth/register',
+        endpoint,
         body: requestBody,
       );
 
