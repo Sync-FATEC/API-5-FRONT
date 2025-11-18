@@ -15,6 +15,32 @@ class BottomNavBarWidget extends StatelessWidget {
         // Papel do usuário
         final role = userProvider.apiUserData?.role.toUpperCase() ?? '';
 
+        // Configuração específica para PACIENTE (Paciente - apenas HOME e PERFIL)
+        if (role == 'PACIENTE') {
+          final routes = <String>['/home', '/profile'];
+
+          final items = const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'HOME'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              label: 'PERFIL',
+            ),
+          ];
+
+          return BottomNavigationBar(
+            currentIndex: currentIndex.clamp(0, items.length - 1),
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: Colors.blue,
+            unselectedItemColor: Colors.grey,
+            onTap: (index) {
+              if (index != currentIndex) {
+                Navigator.pushReplacementNamed(context, routes[index]);
+              }
+            },
+            items: items,
+          );
+        }
+
         // Configuração específica para COORDENADOR_AGENDA (Gerente de Agendamentos)
         if (role == 'COORDENADOR_AGENDA') {
           final routes = <String>[
@@ -25,10 +51,19 @@ class BottomNavBarWidget extends StatelessWidget {
           ];
 
           final items = const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(icon: Icon(Icons.event), label: 'AGENDAMENTOS'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.event),
+              label: 'AGENDAMENTOS',
+            ),
             BottomNavigationBarItem(icon: Icon(Icons.biotech), label: 'EXAMES'),
-            BottomNavigationBarItem(icon: Icon(Icons.groups), label: 'PACIENTES'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'CONTA'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.groups),
+              label: 'PACIENTES',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              label: 'CONTA',
+            ),
           ];
 
           return BottomNavigationBar(

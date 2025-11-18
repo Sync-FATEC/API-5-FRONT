@@ -37,39 +37,52 @@ class _ExamTypesScreenState extends State<ExamTypesScreen> {
           ),
           body: Stack(
             children: [
-              const Header(title: 'TIPOS DE EXAME', subtitle: 'GERENCIAMENTO'),
+              const Header(title: 'TIPOS DE EXAME'),
               Padding(
                 padding: const EdgeInsets.only(top: 120.0),
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
+                      ),
+                      child: Column(
                         children: [
-                          Expanded(
+                          // Campo de busca
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: AppColors.bluePrimary.withOpacity(0.3),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
                             child: TextField(
                               decoration: const InputDecoration(
-                                hintText: 'Buscar por nome ou descrição',
-                                prefixIcon: Icon(Icons.search),
+                                hintText: 'Buscar por nome',
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  color: AppColors.bluePrimary,
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 12,
+                                ),
                               ),
-                              onSubmitted: (txt) => vm.load(query: txt.trim(), isActive: vm.isLoading ? null : true),
+                              onSubmitted: (txt) => vm.load(
+                                query: txt.trim(),
+                                isActive: vm.isLoading ? null : true,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          DropdownButton<bool?>(
-                            value: true,
-                            hint: const Text('Status'),
-                            items: const [
-                              DropdownMenuItem(value: null, child: Text('Todos')),
-                              DropdownMenuItem(value: true, child: Text('Ativos')),
-                              DropdownMenuItem(value: false, child: Text('Inativos')),
-                            ],
-                            onChanged: (v) => vm.load(isActive: v),
-                          ),
-                          IconButton(
-                            tooltip: 'Atualizar',
-                            icon: const Icon(Icons.refresh),
-                            onPressed: () => vm.load(isActive: true),
                           ),
                         ],
                       ),
@@ -77,62 +90,140 @@ class _ExamTypesScreenState extends State<ExamTypesScreen> {
                     Expanded(
                       child: RefreshIndicator(
                         onRefresh: () => vm.load(isActive: true),
-                        child: ListView(
-                          padding: const EdgeInsets.all(16),
-                          children: [
-                          if (vm.isLoading)
-                            const Center(child: CircularProgressIndicator()),
-                          if (vm.error != null)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(vm.error!, style: const TextStyle(color: Colors.red)),
-                            ),
-                          ...vm.items.map(
-                            (e) => CustomCard(
-                              iconData: Icons.biotech,
-                              title: e.name,
-                              subtitle: e.description ?? 'Sem descrição',
-                              onTap: () async {
-                            await ExamTypeDetailModal.show(context, e);
-                              },
-                              showArrow: false,
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
+                        child:
+                            !vm.isLoading &&
+                                vm.error == null &&
+                                vm.items.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.biotech,
+                                      size: 64,
+                                      color: Colors.grey[400],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Nenhum tipo de exame encontrado',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey[600],
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'com esse filtro',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[500],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ListView(
+                                padding: const EdgeInsets.all(16),
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, color: AppColors.bluePrimary),
-                                    tooltip: 'Editar tipo de exame',
-                                    onPressed: () async {
-                                      final updated = await ExamTypeFormModal.show(context, initial: e);
-                                      if (updated == true) vm.load(isActive: true);
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline, color: AppColors.red),
-                                    tooltip: 'Inativar tipo de exame',
-                                    onPressed: () async {
-                                      final confirm = await showDialog<bool>(
-                                        context: context,
-                                        builder: (_) => AlertDialog(
-                                          title: const Text('Inativar tipo de exame?'),
-                                          content: const Text('Esta ação realiza um soft delete.'),
-                                          actions: [
-                                            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-                                            ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Confirmar')),
-                                          ],
+                                  if (vm.isLoading)
+                                    const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  if (vm.error != null)
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        vm.error!,
+                                        style: const TextStyle(
+                                          color: Colors.red,
                                         ),
-                                      );
-                                      if (confirm == true && e.id != null) {
-                                        await vm.remove(e.id!);
-                                      }
-                                    },
+                                      ),
+                                    ),
+                                  ...vm.items.map(
+                                    (e) => CustomCard(
+                                      iconData: Icons.biotech,
+                                      title: e.name,
+                                      subtitle:
+                                          e.description ?? 'Sem descrição',
+                                      onTap: () async {
+                                        await ExamTypeDetailModal.show(
+                                          context,
+                                          e,
+                                        );
+                                      },
+                                      showArrow: false,
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.edit,
+                                              color: AppColors.bluePrimary,
+                                            ),
+                                            tooltip: 'Editar tipo de exame',
+                                            onPressed: () async {
+                                              final updated =
+                                                  await ExamTypeFormModal.show(
+                                                    context,
+                                                    initial: e,
+                                                  );
+                                              if (updated == true)
+                                                vm.load(isActive: true);
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.delete_outline,
+                                              color: AppColors.red,
+                                            ),
+                                            tooltip: 'Inativar tipo de exame',
+                                            onPressed: () async {
+                                              final confirm = await showDialog<bool>(
+                                                context: context,
+                                                builder: (_) => AlertDialog(
+                                                  title: const Text(
+                                                    'Inativar tipo de exame?',
+                                                  ),
+                                                  content: const Text(
+                                                    'Esta ação realiza um soft delete.',
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                            context,
+                                                            false,
+                                                          ),
+                                                      child: const Text(
+                                                        'Cancelar',
+                                                      ),
+                                                    ),
+                                                    ElevatedButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                            context,
+                                                            true,
+                                                          ),
+                                                      child: const Text(
+                                                        'Confirmar',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                              if (confirm == true &&
+                                                  e.id != null) {
+                                                await vm.remove(e.id!);
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                          ],
-                        ),
                       ),
                     ),
                   ],

@@ -6,11 +6,11 @@ class AppointmentUIHelpers {
   static String statusLabel(AppointmentStatus status) {
     switch (status) {
       case AppointmentStatus.realizado:
-        return 'Confirmado';
+        return 'Realizado';
       case AppointmentStatus.cancelado:
         return 'Cancelado';
       case AppointmentStatus.agendado:
-        return 'Pendente';
+        return 'Agendado';
     }
   }
 
@@ -25,4 +25,3 @@ class AppointmentUIHelpers {
     }
   }
 }
-

@@ -122,10 +122,7 @@ class CustomCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: AppColors.gray.withOpacity(0.3),
-            width: 1,
-          ),
+          border: Border.all(color: AppColors.gray.withOpacity(0.3), width: 1),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,7 +156,7 @@ class CustomCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(fontSize: 14, color: AppColors.gray),
-                    maxLines: 2,
+                    maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
