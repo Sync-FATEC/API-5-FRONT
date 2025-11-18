@@ -1,7 +1,6 @@
 // lib/ui/views/appointments/appointments_screen.dart
 
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:provider/provider.dart';
 import '../../../core/providers/user_provider.dart';
 import '../../widgets/background_header.dart';
@@ -53,7 +52,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               ).apiUserData?.role.toUpperCase() ??
               '';
           final isCoordinator = role == 'COORDENADOR_AGENDA';
-          final isPatient = role == 'PACIENTE';
           return Scaffold(
             floatingActionButton: isCoordinator
                 ? AddFloatingButton(
@@ -195,22 +193,101 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                       );
 
                                       if (isCoordinator) {
-                                        // COORDENADOR: Paciente no title, Exame + Data no subtitle
+                                        // COORDENADOR: Paciente no title, Exame no subtitle
+                                        // Data do agendamento e retirada como bottomWidget
+                                        Widget? bottomContent;
+
+                                        if (a.withdrawalDate != null) {
+                                          final r = dateFormat.format(
+                                            a.withdrawalDate!.toLocal(),
+                                          );
+                                          bottomContent = Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Container(
+                                                width: double.infinity,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 8,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey[100],
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: Colors.grey[300]!,
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  'Retirada: $r',
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.grey[700],
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Container(
+                                                width: double.infinity,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 8,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue[50],
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: Colors.blue[300]!,
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  'Agendado: $formattedDate',
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.blue[700],
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        } else {
+                                          bottomContent = Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue[50],
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: Colors.blue[300]!,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'Agendado: $formattedDate',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.blue[700],
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          );
+                                        }
+
                                         return CustomCard(
                                           iconData: Icons.event,
                                           title:
                                               'Paciente: ${vm.patientNameById(a.patientId)}',
-                                          subtitle: () {
-                                            final base =
-                                                'Exame: ${vm.examTypeNameById(a.examTypeId)}\n$formattedDate';
-                                            if (a.withdrawalDate != null) {
-                                              final r = dateFormat.format(
-                                                a.withdrawalDate!.toLocal(),
-                                              );
-                                              return '$base\nRetirada: $r';
-                                            }
-                                            return base;
-                                          }(),
+                                          subtitle:
+                                              'Exame: ${vm.examTypeNameById(a.examTypeId)}',
+                                          bottomWidget: bottomContent,
                                           onTap: () {
                                             AppointmentFormModal.show(
                                               context,
@@ -270,47 +347,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                                 children: [
                                                   Tooltip(
                                                     message:
-                                                        'Baixar recibo (PDF)',
-                                                    child: IconButton(
-                                                      icon: const Icon(
-                                                        Icons.picture_as_pdf,
-                                                        color: AppColors
-                                                            .bluePrimary,
-                                                      ),
-                                                      onPressed: () async {
-                                                        final tempPath =
-                                                            '${Directory.systemTemp.path}/recibo_${a.id ?? 'novo'}.pdf';
-                                                        final err = await vm
-                                                            .downloadReceipt(
-                                                              a.id!,
-                                                              tempPath,
-                                                            );
-                                                        if (err == null) {
-                                                          ScaffoldMessenger.of(
-                                                            context,
-                                                          ).showSnackBar(
-                                                            SnackBar(
-                                                              content: Text(
-                                                                'Recibo baixado em: $tempPath',
-                                                              ),
-                                                            ),
-                                                          );
-                                                        } else {
-                                                          ScaffoldMessenger.of(
-                                                            context,
-                                                          ).showSnackBar(
-                                                            SnackBar(
-                                                              content: Text(
-                                                                'Falha ao baixar recibo: $err',
-                                                              ),
-                                                            ),
-                                                          );
-                                                        }
-                                                      },
-                                                    ),
-                                                  ),
-                                                  Tooltip(
-                                                    message:
                                                         'Cancelar agendamento',
                                                     child: IconButton(
                                                       icon: const Icon(
@@ -348,12 +384,18 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                         );
                                       } else {
                                         // PACIENTE: Data no title, Exame no subtitle
+                                        final additionalInfo =
+                                            a.withdrawalDate != null
+                                            ? 'Retirada: ${dateFormat.format(a.withdrawalDate!.toLocal())}'
+                                            : null;
+
                                         return CustomCard(
                                           iconData: Icons.event,
                                           title: formattedDate,
                                           subtitle: vm.examTypeNameById(
                                             a.examTypeId,
                                           ),
+                                          additionalInfo: additionalInfo,
                                           onTap: () {
                                             final patientName = vm
                                                 .patientNameById(a.patientId);

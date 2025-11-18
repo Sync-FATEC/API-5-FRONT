@@ -140,7 +140,7 @@ class _PatientsScreenState extends State<PatientsScreen> {
         builder: (context, vm, _) => Scaffold(
           body: Stack(
             children: [
-              Column(children: [const Header(title: 'Gerenciar Pacientes')]),
+              Column(children: [const Header(title: 'GERENCIAR PACIENTES')]),
               Positioned(
                 top: 160, // Ajuste este valor para posicionar sobre o header
                 left: 16,
@@ -165,7 +165,8 @@ class _PatientsScreenState extends State<PatientsScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const PatientsManagementScreen(),
+                            builder: (context) =>
+                                const PatientsManagementScreen(),
                           ),
                         );
                       },
