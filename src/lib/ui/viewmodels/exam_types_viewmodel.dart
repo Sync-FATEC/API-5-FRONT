@@ -10,7 +10,8 @@ import '../../data/models/exam_type_model.dart';
 class ExamTypesViewModel extends ChangeNotifier {
   final ExamService _service;
 
-  ExamTypesViewModel({ExamService? service}) : _service = service ?? ExamService();
+  ExamTypesViewModel({ExamService? service})
+    : _service = service ?? ExamService();
 
   // Estado
   List<ExamTypeModel> _allItems = [];

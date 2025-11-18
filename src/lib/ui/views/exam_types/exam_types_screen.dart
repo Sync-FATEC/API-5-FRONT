@@ -93,10 +93,8 @@ class _ExamTypesScreenState extends State<ExamTypesScreen> {
                                   vertical: 12,
                                 ),
                               ),
-                              onChanged: (txt) => vm.load(
-                                query: txt.trim(),
-                                isActive: true,
-                              ),
+                              onChanged: (txt) =>
+                                  vm.load(query: txt.trim(), isActive: true),
                             ),
                           ),
                         ],
