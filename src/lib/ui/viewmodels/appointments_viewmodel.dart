@@ -14,11 +14,9 @@ class AppointmentsViewModel extends ChangeNotifier {
   final AppointmentService _service;
   final ExamService _examService;
 
-  AppointmentsViewModel({
-    AppointmentService? service,
-    ExamService? examService,
-  })  : _service = service ?? AppointmentService(),
-        _examService = examService ?? ExamService();
+  AppointmentsViewModel({AppointmentService? service, ExamService? examService})
+    : _service = service ?? AppointmentService(),
+      _examService = examService ?? ExamService();
 
   // Estado
   List<AppointmentModel> _items = [];
@@ -68,7 +66,9 @@ class AppointmentsViewModel extends ChangeNotifier {
     try {
       _examTypes = await _examService.fetchExamTypes(isActive: true);
       // Ordena alfabeticamente por nome
-      _examTypes.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      _examTypes.sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
       _error = null;
     } catch (e) {
       _error = e.toString();
@@ -80,7 +80,11 @@ class AppointmentsViewModel extends ChangeNotifier {
     try {
       final list = await _service.searchPatients(query);
       // Ordena alfabeticamente por nome completo
-      list.sort((a, b) => (a['name'] ?? '').toString().toLowerCase().compareTo((b['name'] ?? '').toString().toLowerCase()));
+      list.sort(
+        (a, b) => (a['name'] ?? '').toString().toLowerCase().compareTo(
+          (b['name'] ?? '').toString().toLowerCase(),
+        ),
+      );
       _patients = list;
       notifyListeners();
     } catch (e) {
@@ -194,14 +198,7 @@ class AppointmentsViewModel extends ChangeNotifier {
     if (!model.isValidIds) {
       return 'Selecione paciente e tipo de exame';
     }
-    // Horário da clínica: seg–sex, 08:00–18:00
-    final dt = model.dateTime.toLocal();
-    final isWeekday = dt.weekday >= DateTime.monday && dt.weekday <= DateTime.friday;
-    final hour = dt.hour + dt.minute / 60.0;
-    final inHours = hour >= 8 && hour <= 18;
-    if (!isWeekday || !inHours) {
-      return 'Horário fora da clínica (seg–sex, 08:00–18:00)';
-    }
+    // Sem restrição de horário - aceita qualquer dia e horário
     if (!model.isFutureDate) {
       return 'Data/hora deve ser futura';
     }
@@ -209,25 +206,34 @@ class AppointmentsViewModel extends ChangeNotifier {
     // Regras de conflito: por tipo de exame e por paciente
     final examType = _examTypes.firstWhere(
       (t) => t.id == model.examTypeId,
-      orElse: () => const ExamTypeModel(name: '', estimatedDuration: 0, isActive: true),
+      orElse: () =>
+          const ExamTypeModel(name: '', estimatedDuration: 0, isActive: true),
     );
-    final windowMinutes = examType.estimatedDuration > 0 ? examType.estimatedDuration : 30;
-    final windowStart = model.dateTime.subtract(Duration(minutes: windowMinutes));
+    final windowMinutes = examType.estimatedDuration > 0
+        ? examType.estimatedDuration
+        : 30;
+    final windowStart = model.dateTime.subtract(
+      Duration(minutes: windowMinutes),
+    );
     final windowEnd = model.dateTime.add(Duration(minutes: windowMinutes));
 
-    final conflictByType = _items.any((a) =>
-        a.examTypeId == model.examTypeId &&
-        a.status != AppointmentStatus.cancelado &&
-        (a.dateTime.isAfter(windowStart) && a.dateTime.isBefore(windowEnd)));
+    final conflictByType = _items.any(
+      (a) =>
+          a.examTypeId == model.examTypeId &&
+          a.status != AppointmentStatus.cancelado &&
+          (a.dateTime.isAfter(windowStart) && a.dateTime.isBefore(windowEnd)),
+    );
 
     if (conflictByType) {
       return 'Conflito: existe agendamento do mesmo tipo no período';
     }
 
-    final conflictByPatient = _items.any((a) =>
-        a.patientId == model.patientId &&
-        a.status != AppointmentStatus.cancelado &&
-        (a.dateTime.isAfter(windowStart) && a.dateTime.isBefore(windowEnd)));
+    final conflictByPatient = _items.any(
+      (a) =>
+          a.patientId == model.patientId &&
+          a.status != AppointmentStatus.cancelado &&
+          (a.dateTime.isAfter(windowStart) && a.dateTime.isBefore(windowEnd)),
+    );
     if (conflictByPatient) {
       return 'Conflito: paciente possui agendamento no mesmo período';
     }
