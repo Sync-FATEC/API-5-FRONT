@@ -8,6 +8,7 @@ class FiltersSection extends StatelessWidget {
   final VoidCallback onUpdateData;
   final VoidCallback onDownloadPDF;
   final VoidCallback onDownloadExcel;
+  final VoidCallback onShowForecast;
 
   const FiltersSection({
     super.key,
@@ -18,6 +19,7 @@ class FiltersSection extends StatelessWidget {
     required this.onUpdateData,
     required this.onDownloadPDF,
     required this.onDownloadExcel,
+    required this.onShowForecast,
   });
 
   @override
@@ -56,6 +58,7 @@ class FiltersSection extends StatelessWidget {
                       onUpdateData: onUpdateData,
                       onDownloadPDF: onDownloadPDF,
                       onDownloadExcel: onDownloadExcel,
+                      onShowForecast: onShowForecast,
                     ),
                   ],
                 );
@@ -79,6 +82,7 @@ class FiltersSection extends StatelessWidget {
                         onUpdateData: onUpdateData,
                         onDownloadPDF: onDownloadPDF,
                         onDownloadExcel: onDownloadExcel,
+                        onShowForecast: onShowForecast,
                       ),
                     ),
                   ],
@@ -230,44 +234,63 @@ class ActionButtonsWidget extends StatelessWidget {
   final VoidCallback onUpdateData;
   final VoidCallback onDownloadPDF;
   final VoidCallback onDownloadExcel;
+  final VoidCallback onShowForecast;
 
   const ActionButtonsWidget({
     super.key,
     required this.onUpdateData,
     required this.onDownloadPDF,
     required this.onDownloadExcel,
+    required this.onShowForecast,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          flex: 2,
-          child: _buildButton(
-            'Atualizar',
-            Colors.blue,
-            onUpdateData,
-            Icons.refresh,
-          ),
+        Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: _buildButton(
+                'Atualizar',
+                Colors.blue,
+                onUpdateData,
+                Icons.refresh,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildButton(
+                'PDF',
+                Colors.red,
+                onDownloadPDF,
+                Icons.picture_as_pdf,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildButton(
+                'Excel',
+                Colors.green,
+                onDownloadExcel,
+                Icons.table_chart,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildButton(
-            'PDF',
-            Colors.red,
-            onDownloadPDF,
-            Icons.picture_as_pdf,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildButton(
-            'Excel',
-            Colors.green,
-            onDownloadExcel,
-            Icons.table_chart,
-          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildButton(
+                'Previsão',
+                Colors.deepPurple,
+                onShowForecast,
+                Icons.show_chart,
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -652,4 +652,17 @@ class ApiService {
       throw Exception('Erro ao baixar relatório Excel: $e');
     }
   }
+
+  Future<Map<String, dynamic>?> getBalanceForecast({int months = 6}) async {
+    try {
+      final response = await HttpClient.get('/reports/forecast/balance', queryParams: { 'months': months });
+      if (response.success && response.data != null) {
+        return response.data!['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      throw Exception('Erro ao obter previsão de saldo: $e');
+    }
+  }
 }

@@ -7,6 +7,7 @@ import '../../../core/services/file_service.dart';
 import '../../../core/providers/dashboard_provider.dart';
 import '../../../core/providers/stock_provider.dart';
 import 'widgets/filters_section.dart';
+import 'forecast_screen.dart';
 import 'widgets/stock_info_widget.dart';
 import 'widgets/orders_list_widget.dart';
 import 'widgets/orders_by_section_widget.dart';
@@ -31,6 +32,7 @@ class _ReportsScreenScreenState extends State<ReportsScreen> {
   DateTime? startDate;
   DateTime? endDate;
   String? stockId;
+  bool showForecast = false;
 
   @override
   void initState() {
@@ -298,6 +300,13 @@ class _ReportsScreenScreenState extends State<ReportsScreen> {
                       onUpdateData: _updateData,
                       onDownloadPDF: _downloadPDF,
                       onDownloadExcel: _downloadExcel,
+                      onShowForecast: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ForecastScreen(),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
