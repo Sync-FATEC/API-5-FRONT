@@ -6,6 +6,7 @@ import 'package:api2025/ui/widgets/alert_card.dart';
 import 'package:api2025/data/models/alert_model.dart';
 import 'package:api2025/core/providers/alert_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:api2025/core/providers/stock_provider.dart';
 
 class AlertsScreen extends StatefulWidget {
   final String title;
@@ -38,7 +39,9 @@ class _AlertsScreenState extends State<AlertsScreen> {
   void _loadAlerts() {
     print("Método _loadAlerts chamado");
     final alertProvider = Provider.of<AlertProvider>(context, listen: false);
-    alertProvider.loadAlerts();
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
+    final stockId = stockProvider.selectedStock?.id;
+    alertProvider.loadAlerts(stockId: stockId);
   }
 
   @override

@@ -18,14 +18,14 @@ class AlertProvider extends ChangeNotifier {
   /// Retorna uma mensagem informativa quando não há alertas
   String get noAlertsMessage => 'Nenhum alerta de estoque encontrado';
 
-  Future<void> loadAlerts() async {
+  Future<void> loadAlerts({String? stockId}) async {
     print("Iniciando carregamento de alertas");
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _alerts = await _alertService.fetchStockAlerts();
+      _alerts = await _alertService.fetchStockAlerts(stockId: stockId);
       print("Alertas carregados: ${_alerts.length}");
 
       if (_alerts.isEmpty) {
@@ -51,7 +51,8 @@ class AlertProvider extends ChangeNotifier {
       case 'MÉDIOS':
         return _alerts.where((alert) => alert.alertType == 'warning').toList();
       case 'BAIXOS':
-        return _alerts.where((alert) => alert.alertType == 'low').toList();
+        // Backend não retorna 'low' neste endpoint de alertas; tratar como 'warning'
+        return _alerts.where((alert) => alert.alertType == 'warning' || alert.alertType == 'low').toList();
       default:
         return _alerts;
     }

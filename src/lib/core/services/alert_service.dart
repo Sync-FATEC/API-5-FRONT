@@ -2,9 +2,12 @@ import '../../data/models/alert_model.dart';
 import 'http_client.dart';
 
 class AlertService {
-  Future<List<Alert>> fetchStockAlerts() async {
+  Future<List<Alert>> fetchStockAlerts({String? stockId}) async {
     try {
-      final response = await HttpClient.get('/merchandise/stock-alerts');
+      final response = await HttpClient.get(
+        '/merchandise/stock-alerts',
+        queryParams: stockId != null ? {'stockId': stockId} : null,
+      );
 
       if (response.success && response.data != null) {
         final data = response.data!['data'];
