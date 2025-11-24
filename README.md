@@ -11,28 +11,6 @@
   ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 </div>
 
-## 📋 Sobre
-O frontend é responsável por:
-- Interface simples e responsiva
-- Autenticação via login
-- Leitura de QR Codes para identificação rápida
-- Alertas visuais
-- Integração com o backend
-
-## 🚀 Tecnologias
-- **React**
-- **TypeScript**
-- **Flutter**
-- **HTML5**
-- **CSS3**
-
-## ⚙️ Funcionalidades
-- Login e autenticação
-- Dashboard com visão de estoque
-- Busca por QR Code
-- Alertas de estoque
-- Relatórios visuais
-
 # 🚦 Como Executar
 
 ## 📋 Pré-requisitos
@@ -78,12 +56,71 @@ flutter build web
 ## 📁 Estrutura de Diretórios
 ```
 lib/
-├── api/          
-├── components/    
-├── pages/         
-├── hooks/         
-├── contexts/      
-└── utils/         
+├── core/                          # Camada de núcleo da aplicação
+│   ├── client/                    # Cliente HTTP e configurações de rede
+│   │   └── http_client.dart       # Configuração do Dio/HTTP client
+│   ├── constants/                 # Constantes globais da aplicação
+│   ├── providers/                 # Providers do Riverpod/GetIt para injeção de dependência
+│   ├── routing/                   # Configuração de rotas e navegação
+│   ├── services/                  # Serviços de negócio
+│   │   ├── alert_service.dart     # Gerenciamento de alertas
+│   │   ├── api_service.dart       # Serviço genérico de API
+│   │   ├── appointment_service.dart
+│   │   ├── auth_service.dart      # Autenticação e login
+│   │   ├── exam_service.dart
+│   │   ├── file_service.dart      # Upload/download de arquivos
+│   │   ├── merchandise_service.dart
+│   │   ├── merchandise_log_service.dart
+│   │   ├── order_service.dart
+│   │   ├── patient_service.dart
+│   │   ├── report_service.dart
+│   │   ├── section_service.dart
+│   │   ├── stock_service.dart
+│   │   └── user_service.dart
+│   └── utils/                     # Funções utilitárias
+│
+├── data/                          # Camada de dados (modelos e respostas)
+│   ├── enums/                     # Enumerações (roles, status, etc)
+│   ├── models/                    # Modelos de dados da aplicação
+│   └── responses/                 # Modelos de resposta da API
+│
+├── ui/                            # Camada de apresentação
+│   ├── viewmodels/                # ViewModels/Controllers de lógica de tela
+│   ├── views/                     # Telas/páginas da aplicação
+│   │   ├── alerts/                # Tela de alertas de estoque
+│   │   ├── appointments/          # Tela de agendamentos
+│   │   ├── exam_types/            # Tela de tipos de exame
+│   │   ├── forgot_password/       # Tela de recuperação de senha
+│   │   ├── home/                  # Tela inicial/dashboard
+│   │   ├── inventory/             # Tela de inventário
+│   │   ├── login/                 # Tela de login
+│   │   ├── merchandise/           # Tela de mercadorias
+│   │   ├── orders/                # Tela de pedidos
+│   │   ├── patients/              # Tela de pacientes
+│   │   ├── profile/               # Tela de perfil do usuário
+│   │   ├── reports/               # Tela de relatórios
+│   │   ├── section/               # Tela de seções
+│   │   ├── stock/                 # Tela de estoque
+│   │   └── users/                 # Tela de gerenciamento de usuários
+│   └── widgets/                   # Componentes reutilizáveis
+│       ├── add_floating_button.dart
+│       ├── alert_card.dart
+│       ├── background_header.dart
+│       ├── bottom_nav_bar_widget.dart
+│       ├── change_password_modal.dart
+│       ├── custom_card.dart
+│       ├── custom_modal.dart
+│       ├── header_icon.dart
+│       ├── merchandise_card.dart
+│       ├── order_card.dart
+│       ├── role_gate.dart
+│       └── scan_or_manual_dialog.dart
+│
+├── examples/                      # Exemplos de uso
+│   └── api_usage_example.dart
+│
+├── firebase_options.dart          # Configurações do Firebase
+└── main.dart                      # Ponto de entrada da aplicação   
 ```
 
 ## 👥 Time
